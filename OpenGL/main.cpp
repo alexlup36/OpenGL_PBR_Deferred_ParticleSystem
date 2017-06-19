@@ -1,5 +1,6 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include "Common.h"
+
+#include <iostream>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -38,7 +39,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 void loadShaders()
 {
-	basicShader = std::make_unique<Shader>("..\\Shaders\\basic.vs", "..\\Shaders\\basic.ps");
+	basicShader = std::make_unique<Shader>(".\\Shaders\\basic.vert", ".\\Shaders\\basic.frag");
 }
 
 int main(void)
@@ -49,8 +50,16 @@ int main(void)
 	glfwSetErrorCallback(error_callback);
 	if (!glfwInit())
 		exit(EXIT_FAILURE);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
+#ifdef _DEBUG
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#endif // DEBUG
 	window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
 	if (!window)
 	{
@@ -69,18 +78,46 @@ int main(void)
 	}
 	glfwSwapInterval(1);
 
+#ifdef _DEBUG
+	GLint flags;
+	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+	{
+		// Enable OpenGL debug output
+		glEnable(GL_DEBUG_OUTPUT);
+		// Enable synchronous output
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		// Set the callback method for debugging
+		glDebugMessageCallback(glDebugOutput, nullptr);
+		// Option to filter the messages we get
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+	}
+	else
+		std::cout << "Failed to create a OpenGL debug context.\n";
+#endif // DEBUG
+
 	// Load shaders
 	loadShaders();
 	GLuint basicShaderProgram = basicShader->program();
 
-	glGenBuffers(1, &vertex_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	// Generate and bind vertex array object (Required for OpenGL context > 3.1)
+	GLuint vertexArrayObject = 0;
+	glGenVertexArrays(1, &vertexArrayObject);
+	glBindVertexArray(vertexArrayObject);
+
+	// Get uniform and attribute locations
 	mvp_location = glGetUniformLocation(basicShaderProgram, "MVP");
 	vpos_location = glGetAttribLocation(basicShaderProgram, "vPos");
 	vcol_location = glGetAttribLocation(basicShaderProgram, "vCol");
+
+	// Generate and set vertex data
+	glGenBuffers(1, &vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	 
 	glEnableVertexAttribArray(vpos_location);
 	glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)0);
+	
 	glEnableVertexAttribArray(vcol_location);
 	glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 2));
 	

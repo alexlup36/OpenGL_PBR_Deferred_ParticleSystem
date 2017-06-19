@@ -1,9 +1,8 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include <GL/glew.h>
-
 #include <string>
+#include "Common.h"
 
 class Shader
 {
