@@ -132,6 +132,8 @@
   <ItemGroup>
     <None Include="Shaders\basic.frag" />
     <None Include="Shaders\basic.vert" />
+    <None Include="Shaders\cube.frag" />
+    <None Include="Shaders\cube.vert" />
     <None Include="Shaders\glslangValidator.exe" />
     <None Include="Shaders\quad.frag" />
     <None Include="Shaders\quad.vert" />

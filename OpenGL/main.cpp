@@ -17,6 +17,8 @@ int windowHeight = 900;
 
 std::unique_ptr<Shader> basicShader = nullptr;
 std::unique_ptr<Shader> quadShader = nullptr;
+std::unique_ptr<Shader> cubeShader = nullptr;
+
 GUI* gui = nullptr;
 
 // Framebuffer (render target)
@@ -51,6 +53,7 @@ void loadShaders()
 {
 	basicShader = std::make_unique<Shader>(".\\Shaders\\basic.vert", ".\\Shaders\\basic.frag");
 	quadShader = std::make_unique<Shader>(".\\Shaders\\quad.vert", ".\\Shaders\\quad.frag");
+	cubeShader = std::make_unique<Shader>(".\\Shaders\\cube.vert", ".\\Shaders\\cube.frag");
 }
 
 void initGUI(GLFWwindow* window, int windowWidth, int windowHeight)
@@ -70,6 +73,79 @@ void cleanup(GLFWwindow* window)
 	// Should be done last
 	glfwDestroyWindow(window);
 	glfwTerminate();
+}
+
+GLuint renderCubeSetup()
+{
+	// Create cube vertex array
+	GLuint cubeVertexArray;
+	glGenVertexArrays(1, &cubeVertexArray);
+	glBindVertexArray(cubeVertexArray);
+
+	// Cube vertex data
+	static const GLfloat cubeVertexData[] =
+	{
+		-0.5f, -0.5f, -0.5f,
+		0.5f, -0.5f, -0.5f,
+		0.5f,  0.5f, -0.5f,
+		0.5f,  0.5f, -0.5f,
+		-0.5f,  0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+
+		-0.5f, -0.5f,  0.5f,
+		0.5f, -0.5f,  0.5f,
+		0.5f,  0.5f,  0.5f,
+		0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f,
+		-0.5f, -0.5f,  0.5f,
+
+		-0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f,
+
+		0.5f,  0.5f,  0.5f,
+		0.5f,  0.5f, -0.5f,
+		0.5f, -0.5f, -0.5f,
+		0.5f, -0.5f, -0.5f,
+		0.5f, -0.5f,  0.5f,
+		0.5f,  0.5f,  0.5f,
+
+		-0.5f, -0.5f, -0.5f,
+		0.5f, -0.5f, -0.5f,
+		0.5f, -0.5f,  0.5f,
+		0.5f, -0.5f,  0.5f,
+		-0.5f, -0.5f,  0.5f,
+		-0.5f, -0.5f, -0.5f,
+
+		-0.5f,  0.5f, -0.5f,
+		0.5f,  0.5f, -0.5f,
+		0.5f,  0.5f,  0.5f,
+		0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f, -0.5f,
+	};
+
+	// Create cube vertex buffer
+	GLuint cubeVertexBuffer;
+	glGenBuffers(1, &cubeVertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, cubeVertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER,
+		sizeof(cubeVertexData),
+		static_cast<const void*>(cubeVertexData),
+		GL_STATIC_DRAW);
+
+	// Vertex attribute
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, cubeVertexBuffer);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	// Unbind vertex array
+	glBindVertexArray(0);
+
+	return cubeVertexArray;
 }
 
 GLuint renderTextureToScreenSetup()
@@ -180,6 +256,7 @@ int main(void)
 	GLFWwindow* window;
 	GLuint vertex_buffer;
 	GLint mvp_location, vpos_location, vcol_location;
+	GLint mvp_cube_location, vpos_cube_location;
 	GLint renderedTexture_location;
 	glfwSetErrorCallback(error_callback);
 	if (!glfwInit())
@@ -248,6 +325,7 @@ int main(void)
 	loadShaders();
 	GLuint basicShaderProgram = basicShader->program();
 	GLuint quadShaderProgram = quadShader->program();
+	GLuint cubeShaderProgram = cubeShader->program();
 
 	// Get uniform and attribute locations
 	mvp_location = glGetUniformLocation(basicShaderProgram, "MVP");
@@ -255,6 +333,9 @@ int main(void)
 	vcol_location = glGetAttribLocation(basicShaderProgram, "vCol");
 
 	renderedTexture_location = glGetUniformLocation(quadShaderProgram, "renderedTexture");
+
+	mvp_cube_location = glGetUniformLocation(cubeShaderProgram, "MVP");
+	vpos_cube_location = glGetAttribLocation(cubeShaderProgram, "vPos");
 
 	// Generate and bind vertex array object (Required for OpenGL context > 3.1)
 	GLuint vertexArrayObject = 0;
@@ -276,6 +357,7 @@ int main(void)
 	initGUI(window, windowWidth, windowHeight);
 
 	GLuint vaoQuad = renderTextureToScreenSetup();
+	GLuint vaoCube = renderCubeSetup();
 	
 	while (!glfwWindowShouldClose(window))
 	{
@@ -300,13 +382,34 @@ int main(void)
 		glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*)&mvp[0][0]);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
+		// Draw cube
+		glBindVertexArray(vaoCube);
+		float scaleFactor = 0.1f;
+		static float angle = 0.0f;
+		static glm::vec3 yAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+		static glm::vec3 xAxis = glm::vec3(1.0f, 0.0f, 0.0f);
+		static glm::vec3 zAxis = glm::vec3(0.0f, 0.0f, 1.0f);
+		angle += 0.01f;
+		glm::vec3 position = glm::vec3(0.0f, 0.0f, -10.0f);
+		m = glm::mat4();
+		m = glm::scale(m, glm::vec3(scaleFactor));
+		m = glm::translate(m, position);
+		m = glm::rotate(m, angle, xAxis);
+		m = glm::rotate(m, angle, yAxis);
+		m = glm::rotate(m, angle, zAxis);
+		p = glm::perspective(glm::radians(45.0f), static_cast<float>(windowWidth / windowHeight), 0.1f, 100.0f);
+		mvp = p * m;
+		cubeShader->useShader();
+		glUniformMatrix4fv(mvp_cube_location, 1, GL_FALSE, (const GLfloat*)&mvp[0][0]);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
 		// ----------------------------------------------------------
 		// Render color texture to screen
 
 		// Bind the default framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		// Set the viewport and clear the color and depth buffers
-		glViewport(0.0f, 0.0f, windowWidth, windowHeight);
+		glViewport(0, 0, windowWidth, windowHeight);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// Enable the quad shader
 		quadShader->useShader();

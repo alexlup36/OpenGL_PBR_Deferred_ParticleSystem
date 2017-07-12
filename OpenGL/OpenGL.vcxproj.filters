@@ -45,5 +45,7 @@
     <None Include="Shaders\basic.vert" />
     <None Include="Shaders\basic.frag" />
     <None Include="Shaders\glslangValidator.exe" />
+    <None Include="Shaders\cube.frag" />
+    <None Include="Shaders\cube.vert" />
   </ItemGroup>
 </Project>
