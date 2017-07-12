@@ -9,9 +9,14 @@
 #include <stdio.h>
 #include <memory>
 
+#include "GUI.h"
 #include "Shader.h"
 
-std::unique_ptr<Shader> basicShader;
+int windowWidth = 1600;
+int windowHeight = 900;
+
+std::unique_ptr<Shader> basicShader = nullptr;
+GUI* gui = nullptr;
 
 static const struct
 {
@@ -42,6 +47,25 @@ void loadShaders()
 	basicShader = std::make_unique<Shader>(".\\Shaders\\basic.vert", ".\\Shaders\\basic.frag");
 }
 
+void initGUI(GLFWwindow* window, int windowWidth, int windowHeight)
+{
+	gui = new GUI();
+	gui->setup(window, windowWidth, windowHeight);
+}
+
+void cleanup(GLFWwindow* window)
+{
+	if (gui != nullptr)
+	{
+		delete gui;
+		gui = nullptr;
+	}
+
+	// Should be done last
+	glfwDestroyWindow(window);
+	glfwTerminate();
+}
+
 int main(void)
 {
 	GLFWwindow* window;
@@ -60,7 +84,7 @@ int main(void)
 #ifdef _DEBUG
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif // DEBUG
-	window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
+	window = glfwCreateWindow(windowWidth, windowHeight, "OpenGL", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -120,6 +144,9 @@ int main(void)
 	
 	glEnableVertexAttribArray(vcol_location);
 	glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 2));
+
+	// Initialize GUI
+	initGUI(window, windowWidth, windowHeight);
 	
 	while (!glfwWindowShouldClose(window))
 	{
@@ -130,18 +157,23 @@ int main(void)
 		ratio = width / (float)height;
 		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		glBindVertexArray(vertexArrayObject);
 		m = glm::mat4();
 		p = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f);
 		mvp = p * m;
 		basicShader->useShader();
 		glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*)&mvp[0][0]);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		// Draw GUI
+		gui->draw();
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 	
-	glfwDestroyWindow(window);
-	glfwTerminate();
+	cleanup(window);
 	
 	return 0;
 }
