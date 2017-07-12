@@ -39,4 +39,11 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\quad.frag" />
+    <None Include="Shaders\quad.vert" />
+    <None Include="Shaders\basic.vert" />
+    <None Include="Shaders\basic.frag" />
+    <None Include="Shaders\glslangValidator.exe" />
+  </ItemGroup>
 </Project>
