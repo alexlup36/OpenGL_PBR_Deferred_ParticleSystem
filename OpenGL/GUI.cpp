@@ -1,4 +1,6 @@
 #include <assert.h>
+#include <iostream>
+
 #include <GLFW/glfw3.h>
 #include "GUI.h"
 
@@ -21,8 +23,21 @@ bool GUI::setup(GLFWwindow* window, int w, int h)
 	win_h = h;
 
 	TwInit(TW_OPENGL_CORE, NULL);
-	bar = TwNewBar("SWNT");
-	TwAddVarRW(bar, "speed", TW_TYPE_DOUBLE, &test, "min=0 max=10 step=0.1 help='test'");
+
+	bar = TwNewBar("Phong Lighting");
+
+	TwAddVarRW(bar, "ObjectShininess", TW_TYPE_FLOAT, &m_shininess, "min=0 max=256 step=1.0 help='Power of 2'");
+
+	TwAddVarRW(bar, "ObjRotation", TW_TYPE_QUAT4F, m_rotation,
+		" label='Object rotation' opened=true help='Change the object orientation.' ");
+
+	TwAddVarRW(bar, "LightDirection", TW_TYPE_DIR3F, m_lightDirection,
+		" label='Light direction' opened=true help='Change the light direction.' ");
+
+	TwAddVarRW(bar, "ObjectColor", TW_TYPE_COLOR4F, m_objectColor,
+		" label='Cube color' alpha help='Color and transparency of the cube.' ");
+
+	TwAddVarRW(bar, "LightColor", TW_TYPE_COLOR3F, m_lightColor, " label='Light color' ");
 
 	TwWindowSize(win_w, win_h);
 
@@ -85,4 +100,8 @@ void GUI::onKeyPressed(int key, int mod)
 void GUI::draw() 
 {
 	TwDraw();
+
+	//std::cout << std::endl;
+	//std::cout << "Axis: x: " << m_rotation[0] << " y: " << m_rotation[1] << " z: " << m_rotation[2] << std::endl;
+	//std::cout << "Angle: " << m_rotation[3] << std::endl;
 }

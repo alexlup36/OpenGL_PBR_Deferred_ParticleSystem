@@ -4,6 +4,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -17,7 +18,7 @@ int windowHeight = 900;
 
 std::unique_ptr<Shader> basicShader = nullptr;
 std::unique_ptr<Shader> quadShader = nullptr;
-std::unique_ptr<Shader> cubeShader = nullptr;
+std::unique_ptr<Shader> phongShader = nullptr;
 
 GUI* gui = nullptr;
 
@@ -53,7 +54,7 @@ void loadShaders()
 {
 	basicShader = std::make_unique<Shader>(".\\Shaders\\basic.vert", ".\\Shaders\\basic.frag");
 	quadShader = std::make_unique<Shader>(".\\Shaders\\quad.vert", ".\\Shaders\\quad.frag");
-	cubeShader = std::make_unique<Shader>(".\\Shaders\\cube.vert", ".\\Shaders\\cube.frag");
+	phongShader = std::make_unique<Shader>(".\\Shaders\\phong.vert", ".\\Shaders\\phong.frag");
 }
 
 void initGUI(GLFWwindow* window, int windowWidth, int windowHeight)
@@ -85,47 +86,47 @@ GLuint renderCubeSetup()
 	// Cube vertex data
 	static const GLfloat cubeVertexData[] =
 	{
-		-0.5f, -0.5f, -0.5f,
-		0.5f, -0.5f, -0.5f,
-		0.5f,  0.5f, -0.5f,
-		0.5f,  0.5f, -0.5f,
-		-0.5f,  0.5f, -0.5f,
-		-0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-		-0.5f, -0.5f,  0.5f,
-		0.5f, -0.5f,  0.5f,
-		0.5f,  0.5f,  0.5f,
-		0.5f,  0.5f,  0.5f,
-		-0.5f,  0.5f,  0.5f,
-		-0.5f, -0.5f,  0.5f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+		0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+		0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+		0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
 
-		-0.5f,  0.5f,  0.5f,
-		-0.5f,  0.5f, -0.5f,
-		-0.5f, -0.5f, -0.5f,
-		-0.5f, -0.5f, -0.5f,
-		-0.5f, -0.5f,  0.5f,
-		-0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-		0.5f,  0.5f,  0.5f,
-		0.5f,  0.5f, -0.5f,
-		0.5f, -0.5f, -0.5f,
-		0.5f, -0.5f, -0.5f,
-		0.5f, -0.5f,  0.5f,
-		0.5f,  0.5f,  0.5f,
+		0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-		-0.5f, -0.5f, -0.5f,
-		0.5f, -0.5f, -0.5f,
-		0.5f, -0.5f,  0.5f,
-		0.5f, -0.5f,  0.5f,
-		-0.5f, -0.5f,  0.5f,
-		-0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-		-0.5f,  0.5f, -0.5f,
-		0.5f,  0.5f, -0.5f,
-		0.5f,  0.5f,  0.5f,
-		0.5f,  0.5f,  0.5f,
-		-0.5f,  0.5f,  0.5f,
-		-0.5f,  0.5f, -0.5f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+		0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+		0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 	};
 
 	// Create cube vertex buffer
@@ -137,15 +138,61 @@ GLuint renderCubeSetup()
 		static_cast<const void*>(cubeVertexData),
 		GL_STATIC_DRAW);
 
-	// Vertex attribute
-	glEnableVertexAttribArray(0);
+	// Vertex buffer bind
 	glBindBuffer(GL_ARRAY_BUFFER, cubeVertexBuffer);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	// Vertex attribute
+	// Postion
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)0);
+
+	// Normal
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(3 * sizeof(float)));
 
 	// Unbind vertex array
 	glBindVertexArray(0);
 
 	return cubeVertexArray;
+}
+
+GLuint renderQuadSetup()
+{
+	// Create quad vertex object
+	GLuint quadVertexArray;
+	glGenVertexArrays(1, &quadVertexArray);
+	glBindVertexArray(quadVertexArray);
+
+	// Quad vertex data
+	static const GLfloat quadVertexData[] = {
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+		1.0f, -1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+		-1.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+		-1.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+		1.0f, -1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 
+		1.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+	};
+	// Create quad vertex buffer
+	GLuint quadVertexBuffer;
+	glGenBuffers(1, &quadVertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertexData),
+		static_cast<const void*>(quadVertexData),
+		GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer);
+
+	// Vertex attribute
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)0);
+
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(3 * sizeof(float)));
+
+	// Unbind vertex array object
+	glBindVertexArray(0);
+
+	return quadVertexArray;
 }
 
 GLuint renderTextureToScreenSetup()
@@ -255,9 +302,17 @@ int main(void)
 {
 	GLFWwindow* window;
 	GLuint vertex_buffer;
+
+	// Basic
 	GLint mvp_location, vpos_location, vcol_location;
-	GLint mvp_cube_location, vpos_cube_location;
+
+	// Quad shader
 	GLint renderedTexture_location;
+
+	// Phong
+	GLint modelMat_location, normalMat_location, viewMat_location, projMat_location;
+	GLint lightDir_location, lightColor_location, objectColor_location, viewPos_location, shininess_location;
+
 	glfwSetErrorCallback(error_callback);
 	if (!glfwInit())
 		exit(EXIT_FAILURE);
@@ -306,6 +361,8 @@ int main(void)
 		std::cout << "Failed to create a OpenGL debug context.\n";
 #endif // DEBUG
 
+	glEnable(GL_DEPTH_TEST);
+
 	// Create render target
 	GLuint framebuffer = 0;
 	bool res = createRenderTarget(&framebuffer,
@@ -325,17 +382,28 @@ int main(void)
 	loadShaders();
 	GLuint basicShaderProgram = basicShader->program();
 	GLuint quadShaderProgram = quadShader->program();
-	GLuint cubeShaderProgram = cubeShader->program();
+	GLuint phongShaderProgram = phongShader->program();
 
 	// Get uniform and attribute locations
+
+	// Basic shader
 	mvp_location = glGetUniformLocation(basicShaderProgram, "MVP");
 	vpos_location = glGetAttribLocation(basicShaderProgram, "vPos");
 	vcol_location = glGetAttribLocation(basicShaderProgram, "vCol");
 
+	// Quad shader
 	renderedTexture_location = glGetUniformLocation(quadShaderProgram, "renderedTexture");
 
-	mvp_cube_location = glGetUniformLocation(cubeShaderProgram, "MVP");
-	vpos_cube_location = glGetAttribLocation(cubeShaderProgram, "vPos");
+	// Phong shader
+	modelMat_location = glGetUniformLocation(phongShaderProgram, "model");
+	normalMat_location = glGetUniformLocation(phongShaderProgram, "normalMat");
+	viewMat_location = glGetUniformLocation(phongShaderProgram, "view");
+	projMat_location = glGetUniformLocation(phongShaderProgram, "projection");
+	lightDir_location = glGetUniformLocation(phongShaderProgram, "lightDir");
+	lightColor_location = glGetUniformLocation(phongShaderProgram, "lightColor");
+	objectColor_location = glGetUniformLocation(phongShaderProgram, "objectColor");
+	viewPos_location = glGetUniformLocation(phongShaderProgram, "viewPos");
+	shininess_location = glGetUniformLocation(phongShaderProgram, "shininess");
 
 	// Generate and bind vertex array object (Required for OpenGL context > 3.1)
 	GLuint vertexArrayObject = 0;
@@ -356,8 +424,9 @@ int main(void)
 	// Initialize GUI
 	initGUI(window, windowWidth, windowHeight);
 
-	GLuint vaoQuad = renderTextureToScreenSetup();
+	GLuint vaoQuadRenderToTexture = renderTextureToScreenSetup();
 	GLuint vaoCube = renderCubeSetup();
+	GLuint vaoQuad = renderQuadSetup();
 	
 	while (!glfwWindowShouldClose(window))
 	{
@@ -374,34 +443,82 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Draw triangle
-		glBindVertexArray(vertexArrayObject);
+		/*glBindVertexArray(vertexArrayObject);
 		m = glm::mat4();
 		p = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f);
 		mvp = p * m;
 		basicShader->useShader();
 		glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*)&mvp[0][0]);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLES, 0, 3);*/
 
+		// ------------------------------------------------------
 		// Draw cube
 		glBindVertexArray(vaoCube);
 		float scaleFactor = 0.1f;
-		static float angle = 0.0f;
-		static glm::vec3 yAxis = glm::vec3(0.0f, 1.0f, 0.0f);
-		static glm::vec3 xAxis = glm::vec3(1.0f, 0.0f, 0.0f);
-		static glm::vec3 zAxis = glm::vec3(0.0f, 0.0f, 1.0f);
-		angle += 0.01f;
-		glm::vec3 position = glm::vec3(0.0f, 0.0f, -10.0f);
+		glm::vec3 position = glm::vec3(0.0f, 0.0f, -2.0f);
 		m = glm::mat4();
 		m = glm::scale(m, glm::vec3(scaleFactor));
 		m = glm::translate(m, position);
-		m = glm::rotate(m, angle, xAxis);
-		m = glm::rotate(m, angle, yAxis);
-		m = glm::rotate(m, angle, zAxis);
-		p = glm::perspective(glm::radians(45.0f), static_cast<float>(windowWidth / windowHeight), 0.1f, 100.0f);
-		mvp = p * m;
-		cubeShader->useShader();
-		glUniformMatrix4fv(mvp_cube_location, 1, GL_FALSE, (const GLfloat*)&mvp[0][0]);
+		glm::quat quat = glm::quat(gui->m_rotation[3], gui->m_rotation[0], gui->m_rotation[1], gui->m_rotation[2]);
+		glm::mat4 rotMat = glm::toMat4(quat);
+		m = m * rotMat;
+		p = glm::perspective(glm::radians(60.0f), static_cast<float>(windowWidth) / windowHeight, 0.1f, 100.0f);
+		glm::mat4 v = glm::mat4(1.0f);
+
+		phongShader->useShader();
+
+		// Matrices
+		glUniformMatrix4fv(modelMat_location, 1, GL_FALSE, (const GLfloat*)&m[0][0]);
+		glm::mat4 normalMat = glm::transpose(glm::inverse(m));
+		glUniformMatrix4fv(normalMat_location, 1, GL_FALSE, (const GLfloat*)&normalMat[0][0]);
+		glUniformMatrix4fv(viewMat_location, 1, GL_FALSE, (const GLfloat*)&v[0][0]);
+		glUniformMatrix4fv(projMat_location, 1, GL_FALSE, (const GLfloat*)&p[0][0]);
+
+		// Light color
+		glUniform3f(lightColor_location, gui->m_lightColor[0], gui->m_lightColor[1], gui->m_lightColor[2]);
+		// Light direction
+		glUniform3f(lightDir_location, -gui->m_lightDirection[0], -gui->m_lightDirection[1], -gui->m_lightDirection[2]);
+		// Object color
+		glUniform4f(objectColor_location, gui->m_objectColor[0], gui->m_objectColor[1], gui->m_objectColor[2], gui->m_objectColor[3]);
+		// Set view position
+		glUniform3f(viewPos_location, 0.0f, 0.0f, 0.0f);
+		// Set specular shininess
+		glUniform1f(shininess_location, gui->m_shininess);
+
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// ------------------------------------------------------
+		// Draw quad
+		glBindVertexArray(vaoQuad);
+		position = glm::vec3(0.0f, -1.0f, -2.0f);
+		scaleFactor = 100.0f;
+		m = glm::mat4();
+		m = glm::translate(m, position);
+		m = glm::rotate(m, 90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+		//m = m * rotMat;
+		m = glm::scale(m, glm::vec3(scaleFactor, 1.0f, scaleFactor));
+
+		phongShader->useShader();
+
+		glUniformMatrix4fv(modelMat_location, 1, GL_FALSE, (const GLfloat*)&m[0][0]);
+		normalMat = glm::transpose(glm::inverse(m));
+		glUniformMatrix4fv(normalMat_location, 1, GL_FALSE, (const GLfloat*)&normalMat[0][0]);
+		glUniformMatrix4fv(viewMat_location, 1, GL_FALSE, (const GLfloat*)&v[0][0]);
+		glUniformMatrix4fv(projMat_location, 1, GL_FALSE, (const GLfloat*)&p[0][0]);
+
+		// Light color
+		glUniform3f(lightColor_location, gui->m_lightColor[0], gui->m_lightColor[1], gui->m_lightColor[2]);
+		// Light direction
+		glUniform3f(lightDir_location, -gui->m_lightDirection[0], -gui->m_lightDirection[1], -gui->m_lightDirection[2]);
+		// Object color
+		glm::vec4 quadColor = glm::vec4(0.2f, 0.6f, 0.9f, 1.0f);
+		glUniform4f(objectColor_location, quadColor.x, quadColor.y, quadColor.z, quadColor.w);
+		// Set view position
+		glUniform3f(viewPos_location, 0.0f, 0.0f, 0.0f);
+		// Set specular shininess
+		glUniform1f(shininess_location, gui->m_shininess);
+
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		// ----------------------------------------------------------
 		// Render color texture to screen
@@ -415,7 +532,7 @@ int main(void)
 		quadShader->useShader();
 
 		// Bind the quad vao
-		glBindVertexArray(vaoQuad);
+		glBindVertexArray(vaoQuadRenderToTexture);
 
 		// Bind the rendered texture to texture unit
 		GLuint textureUnit = 0;
