@@ -13,12 +13,17 @@
 #include "GUI.h"
 #include "Shader.h"
 
+#include "Mesh.h"
+#include "Camera.h"
+#include "Input.h"
+
 int windowWidth = 1600;
 int windowHeight = 900;
 
 std::unique_ptr<Shader> basicShader = nullptr;
 std::unique_ptr<Shader> quadShader = nullptr;
 std::unique_ptr<Shader> phongShader = nullptr;
+std::unique_ptr<Camera> camera = nullptr;
 
 GUI* gui = nullptr;
 
@@ -301,6 +306,9 @@ bool createRenderTarget(GLuint* framebuffer,
 int main(void)
 {
 	GLFWwindow* window;
+	float deltaTime = 0.0f;
+	float lastFrame = 0.0f;
+
 	GLuint vertex_buffer;
 
 	// Basic
@@ -363,6 +371,15 @@ int main(void)
 
 	glEnable(GL_DEPTH_TEST);
 
+	// Cull face
+	
+	// Enable face culling
+	//glEnable(GL_CULL_FACE);
+	// Cull back faces
+	glCullFace(GL_BACK);
+	// Set the winding order for a face to be considered front facing
+	glFrontFace(GL_CCW);
+
 	// Create render target
 	GLuint framebuffer = 0;
 	bool res = createRenderTarget(&framebuffer,
@@ -383,6 +400,13 @@ int main(void)
 	GLuint basicShaderProgram = basicShader->program();
 	GLuint quadShaderProgram = quadShader->program();
 	GLuint phongShaderProgram = phongShader->program();
+
+	// Setup camera
+	//camera = std::make_unique<Camera>();
+
+	// Load meshes
+	Mesh<VertexPTNT> mesh1;
+	mesh1.loadMesh("..//Assets//nanosuit.obj");
 
 	// Get uniform and attribute locations
 
@@ -424,12 +448,25 @@ int main(void)
 	// Initialize GUI
 	initGUI(window, windowWidth, windowHeight);
 
+	// Initialize input
+	Input::getInstance().initialize(window);
+
 	GLuint vaoQuadRenderToTexture = renderTextureToScreenSetup();
 	GLuint vaoCube = renderCubeSetup();
 	GLuint vaoQuad = renderQuadSetup();
 	
 	while (!glfwWindowShouldClose(window))
 	{
+		// ----------------------------------------------------------
+		// Frame time
+		float currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+
+		// ----------------------------------------------------------
+		// Camera input
+		//camera->processInput(window, deltaTime);
+		//camera->updateView();
+
 		// ----------------------------------------------------------
 		// Render to texture
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
@@ -463,7 +500,7 @@ int main(void)
 		glm::mat4 rotMat = glm::toMat4(quat);
 		m = m * rotMat;
 		p = glm::perspective(glm::radians(60.0f), static_cast<float>(windowWidth) / windowHeight, 0.1f, 100.0f);
-		glm::mat4 v = glm::mat4(1.0f);
+		glm::mat4 v = glm::mat4(1.0f);// camera->viewMatrix();
 
 		phongShader->useShader();
 
@@ -554,6 +591,8 @@ int main(void)
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+
+		lastFrame = currentFrame;
 	}
 	
 	cleanup(window);
