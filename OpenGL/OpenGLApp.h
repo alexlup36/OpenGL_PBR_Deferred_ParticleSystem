@@ -14,11 +14,13 @@ public:
 	~OpenGLApp();
 
 	// Getters/Setters
-	inline const GLFWwindow* window() const { return m_pWindow; }
+	inline GLFWwindow* window() const { return m_pWindow; }
+	inline int windowWidth() const { return m_iWindowWidth; }
+	inline int windowHeight() const { return m_iWindowHeight; }
 
 protected:
-	virtual void update(float dt);
-	virtual void draw(float dt);
+	virtual void update(double dt);
+	virtual void draw(double dt);
 
 	virtual bool initialize(const char* windowTitle, bool enableMultisampling, bool enableSRGB);
 	virtual void setupScene();

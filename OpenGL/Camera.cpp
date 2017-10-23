@@ -1,5 +1,7 @@
 #include "Camera.h"
 
+#include "Input.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -31,9 +33,9 @@ void Camera::updateView()
 
 // ----------------------------------------------------------------------------
 
-void Camera::processInput(GLFWwindow* window, float deltaTime)
+void Camera::processInput(GLFWwindow* window, double deltaTime)
 {
-	float cameraSpeed = 2.5f * deltaTime;
+	float cameraSpeed = static_cast<float>(Input::camereaSpeed() * deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 		m_positionVec += cameraSpeed * m_frontVec;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)

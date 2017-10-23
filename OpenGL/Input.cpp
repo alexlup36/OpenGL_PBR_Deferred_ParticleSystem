@@ -4,6 +4,10 @@
 
 // ----------------------------------------------------------------------------
 
+float Input::m_fCameraSpeed = 2.5f;
+
+// ----------------------------------------------------------------------------
+
 void Input::initialize(GLFWwindow* window)
 {
 	glfwSetMouseButtonCallback(window, (GLFWmousebuttonfun)Input::onMouseClicked);

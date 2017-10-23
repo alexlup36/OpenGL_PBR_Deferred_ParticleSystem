@@ -12,7 +12,7 @@ public:
 	~Camera();
 
 	void updateView();
-	void processInput(GLFWwindow* window, float deltaTime);
+	void processInput(GLFWwindow* window, double deltaTime);
 
 	inline const glm::mat4& viewMatrix() const { return m_viewMat; }
 

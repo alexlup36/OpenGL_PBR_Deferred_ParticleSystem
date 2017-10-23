@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "GLFramework.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -10,22 +12,16 @@
 #include <stdio.h>
 #include <memory>
 
-#include "GUI.h"
 #include "Shader.h"
 
 #include "Mesh.h"
 #include "Camera.h"
 #include "Input.h"
 
-int windowWidth = 1600;
-int windowHeight = 900;
-
 std::unique_ptr<Shader> basicShader = nullptr;
 std::unique_ptr<Shader> quadShader = nullptr;
 std::unique_ptr<Shader> phongShader = nullptr;
 std::unique_ptr<Camera> camera = nullptr;
-
-GUI* gui = nullptr;
 
 // Framebuffer (render target)
 GLuint colorTexture;
@@ -60,25 +56,6 @@ void loadShaders()
 	basicShader = std::make_unique<Shader>(".\\Shaders\\basic.vert", ".\\Shaders\\basic.frag");
 	quadShader = std::make_unique<Shader>(".\\Shaders\\quad.vert", ".\\Shaders\\quad.frag");
 	phongShader = std::make_unique<Shader>(".\\Shaders\\phong.vert", ".\\Shaders\\phong.frag");
-}
-
-void initGUI(GLFWwindow* window, int windowWidth, int windowHeight)
-{
-	gui = new GUI();
-	gui->setup(window, windowWidth, windowHeight);
-}
-
-void cleanup(GLFWwindow* window)
-{
-	if (gui != nullptr)
-	{
-		delete gui;
-		gui = nullptr;
-	}
-
-	// Should be done last
-	glfwDestroyWindow(window);
-	glfwTerminate();
 }
 
 GLuint renderCubeSetup()
@@ -305,6 +282,31 @@ bool createRenderTarget(GLuint* framebuffer,
 
 int main(void)
 {
+	int windowWidth = 1600;
+	int windowHeight = 900;
+
+	// Create GLFramework instance
+	std::unique_ptr<GLFramework> glFramework = std::make_unique<GLFramework>(windowWidth, windowHeight);
+	// Initialize GLFramework
+	bool enableMultisampling = true;
+	bool enableSRGBFbSupport = true;
+	if (glFramework->initialize("GLFramework", enableMultisampling, enableSRGBFbSupport) == false)
+		return -1;
+	
+	// Main loop
+	do
+	{
+		static double previousTime = glfwGetTime();
+		double currentTime = glfwGetTime();
+		double dt = currentTime - previousTime;
+
+		glFramework->update(dt);
+		glFramework->draw(dt);
+
+		previousTime = currentTime;
+	} 
+	while (!glfwWindowShouldClose(glFramework->window()));
+
 	GLFWwindow* window;
 	double deltaTime = 0.0f;
 	double lastFrame = 0.0f;
@@ -401,9 +403,6 @@ int main(void)
 	GLuint quadShaderProgram = quadShader->program();
 	GLuint phongShaderProgram = phongShader->program();
 
-	// Setup camera
-	//camera = std::make_unique<Camera>();
-
 	// Load meshes
 	Mesh<VertexPTNT> mesh1;
 	mesh1.loadMesh("..//Assets//nanosuit.obj");
@@ -445,12 +444,6 @@ int main(void)
 	glEnableVertexAttribArray(vcol_location);
 	glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 2));
 
-	// Initialize GUI
-	initGUI(window, windowWidth, windowHeight);
-
-	// Initialize input
-	Input::getInstance().initialize(window);
-
 	GLuint vaoQuadRenderToTexture = renderTextureToScreenSetup();
 	GLuint vaoCube = renderCubeSetup();
 	GLuint vaoQuad = renderQuadSetup();
@@ -461,11 +454,6 @@ int main(void)
 		// Frame time
 		double currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
-
-		// ----------------------------------------------------------
-		// Camera input
-		//camera->processInput(window, deltaTime);
-		//camera->updateView();
 
 		// ----------------------------------------------------------
 		// Render to texture
@@ -584,18 +572,12 @@ int main(void)
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		// ----------------------------------------------------------
-		// Draw GUI
-		gui->draw();
-
-		// ----------------------------------------------------------
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
 		lastFrame = currentFrame;
 	}
-	
-	cleanup(window);
 	
 	return 0;
 }

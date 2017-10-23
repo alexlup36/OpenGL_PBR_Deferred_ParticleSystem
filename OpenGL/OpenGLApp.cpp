@@ -18,6 +18,13 @@ OpenGLApp::OpenGLApp(int windowWidth, int windowHeight)
 
 OpenGLApp::~OpenGLApp()
 {
+	// Should be done last
+
+	// Destroy window
+	if (m_pWindow)
+		glfwDestroyWindow(m_pWindow);
+	// Shutdown GLFW
+	glfwTerminate();
 }
 
 // ----------------------------------------------------------------------------
@@ -105,14 +112,14 @@ bool OpenGLApp::initialize(const char* windowTitle,
 
 // ----------------------------------------------------------------------------
 
-void OpenGLApp::update(float dt)
+void OpenGLApp::update(double dt)
 {
 	glfwPollEvents();
 }
 
 // ----------------------------------------------------------------------------
 
-void OpenGLApp::draw(float dt)
+void OpenGLApp::draw(double dt)
 {
 	// Draw
 	glClear(GL_COLOR_BUFFER_BIT);

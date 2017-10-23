@@ -19,8 +19,12 @@ public:
 	static void onScrollCallback(GLFWwindow* window, double x, double y);
 	static void onResize(GLFWwindow* window, int w, int h);
 
+	static float camereaSpeed() { return m_fCameraSpeed; }
+
 private:
 	Input() {}
+
+	static float m_fCameraSpeed;
 
 public:
 	Input(Input const&) = delete;
