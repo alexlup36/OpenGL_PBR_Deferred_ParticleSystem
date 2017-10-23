@@ -26,6 +26,8 @@ bool OpenGLApp::initialize(const char* windowTitle,
 	bool enableMultisampling,
 	bool enableSRGB)
 {
+	std::cout << "OpenGLApp initialize. \n";
+
 	assert(windowTitle != nullptr && "Invalid window title.");
 
 	// Set GLFW error callback method
@@ -103,20 +105,19 @@ bool OpenGLApp::initialize(const char* windowTitle,
 
 // ----------------------------------------------------------------------------
 
-void OpenGLApp::run()
-{
-}
-
-// ----------------------------------------------------------------------------
-
 void OpenGLApp::update(float dt)
 {
+	glfwPollEvents();
 }
 
 // ----------------------------------------------------------------------------
 
 void OpenGLApp::draw(float dt)
 {
+	// Draw
+	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, m_iWindowWidth, m_iWindowHeight);
 }
 
 // ----------------------------------------------------------------------------
@@ -162,6 +163,9 @@ bool OpenGLApp::setOpenGLState() const
 	// Enable depth test and set depth function
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+
+	// Success
+	return true;
 }
 
 // ----------------------------------------------------------------------------

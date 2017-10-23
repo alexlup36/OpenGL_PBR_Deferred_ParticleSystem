@@ -306,8 +306,8 @@ bool createRenderTarget(GLuint* framebuffer,
 int main(void)
 {
 	GLFWwindow* window;
-	float deltaTime = 0.0f;
-	float lastFrame = 0.0f;
+	double deltaTime = 0.0f;
+	double lastFrame = 0.0f;
 
 	GLuint vertex_buffer;
 
@@ -459,7 +459,7 @@ int main(void)
 	{
 		// ----------------------------------------------------------
 		// Frame time
-		float currentFrame = glfwGetTime();
+		double currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 
 		// ----------------------------------------------------------

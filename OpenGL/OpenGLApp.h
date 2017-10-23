@@ -13,8 +13,6 @@ public:
 	OpenGLApp(int windowWidth, int windowHeight);
 	~OpenGLApp();
 
-	void run();
-
 	// Getters/Setters
 	inline const GLFWwindow* window() const { return m_pWindow; }
 

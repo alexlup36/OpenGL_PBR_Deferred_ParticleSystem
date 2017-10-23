@@ -12,8 +12,8 @@ Camera::Camera(int windowWidth, int windowHeight)
 {
 	m_fYaw = -90.0f;
 	m_fPitch = 0.0f;
-	m_fLastX = static_cast<int>(windowWidth * 0.5f);
-	m_fLastY = static_cast<int>(windowHeight * 0.5f);
+	m_fLastX = windowWidth * 0.5f;
+	m_fLastY = windowHeight * 0.5f;
 }
 
 // ----------------------------------------------------------------------------
