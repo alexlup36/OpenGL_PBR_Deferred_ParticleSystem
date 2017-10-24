@@ -18,6 +18,8 @@
 #include "Camera.h"
 #include "Input.h"
 
+#include "GUI.h"
+
 std::unique_ptr<Shader> basicShader = nullptr;
 std::unique_ptr<Shader> quadShader = nullptr;
 std::unique_ptr<Shader> phongShader = nullptr;
@@ -26,6 +28,8 @@ std::unique_ptr<Camera> camera = nullptr;
 // Framebuffer (render target)
 GLuint colorTexture;
 GLuint depthTexture;
+
+GUI* gui = nullptr;
 
 static const struct
 {
@@ -177,108 +181,108 @@ GLuint renderQuadSetup()
 	return quadVertexArray;
 }
 
-GLuint renderTextureToScreenSetup()
-{
-	// Create quad vertex object
-	GLuint quadVertexArray;
-	glGenVertexArrays(1, &quadVertexArray);
-	glBindVertexArray(quadVertexArray);
+//GLuint renderTextureToScreenSetup()
+//{
+//	// Create quad vertex object
+//	GLuint quadVertexArray;
+//	glGenVertexArrays(1, &quadVertexArray);
+//	glBindVertexArray(quadVertexArray);
+//
+//	// Quad vertex data
+//	static const GLfloat quadVertexData[] = {
+//		-1.0f, -1.0f, 0.0f,
+//		1.0f, -1.0f, 0.0f,
+//		-1.0f, 1.0f, 0.0f,
+//		-1.0f, 1.0f, 0.0f,
+//		1.0f, -1.0f, 0.0f,
+//		1.0f, 1.0f, 0.0f,
+//	};
+//	// Create quad vertex buffer
+//	GLuint quadVertexBuffer;
+//	glGenBuffers(1, &quadVertexBuffer);
+//	glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer);
+//	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertexData),
+//		static_cast<const void*>(quadVertexData),
+//		GL_STATIC_DRAW);
+//
+//	// Vertex attribute
+//	glEnableVertexAttribArray(0);
+//	glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer);
+//	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+//
+//	// Unbind vertex array object
+//	glBindVertexArray(0);
+//
+//	return quadVertexArray;
+//}
 
-	// Quad vertex data
-	static const GLfloat quadVertexData[] = {
-		-1.0f, -1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,
-		-1.0f, 1.0f, 0.0f,
-		-1.0f, 1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,
-		1.0f, 1.0f, 0.0f,
-	};
-	// Create quad vertex buffer
-	GLuint quadVertexBuffer;
-	glGenBuffers(1, &quadVertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertexData),
-		static_cast<const void*>(quadVertexData),
-		GL_STATIC_DRAW);
-
-	// Vertex attribute
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-	// Unbind vertex array object
-	glBindVertexArray(0);
-
-	return quadVertexArray;
-}
-
-bool createRenderTarget(GLuint* framebuffer,
-	GLint internalFormat,
-	GLenum elementFormat,
-	GLenum elementType,
-	GLsizei width,
-	GLsizei height,
-	bool createDepth,
-	GLenum depthFormat)
-{
-	assert(framebuffer != nullptr);
-	GLuint fb = 0;
-
-	// Create a render target
-	glGenFramebuffers(1, &fb);
-	glBindFramebuffer(GL_FRAMEBUFFER, fb);
-
-	// Create a render target color texture
-	glGenTextures(1, &colorTexture);
-	glBindTexture(GL_TEXTURE_2D, colorTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, elementFormat, elementType, nullptr);
-	// Filtering
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-	// Create the render target depth texture
-	if (createDepth)
-	{
-		GLuint depthTexture;
-
-		//glGenRenderbuffers(1, &depthTexture);
-		//glBindRenderbuffer(GL_RENDERBUFFER, depthTexture);
-		//glRenderbufferStorage(GL_RENDERBUFFER, depthFormat, width, height);
-		//
-		//// Attach the depth texture to the render target
-		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthTexture);
-
-		// If we need the data from the depth buffer use a texture instead of a render buffer
-		glGenTextures(1, &depthTexture);
-		glBindTexture(GL_TEXTURE_2D, depthTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
-	}
-
-	// Color attachment tracking index
-	unsigned int colorAttachmentIndex = 0;
-
-	// Attach the color texture to the render target
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorAttachmentIndex, colorTexture, 0);
-
-	// Set the list of draw buffers
-	GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-	glDrawBuffers(1, drawBuffers);
-
-	// Check framebuffer status
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		return false;
-
-	// Unbind the framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	// Copy the framwbuffer to output
-	*framebuffer = fb;
-
-	// Success
-	return true;
-}
+//bool createRenderTarget(GLuint* framebuffer,
+//	GLint internalFormat,
+//	GLenum elementFormat,
+//	GLenum elementType,
+//	GLsizei width,
+//	GLsizei height,
+//	bool createDepth,
+//	GLenum depthFormat)
+//{
+//	assert(framebuffer != nullptr);
+//	GLuint fb = 0;
+//
+//	// Create a render target
+//	glGenFramebuffers(1, &fb);
+//	glBindFramebuffer(GL_FRAMEBUFFER, fb);
+//
+//	// Create a render target color texture
+//	glGenTextures(1, &colorTexture);
+//	glBindTexture(GL_TEXTURE_2D, colorTexture);
+//	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, elementFormat, elementType, nullptr);
+//	// Filtering
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//
+//	// Create the render target depth texture
+//	if (createDepth)
+//	{
+//		GLuint depthTexture;
+//
+//		//glGenRenderbuffers(1, &depthTexture);
+//		//glBindRenderbuffer(GL_RENDERBUFFER, depthTexture);
+//		//glRenderbufferStorage(GL_RENDERBUFFER, depthFormat, width, height);
+//		//
+//		//// Attach the depth texture to the render target
+//		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthTexture);
+//
+//		// If we need the data from the depth buffer use a texture instead of a render buffer
+//		glGenTextures(1, &depthTexture);
+//		glBindTexture(GL_TEXTURE_2D, depthTexture);
+//		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+//
+//		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
+//	}
+//
+//	// Color attachment tracking index
+//	unsigned int colorAttachmentIndex = 0;
+//
+//	// Attach the color texture to the render target
+//	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorAttachmentIndex, colorTexture, 0);
+//
+//	// Set the list of draw buffers
+//	GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+//	glDrawBuffers(1, drawBuffers);
+//
+//	// Check framebuffer status
+//	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+//		return false;
+//
+//	// Unbind the framebuffer
+//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//
+//	// Copy the framwbuffer to output
+//	*framebuffer = fb;
+//
+//	// Success
+//	return true;
+//}
 
 int main(void)
 {
@@ -307,7 +311,7 @@ int main(void)
 	} 
 	while (!glfwWindowShouldClose(glFramework->window()));
 
-	GLFWwindow* window;
+	GLFWwindow* window = nullptr;
 	double deltaTime = 0.0f;
 	double lastFrame = 0.0f;
 
@@ -323,67 +327,67 @@ int main(void)
 	GLint modelMat_location, normalMat_location, viewMat_location, projMat_location;
 	GLint lightDir_location, lightColor_location, objectColor_location, viewPos_location, shininess_location;
 
-	glfwSetErrorCallback(error_callback);
-	if (!glfwInit())
-		exit(EXIT_FAILURE);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
-	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
-#ifdef _DEBUG
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-#endif // DEBUG
-	window = glfwCreateWindow(windowWidth, windowHeight, "OpenGL", NULL, NULL);
-	if (!window)
-	{
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
-	glfwSetKeyCallback(window, key_callback);
-	glfwMakeContextCurrent(window);
-	glewExperimental = true;
-
-	// Initialize GLEW
-	if (glewInit() != GLEW_OK)
-	{
-		fprintf(stderr, "Failed to initialize GLEW\n");
-		return 0;
-	}
-	glfwSwapInterval(1);
-
-#ifdef _DEBUG
-	GLint flags;
-	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
-	{
-		// Enable OpenGL debug output
-		glEnable(GL_DEBUG_OUTPUT);
-		// Enable synchronous output
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		// Set the callback method for debugging
-		glDebugMessageCallback(glDebugOutput, nullptr);
-		// Option to filter the messages we get
-		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-	}
-	else
-		std::cout << "Failed to create a OpenGL debug context.\n";
-#endif // DEBUG
-
-	glEnable(GL_DEPTH_TEST);
-
-	// Cull face
-	
-	// Enable face culling
-	//glEnable(GL_CULL_FACE);
-	// Cull back faces
-	glCullFace(GL_BACK);
-	// Set the winding order for a face to be considered front facing
-	glFrontFace(GL_CCW);
+//	glfwSetErrorCallback(error_callback);
+//	if (!glfwInit())
+//		exit(EXIT_FAILURE);
+//	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+//	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+//	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+//	glfwWindowHint(GLFW_SAMPLES, 4);
+//	glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
+//#ifdef _DEBUG
+//	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+//#endif // DEBUG
+//	window = glfwCreateWindow(windowWidth, windowHeight, "OpenGL", NULL, NULL);
+//	if (!window)
+//	{
+//		glfwTerminate();
+//		exit(EXIT_FAILURE);
+//	}
+//	glfwSetKeyCallback(window, key_callback);
+//	glfwMakeContextCurrent(window);
+//	glewExperimental = true;
+//
+//	// Initialize GLEW
+//	if (glewInit() != GLEW_OK)
+//	{
+//		fprintf(stderr, "Failed to initialize GLEW\n");
+//		return 0;
+//	}
+//	glfwSwapInterval(1);
+//
+//#ifdef _DEBUG
+//	GLint flags;
+//	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+//	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+//	{
+//		// Enable OpenGL debug output
+//		glEnable(GL_DEBUG_OUTPUT);
+//		// Enable synchronous output
+//		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+//		// Set the callback method for debugging
+//		glDebugMessageCallback(glDebugOutput, nullptr);
+//		// Option to filter the messages we get
+//		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+//	}
+//	else
+//		std::cout << "Failed to create a OpenGL debug context.\n";
+//#endif // DEBUG
+//
+//	glEnable(GL_DEPTH_TEST);
+//
+//	// Cull face
+//	
+//	// Enable face culling
+//	//glEnable(GL_CULL_FACE);
+//	// Cull back faces
+//	glCullFace(GL_BACK);
+//	// Set the winding order for a face to be considered front facing
+//	glFrontFace(GL_CCW);
 
 	// Create render target
-	GLuint framebuffer = 0;
+	/*GLuint framebuffer = 0;
 	bool res = createRenderTarget(&framebuffer,
 		GL_RGBA16F,
 		GL_RGBA,
@@ -395,7 +399,7 @@ int main(void)
 	if (res == false)
 	{
 		std::cout << "Failed to create framebuffer.\n";
-	}
+	}*/
 
 	// Load shaders
 	loadShaders();
@@ -444,7 +448,7 @@ int main(void)
 	glEnableVertexAttribArray(vcol_location);
 	glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 2));
 
-	GLuint vaoQuadRenderToTexture = renderTextureToScreenSetup();
+	//GLuint vaoQuadRenderToTexture = renderTextureToScreenSetup();
 	GLuint vaoCube = renderCubeSetup();
 	GLuint vaoQuad = renderQuadSetup();
 	
@@ -452,20 +456,20 @@ int main(void)
 	{
 		// ----------------------------------------------------------
 		// Frame time
-		double currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
+		//double currentFrame = glfwGetTime();
+		//deltaTime = currentFrame - lastFrame;
 
 		// ----------------------------------------------------------
 		// Render to texture
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+		//glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
-		float ratio;
-		int width, height;
+		//float ratio;
+		//int width, height;
 		glm::mat4 m, p, mvp;
-		glfwGetFramebufferSize(window, &width, &height);
-		ratio = width / (float)height;
-		glViewport(0, 0, width, height);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glfwGetFramebufferSize(window, &width, &height);
+		//ratio = width / (float)height;
+		//glViewport(0, 0, width, height);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Draw triangle
 		/*glBindVertexArray(vertexArrayObject);
@@ -548,23 +552,23 @@ int main(void)
 		// ----------------------------------------------------------
 		// Render color texture to screen
 
-		// Bind the default framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		// Set the viewport and clear the color and depth buffers
-		glViewport(0, 0, windowWidth, windowHeight);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//// Bind the default framebuffer
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//// Set the viewport and clear the color and depth buffers
+		//glViewport(0, 0, windowWidth, windowHeight);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// Enable the quad shader
 		quadShader->useShader();
 
 		// Bind the quad vao
-		glBindVertexArray(vaoQuadRenderToTexture);
+		//glBindVertexArray(vaoQuadRenderToTexture);
 
-		// Bind the rendered texture to texture unit
+		//// Bind the rendered texture to texture unit
 		GLuint textureUnit = 0;
-		// Activate texture unit 0
-		glActiveTexture(GL_TEXTURE0 + textureUnit);
-		// Bind the rendered texture to texture unit
-		glBindTexture(GL_TEXTURE_2D, colorTexture);
+		//// Activate texture unit 0
+		//glActiveTexture(GL_TEXTURE0 + textureUnit);
+		//// Bind the rendered texture to texture unit
+		//glBindTexture(GL_TEXTURE_2D, colorTexture);
 		// Set the sampler to use the texture unit
 		glUniform1i(renderedTexture_location, textureUnit);
 
@@ -573,10 +577,10 @@ int main(void)
 
 		// ----------------------------------------------------------
 
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		//glfwSwapBuffers(window);
+		//glfwPollEvents();
 
-		lastFrame = currentFrame;
+		//lastFrame = currentFrame;
 	}
 	
 	return 0;

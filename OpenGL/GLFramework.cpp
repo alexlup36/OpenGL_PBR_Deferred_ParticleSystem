@@ -50,6 +50,13 @@ void GLFramework::draw(double dt)
 	// ------------------------------------------------------------------------
 	// Do drawing here
 
+	// Render to texture
+	m_pRT->renderToTexture();
+
+	// Do rendering
+
+	// Render to screen
+	m_pRT->renderToScreen(0, 0, windowWidth(), windowHeight());
 
 	// ------------------------------------------------------------------------
 	// Draw GUI
@@ -80,6 +87,20 @@ bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, 
 
 	// Initalize camera
 	m_pCamera1 = std::make_unique<Camera>(windowWidth(), windowHeight());
+
+	// Initialize RT
+	m_pRT = std::make_unique<RenderTarget>(GL_RGBA16F,
+		GL_RGBA,
+		GL_FLOAT,
+		windowWidth(),
+		windowHeight(),
+		true,
+		GL_DEPTH_COMPONENT24);
+	if (m_pRT->initialize() == false)
+	{
+		std::cout << "Failed to create RT. \n";
+		return false;
+	}
 
 	// ------------------------------------------------------------------------
 

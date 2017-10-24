@@ -126,6 +126,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="OpenGLApp.cpp" />
+    <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -137,6 +138,7 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="OpenGLApp.h" />
+    <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>

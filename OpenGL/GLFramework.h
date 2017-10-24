@@ -2,6 +2,7 @@
 #define GLFRAMEWORK_H
 
 #include "OpenGLApp.h"
+#include "RenderTarget.h"
 #include <memory>
 
 class GUI;
@@ -25,6 +26,8 @@ private:
 	GUI* m_pGUI;
 	// FPS camera
 	std::unique_ptr<Camera> m_pCamera1;
+	// Render target
+	std::unique_ptr<RenderTarget> m_pRT;
 };
 
 #endif // GLFRAMEWORK_H
