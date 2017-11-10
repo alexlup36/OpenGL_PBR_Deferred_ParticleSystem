@@ -22,7 +22,7 @@ void main()
 	
 	// Diffuse component
 	vec3 normal = normalize(vNorm);
-	vec3 dir = normalize(lightDir - vPosWorld);
+	vec3 dir = normalize(-lightDir - vPosWorld);
 	float diffuse = max(dot(normal, dir), 0.0f);
 	vec3 diffuseComponent = diffuse * lightColor;
 
@@ -33,7 +33,7 @@ void main()
 	// Specular component
 	float specularStrength = 0.5f;
 	vec3 viewDir = normalize(viewPos - vPosWorld);
-	vec3 reflectDir = reflect(-lightDir, normal);
+	vec3 reflectDir = reflect(lightDir, normal);
 	float specular = pow(max(dot(viewDir, reflectDir), 0.0f), shininess);
 	vec3 specularComponent = specularStrength * specular * lightColor;
 

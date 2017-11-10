@@ -37,6 +37,12 @@ void Input::onMouseClicked(GLFWwindow* window, int button, int action, int mods)
 
 void Input::onKeyPressed(GLFWwindow* window, int key, int scanCode, int action, int mods)
 {
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+	{
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
+		return;
+	}
+
 	switch (key) {
 	case GLFW_KEY_LEFT: key = TW_KEY_LEFT; break;
 	case GLFW_KEY_RIGHT: key = TW_KEY_RIGHT; break;

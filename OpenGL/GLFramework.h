@@ -4,9 +4,11 @@
 #include "OpenGLApp.h"
 #include "RenderTarget.h"
 #include <memory>
+#include "Mesh.h"
 
 class GUI;
 class Camera;
+class Shader;
 
 class GLFramework : public OpenGLApp
 {
@@ -24,10 +26,22 @@ private:
 
 	// User interface manager
 	GUI* m_pGUI;
+
+	// VAO
+	GLuint m_cubeVAO;
+	GLuint m_quadVAO;
+
+	// Shaders
+	std::unique_ptr<Shader> m_basicShader = nullptr;
+	std::unique_ptr<Shader> m_quadShader = nullptr;
+	std::unique_ptr<Shader> m_phongShader = nullptr;
+
 	// FPS camera
 	std::unique_ptr<Camera> m_pCamera1;
 	// Render target
 	std::unique_ptr<RenderTarget> m_pRT;
+
+	std::unique_ptr<Mesh<VertexPTNT>> m_pNanosuitMesh;
 };
 
 #endif // GLFRAMEWORK_H

@@ -165,7 +165,8 @@ bool OpenGLApp::setOpenGLState() const
 	glClearColor(0.01f, 0.01f, 0.01f, 1.0f);
 
 	// Enable face culling
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
 
 	// Enable depth test and set depth function
 	glEnable(GL_DEPTH_TEST);

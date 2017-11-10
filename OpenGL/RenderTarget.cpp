@@ -135,7 +135,7 @@ void RenderTarget::renderToTexture()
 
 // ----------------------------------------------------------------------------
 
-void RenderTarget::renderToScreen(int x, int y, int width, int height)
+void RenderTarget::renderToScreen(int x, int y, int width, int height, GLuint textureUnit)
 {
 	// Bind the default framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -144,7 +144,6 @@ void RenderTarget::renderToScreen(int x, int y, int width, int height)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Bind the rendered texture to texture unit
-	GLuint textureUnit = 0;
 	// Activate texture unit 0
 	glActiveTexture(GL_TEXTURE0 + textureUnit);
 	// Bind the rendered texture to texture unit

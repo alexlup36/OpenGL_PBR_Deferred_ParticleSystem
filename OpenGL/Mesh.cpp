@@ -4,94 +4,6 @@
 
 // ----------------------------------------------------------------------------
 
-template <class T>
-Mesh<T>::Mesh()
-{
-}
-
-template <>
-Mesh<VertexPTNT>::Mesh()
-{
-
-}
-
-// ----------------------------------------------------------------------------
-
-template <class T>
-Mesh<T>::~Mesh()
-{
-}
-
-template <>
-Mesh<VertexPTNT>::~Mesh()
-{
-
-}
-
-// ----------------------------------------------------------------------------
-
-template <class T>
-void Mesh<T>::loadMesh(const std::string& path)
-{
-	Assimp::Importer assimpImporter;
-
-	const aiScene* pScene = assimpImporter.ReadFile(path.c_str(),
-		aiProcess_Triangulate |
-		aiProcess_GenSmoothNormals |
-		aiProcess_FlipUVs |
-		aiProcess_CalcTangentSpace |
-		aiProcess_ImproveCacheLocality);
-
-	if (pScene == nullptr)
-	{
-		std::cout << "Mesh load failed!: " << path << " " << assimpImporter.GetErrorString() << std::endl;
-		return;
-	}
-	else if (pScene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || pScene->mRootNode == false)
-	{
-		std::cout << "Failed to load file " << path << " " << assimpImporter.GetErrorString() << std::endl;
-		return;
-	}
-	else
-	{
-		std::cout << "Mesh loaded successfully: " << path << std::endl;
-	}
-
-	recursiveProcess(pScene->mRootNode, pScene);
-}
-
-template <>
-void Mesh<VertexPTNT>::loadMesh(const std::string& path)
-{
-	Assimp::Importer assimpImporter;
-
-	const aiScene* pScene = assimpImporter.ReadFile(path.c_str(),
-		aiProcess_Triangulate |
-		aiProcess_GenSmoothNormals |
-		aiProcess_FlipUVs |
-		aiProcess_CalcTangentSpace |
-		aiProcess_ImproveCacheLocality);
-
-	if (pScene == nullptr)
-	{
-		std::cout << "Mesh load failed!: " << path << " " << assimpImporter.GetErrorString() << std::endl;
-		return;
-	}
-	else if (pScene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || pScene->mRootNode == false)
-	{
-		std::cout << "Failed to load file " << path << " " << assimpImporter.GetErrorString() << std::endl;
-		return;
-	}
-	else
-	{
-		std::cout << "Mesh loaded successfully: " << path << std::endl;
-	}
-
-	recursiveProcess(pScene->mRootNode, pScene);
-}
-
-// ----------------------------------------------------------------------------
-
 template <>
 void Mesh<VertexP>::processMesh(aiMesh* pModel)
 {
@@ -111,7 +23,7 @@ void Mesh<VertexP>::processMesh(aiMesh* pModel)
 		vertex.position = position;
 
 		// Add vertex to vertex list
-		m_vVertexList.push_back(vertex);
+		m_vertexList.push_back(vertex);
 	}
 
 	// Process indices -------------------------------------------------------------
@@ -148,7 +60,7 @@ void Mesh<VertexPN>::processMesh(aiMesh* pModel)
 		vertex.normal = normal;
 
 		// Add vertex to vertex list
-		m_vVertexList.push_back(vertex);
+		m_vertexList.push_back(vertex);
 	}
 
 	// Process indices -------------------------------------------------------------
@@ -187,7 +99,7 @@ void Mesh<VertexPC>::processMesh(aiMesh* pModel)
 		vertex.color = color;
 
 		// Add vertex to vertex list
-		m_vVertexList.push_back(vertex);
+		m_vertexList.push_back(vertex);
 	}
 
 	// Process indices -------------------------------------------------------------
@@ -257,7 +169,7 @@ void Mesh<VertexPTNT>::processMesh(aiMesh* pModel)
 		vertex.bitangent = bitangent;
 
 		// Add vertex to vertex list
-		m_vVertexList.push_back(vertex);
+		m_vertexList.push_back(vertex);
 	}
 
 	// Process indices -------------------------------------------------------------
@@ -266,38 +178,198 @@ void Mesh<VertexPTNT>::processMesh(aiMesh* pModel)
 
 // ----------------------------------------------------------------------------
 
-template <class T>
-void Mesh<T>::processIndices(aiMesh* pModel)
+template <>
+void Mesh<VertexP>::setupVertexInput(GLuint shaderProgram, const VertexP* vertexData, size_t vertexCount, const GLushort* indexData, size_t indexCount)
 {
-	for (unsigned int i = 0; i < pModel->mNumFaces; i++)
-	{
-		aiFace face = pModel->mFaces[i];
+	m_vertexCount = vertexCount;
 
-		for (unsigned int j = 0; j < face.mNumIndices; j++)
-		{
-			m_vIndexList.push_back(face.mIndices[j]);
-		}
-	}
+	// Generate the buffers -------------------------------------------------------------------------
+
+	// Generate the vertex array
+	glGenVertexArrays(1, &m_vertexArrayObject);
+	glBindVertexArray(m_vertexArrayObject);
+
+	// Generate the buffers and bind them
+	GLuint vertexInputBuffer[1];
+	glGenBuffers(1, vertexInputBuffer);
+	glGenBuffers(1, &m_indexBuffer);
+	m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexPosition)] = vertexInputBuffer[0];
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexPosition)]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
+
+	// Initialize the data in the buffers ------------------------------------------------------------
+
+	// Set vertex data
+	glBufferData(GL_ARRAY_BUFFER, sizeof(VertexP) * vertexCount, vertexData, GL_STATIC_DRAW);
+	// Set index data
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * indexCount, indexData, GL_STATIC_DRAW);
+
+	// Setup the attributes --------------------------------------------------------------------------
+	int positionLocation = glGetAttribLocation(shaderProgram, "pos");
+	assert(positionLocation != -1 && "Shader program not compatible with vertex format.");
+	
+	glEnableVertexAttribArray(static_cast<GLuint>(positionLocation)); // Enable vertex position
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexP), 0); // Position
+																								   
+	// -----------------------------------------------------------------------------------------------
+ 
+	glBindVertexArray(0);
 }
-
 
 // ----------------------------------------------------------------------------
 
-template <class T>
-void Mesh<T>::recursiveProcess(aiNode* pNode, const aiScene* pScene)
+template <>
+void Mesh<VertexPN>::setupVertexInput(GLuint shaderProgram, const VertexPN* vertexData, size_t vertexCount, const GLushort* indexData, size_t indexCount)
 {
-	// Process
-	for (unsigned int i = 0; i < pNode->mNumMeshes; i++)
-	{
-		aiMesh* mesh = pScene->mMeshes[pNode->mMeshes[i]];
-		processMesh(mesh);
-	}
+	m_vertexCount = vertexCount;
 
-	// Recursion
-	for (unsigned int i = 0; i < pNode->mNumChildren; i++)
-	{
-		recursiveProcess(pNode->mChildren[i], pScene);
-	}
+	// Generate the buffers -------------------------------------------------------------------------
+
+	// Generate the vertex array
+	glGenVertexArrays(1, &m_vertexArrayObject);
+	glBindVertexArray(m_vertexArrayObject);
+
+	// Generate the buffers and bind them
+	GLuint vertexInputBuffer[2];
+	glGenBuffers(2, vertexInputBuffer);
+	m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexPosition)] = vertexInputBuffer[0];
+	m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexNormal)] = vertexInputBuffer[1];
+	glGenBuffers(1, &m_indexBuffer);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexPosition)]);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexNormal)]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
+
+	// Initialize the data in the buffers ------------------------------------------------------------
+
+	// Vertices
+	glBufferData(GL_ARRAY_BUFFER, sizeof(VertexPN) * vertexCount, vertexData, GL_STATIC_DRAW);
+	// Indices
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * indexCount, indexData, GL_STATIC_DRAW);
+
+	// Setup the attributes --------------------------------------------------------------------------
+	int positionLocation = glGetAttribLocation(shaderProgram, "pos");
+	int normalLocation = glGetAttribLocation(shaderProgram, "norm");
+	assert(positionLocation != -1 && "Shader program not compatible with vertex format. Position location not found.");
+	assert(normalLocation != -1 && "Shader program not compatible with vertex format. Normal location not found.");
+
+	glEnableVertexAttribArray(positionLocation); // Enable vertex position
+	glEnableVertexAttribArray(normalLocation); // Enable vertex normal
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPN), 0); // Position
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPN), (GLvoid*)(sizeof(float) * 3)); // Normal
+
+	// -----------------------------------------------------------------------------------------------
+	glBindVertexArray(0);
+}
+
+// ----------------------------------------------------------------------------
+
+template <>
+void Mesh<VertexPC>::setupVertexInput(GLuint shaderProgram, const VertexPC* vertexData, size_t vertexCount, const GLushort* indexData, size_t indexCount)
+{
+	m_vertexCount = vertexCount;
+
+	// Generate the buffers -------------------------------------------------------------------------
+
+	// Generate the vertex array
+	glGenVertexArrays(1, &m_vertexArrayObject);
+	glBindVertexArray(m_vertexArrayObject);
+
+	// Generate the buffers and bind them
+	GLuint vertexInputBuffer[2];
+	glGenBuffers(2, vertexInputBuffer);
+	m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexPosition)] = vertexInputBuffer[0];
+	m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexColor)] = vertexInputBuffer[1];
+	glGenBuffers(1, &m_indexBuffer);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexPosition)]);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexColor)]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
+
+	// Initialize the data in the buffers ------------------------------------------------------------
+
+	// Vertices
+	glBufferData(GL_ARRAY_BUFFER, sizeof(VertexPC) * vertexCount, vertexData, GL_STATIC_DRAW);
+	// Indices
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * indexCount, indexData, GL_STATIC_DRAW);
+
+	// Setup the attributes --------------------------------------------------------------------------
+	int positionLocation = glGetAttribLocation(shaderProgram, "pos");
+	int colorLocation = glGetAttribLocation(shaderProgram, "col");
+	assert(positionLocation != -1 && "Shader program not compatible with vertex format. Position location not found.");
+	assert(colorLocation != -1 && "Shader program not compatible with vertex format. Color location not found.");
+
+	glEnableVertexAttribArray(positionLocation); // Enable vertex position
+	glEnableVertexAttribArray(colorLocation); // Enable vertex color
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPC), 0); // Position
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPC), (GLvoid*)(sizeof(float) * 3)); // Color
+
+	// -----------------------------------------------------------------------------------------------
+	glBindVertexArray(0);
+}
+
+// ----------------------------------------------------------------------------
+
+template <>
+void Mesh<VertexPTNT>::setupVertexInput(GLuint shaderProgram, const VertexPTNT* vertexData, size_t vertexCount, const GLushort* indexData, size_t indexCount)
+{
+	m_vertexCount = vertexCount;
+
+	// Generate the buffers -------------------------------------------------------------------------
+
+	// Generate the vertex array
+	glGenVertexArrays(1, &m_vertexArrayObject);
+	glBindVertexArray(m_vertexArrayObject);
+
+	// Generate the buffers and bind them
+	GLuint vertexInputBuffer[4];
+	glGenBuffers(4, vertexInputBuffer);
+	m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexPosition)] = vertexInputBuffer[0];
+	m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexTextureCoord)] = vertexInputBuffer[1];
+	m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexNormal)] = vertexInputBuffer[2];
+	m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexTangent)] = vertexInputBuffer[3];
+	glGenBuffers(1, &m_indexBuffer);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexPosition)]);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexTextureCoord)]);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexNormal)]);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexArrayBuffer[static_cast<int>(VertexInputType::VertexTangent)]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
+
+	// Initialize the data in the buffers ------------------------------------------------------------
+
+	// Vertices
+	glBufferData(GL_ARRAY_BUFFER, sizeof(VertexPTNT) * vertexCount, vertexData, GL_STATIC_DRAW);
+	// Indices
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * indexCount, indexData, GL_STATIC_DRAW);
+
+	// Setup the attributes --------------------------------------------------------------------------
+	glEnableVertexAttribArray(0); // Enable vertex position
+	glEnableVertexAttribArray(1); // Enable vertex texture
+	glEnableVertexAttribArray(2); // Enable vertex normal
+	glEnableVertexAttribArray(3); // Enable vertex tangent
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPTNT), 0); // Position
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexPTNT), (GLvoid*)(sizeof(float) * 3)); // Texture
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPTNT), (GLvoid*)(sizeof(float) * 5)); // Normal
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPTNT), (GLvoid*)(sizeof(float) * 8)); // Tangent
+
+	// -----------------------------------------------------------------------------------------------
+	glBindVertexArray(0);
+}
+
+// ----------------------------------------------------------------------------
+
+template<class T>
+void Mesh<T>::render()
+{
+	glBindVertexArray(m_vertexArrayObject);
+	glDrawElements(GL_TRIANGLES, (GLsizei)m_vertexCount, GL_UNSIGNED_SHORT, 0);
+	glBindVertexArray(0);
 }
 
 // ----------------------------------------------------------------------------

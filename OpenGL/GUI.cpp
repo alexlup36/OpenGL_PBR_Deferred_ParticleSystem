@@ -25,16 +25,27 @@ bool GUI::setup(GLFWwindow* window, int w, int h)
 
 	TwAddVarRW(bar, "ObjectShininess", TW_TYPE_FLOAT, &m_shininess, "min=0 max=256 step=1.0 help='Power of 2'");
 
-	TwAddVarRW(bar, "ObjRotation", TW_TYPE_QUAT4F, m_rotation,
+	//TwAddVarRW(bar, "ObjRotation", TW_TYPE_QUAT4F, m_rotation,
+	//	" label='Object rotation' opened=true help='Change the object orientation.' ");
+
+	//TwAddVarRW(bar, "LightDirection", TW_TYPE_DIR3F, m_lightDirection,
+	//	" label='Light direction' opened=true help='Change the light direction.' ");
+
+	//TwAddVarRW(bar, "ObjectColor", TW_TYPE_COLOR4F, m_objectColor,
+	//	" label='Cube color' alpha help='Color and transparency of the cube.' ");
+
+	//TwAddVarRW(bar, "LightColor", TW_TYPE_COLOR3F, m_lightColor, " label='Light color' ");
+
+	TwAddVarRW(bar, "ObjRotation", TW_TYPE_QUAT4F, static_cast<void*>(&m_rotation[0]),
 		" label='Object rotation' opened=true help='Change the object orientation.' ");
 
-	TwAddVarRW(bar, "LightDirection", TW_TYPE_DIR3F, m_lightDirection,
+	TwAddVarRW(bar, "LightDirection", TW_TYPE_DIR3F, static_cast<void*>(&m_lightDirection[0]),
 		" label='Light direction' opened=true help='Change the light direction.' ");
 
-	TwAddVarRW(bar, "ObjectColor", TW_TYPE_COLOR4F, m_objectColor,
+	TwAddVarRW(bar, "ObjectColor", TW_TYPE_COLOR4F, static_cast<void*>(&m_objectColor[0]),
 		" label='Cube color' alpha help='Color and transparency of the cube.' ");
 
-	TwAddVarRW(bar, "LightColor", TW_TYPE_COLOR3F, m_lightColor, " label='Light color' ");
+	TwAddVarRW(bar, "LightColor", TW_TYPE_COLOR3F, static_cast<void*>(&m_lightColor[0]), " label='Light color' ");
 
 	TwWindowSize(w, h);
 

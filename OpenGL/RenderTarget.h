@@ -18,7 +18,7 @@ public:
 	bool initialize();
 
 	void renderToTexture();
-	void renderToScreen(int x, int y, int width, int height);
+	void renderToScreen(int x, int y, int width, int height, GLuint textureUnit);
 
 	// Getters/setters
 	inline const GLsizei width() const { return m_width; }

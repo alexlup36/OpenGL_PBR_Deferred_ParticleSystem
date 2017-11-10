@@ -30,6 +30,23 @@ Shader::Shader(const std::string& vsFilePath, const std::string& psFilePath)
 	// Link program
 	linkProgram();
 
+	// Default values for shader uniforms
+	unsigned int shaderUniformCount = static_cast<int>(ShaderUniform::Count);
+	for (unsigned int index = 0; index < shaderUniformCount; ++index)
+		m_shaderUniforms[index] = -1;
+
+	// Initialize shader uniform locations
+	m_shaderUniforms[static_cast<int>(ShaderUniform::ModelMat)] = glGetUniformLocation(m_program, "model");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::NormalMat)] = glGetUniformLocation(m_program, "normalMat");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::ViewMat)] = glGetUniformLocation(m_program, "view");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::ProjMat)] = glGetUniformLocation(m_program, "projection");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::LightDir)] = glGetUniformLocation(m_program, "lightDir");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::LightColor)] = glGetUniformLocation(m_program, "lightColor");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::ObjectColor)] = glGetUniformLocation(m_program, "objectColor");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::ViewPos)] = glGetUniformLocation(m_program, "viewPos");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::Shininess)] = glGetUniformLocation(m_program, "shininess");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::RenderedTexture)] = glGetUniformLocation(m_program, "renderedTexture");
+
 	// Delete shader objects
 	glDeleteShader(vsObject);
 	glDeleteShader(psObject);
@@ -110,5 +127,25 @@ bool Shader::linkProgram()
 	// Success
 	return true;
 }
+
+// ----------------------------------------------------------------------------
+
+//template <> template<>
+//void Shader<int>::set<double>()
+//{
+//
+//}
+
+//template<>
+//void Shader<glm::mat4>::set(ShaderUniform uniform, T val)
+//{
+//
+//}
+
+//template <>
+//void Shader<glm::mat4>::set()
+//{
+//
+//}
 
 // ----------------------------------------------------------------------------
