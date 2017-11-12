@@ -22,6 +22,12 @@ enum class ShaderUniform
 	ViewPos,
 	Shininess,
 	RenderedTexture,
+	SpecularStrength,
+
+	DiffuseTexture,
+	NormalTexture,
+	SpecularTexture,
+	DisplacementTexture,
 
 	Count,
 };

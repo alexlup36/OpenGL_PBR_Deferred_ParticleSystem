@@ -23,7 +23,8 @@ bool GUI::setup(GLFWwindow* window, int w, int h)
 
 	bar = TwNewBar("Phong Lighting");
 
-	TwAddVarRW(bar, "ObjectShininess", TW_TYPE_FLOAT, &m_shininess, "min=0 max=256 step=1.0 help='Power of 2'");
+	TwAddVarRW(bar, "ObjectShininess", TW_TYPE_FLOAT, &m_shininess, "min=1 max=256 step=0.1 help='Power of 2'");
+	TwAddVarRW(bar, "ObjectSpecularStrength", TW_TYPE_FLOAT, &m_specularStrength, "min=0 max=1 step=0.01 ");
 
 	//TwAddVarRW(bar, "ObjRotation", TW_TYPE_QUAT4F, m_rotation,
 	//	" label='Object rotation' opened=true help='Change the object orientation.' ");

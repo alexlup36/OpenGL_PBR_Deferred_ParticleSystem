@@ -86,7 +86,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)Lib\lib;$(SolutionDir)Lib\lib\anttweakbar\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;assimp.lib;AntTweakBarStatic64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;assimp.lib;soil2.lib;AntTweakBarStatic64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -115,7 +115,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)Lib\lib;$(SolutionDir)Lib\lib\anttweakbar\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;assimp.lib;anttweakbarstatic64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;assimp.lib;soil2.lib;anttweakbarstatic64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -125,9 +125,12 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="OpenGLApp.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Texture2D.cpp" />
+    <ClCompile Include="TextureMan.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -137,9 +140,12 @@
     <ClInclude Include="GUI.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="OpenGLApp.h" />
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Texture2D.h" />
+    <ClInclude Include="TextureMan.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\basic.frag" />
@@ -147,10 +153,20 @@
     <None Include="Shaders\cube.frag" />
     <None Include="Shaders\cube.vert" />
     <None Include="Shaders\glslangValidator.exe" />
-    <None Include="Shaders\phong.frag" />
-    <None Include="Shaders\phong.vert" />
+    <None Include="Shaders\normalMapping.frag" />
+    <None Include="Shaders\normalMapping.vert" />
+    <None Include="Shaders\parallaxMapping.frag" />
+    <None Include="Shaders\parallaxMapping.vert" />
+    <None Include="Shaders\pbr.frag" />
+    <None Include="Shaders\pbr.vert" />
+    <None Include="Shaders\phongColor.frag" />
+    <None Include="Shaders\phongColor.vert" />
+    <None Include="Shaders\phongTexture.frag" />
+    <None Include="Shaders\phongTexture.vert" />
     <None Include="Shaders\quad.frag" />
     <None Include="Shaders\quad.vert" />
+    <None Include="Shaders\simplePBR.frag" />
+    <None Include="Shaders\simplePBR.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

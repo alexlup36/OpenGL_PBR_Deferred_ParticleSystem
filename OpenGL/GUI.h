@@ -24,6 +24,7 @@ public:
 	glm::vec4 m_rotation = glm::vec4(0.5f, 0.5f, 0.5f, 0.0f);
 	glm::vec3 m_lightDirection = glm::vec3(0.5f, 0.5f, 0.5f);
 	float m_shininess = 32.0f;
+	float m_specularStrength = 0.1f;
 	glm::vec3 m_lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec4 m_objectColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 };

@@ -45,7 +45,13 @@ Shader::Shader(const std::string& vsFilePath, const std::string& psFilePath)
 	m_shaderUniforms[static_cast<int>(ShaderUniform::ObjectColor)] = glGetUniformLocation(m_program, "objectColor");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::ViewPos)] = glGetUniformLocation(m_program, "viewPos");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::Shininess)] = glGetUniformLocation(m_program, "shininess");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::SpecularStrength)] = glGetUniformLocation(m_program, "specularStrength");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::RenderedTexture)] = glGetUniformLocation(m_program, "renderedTexture");
+
+	m_shaderUniforms[static_cast<int>(ShaderUniform::DiffuseTexture)] = glGetUniformLocation(m_program, "diffuseTexture");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::NormalTexture)] = glGetUniformLocation(m_program, "normalTexture");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::SpecularTexture)] = glGetUniformLocation(m_program, "specularTexture");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::DisplacementTexture)] = glGetUniformLocation(m_program, "displacementTexture");
 
 	// Delete shader objects
 	glDeleteShader(vsObject);
@@ -127,25 +133,5 @@ bool Shader::linkProgram()
 	// Success
 	return true;
 }
-
-// ----------------------------------------------------------------------------
-
-//template <> template<>
-//void Shader<int>::set<double>()
-//{
-//
-//}
-
-//template<>
-//void Shader<glm::mat4>::set(ShaderUniform uniform, T val)
-//{
-//
-//}
-
-//template <>
-//void Shader<glm::mat4>::set()
-//{
-//
-//}
 
 // ----------------------------------------------------------------------------

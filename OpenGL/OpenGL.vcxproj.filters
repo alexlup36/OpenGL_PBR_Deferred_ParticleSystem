@@ -42,6 +42,15 @@
     <ClCompile Include="RenderTarget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TextureMan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture2D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -74,6 +83,15 @@
     <ClInclude Include="RenderTarget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TextureMan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture2D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\quad.frag" />
@@ -83,7 +101,17 @@
     <None Include="Shaders\glslangValidator.exe" />
     <None Include="Shaders\cube.frag" />
     <None Include="Shaders\cube.vert" />
-    <None Include="Shaders\phong.frag" />
-    <None Include="Shaders\phong.vert" />
+    <None Include="Shaders\normalMapping.frag" />
+    <None Include="Shaders\normalMapping.vert" />
+    <None Include="Shaders\parallaxMapping.frag" />
+    <None Include="Shaders\parallaxMapping.vert" />
+    <None Include="Shaders\pbr.frag" />
+    <None Include="Shaders\pbr.vert" />
+    <None Include="Shaders\simplePBR.frag" />
+    <None Include="Shaders\simplePBR.vert" />
+    <None Include="Shaders\phongColor.frag" />
+    <None Include="Shaders\phongColor.vert" />
+    <None Include="Shaders\phongTexture.frag" />
+    <None Include="Shaders\phongTexture.vert" />
   </ItemGroup>
 </Project>

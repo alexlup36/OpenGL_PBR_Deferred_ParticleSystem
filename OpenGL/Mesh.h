@@ -13,6 +13,7 @@
 #include "Common.h"
 
 // ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // Base vertex definition containig only position data
 struct VertexP
@@ -25,6 +26,8 @@ struct VertexP
 	glm::vec3 position;
 };
 
+// ----------------------------------------------------------------------------
+
 // Vertex containing position and color data
 struct VertexPC : public VertexP
 {
@@ -36,6 +39,8 @@ struct VertexPC : public VertexP
 
 	glm::vec4 color;
 };
+
+// ----------------------------------------------------------------------------
 
 // Vertex containing position and normal data
 struct VertexPN : public VertexP
@@ -69,18 +74,15 @@ struct VertexPTNT : public VertexPN
 };
 
 // ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 template<class T>
 class Mesh
 {
 public:
-	Mesh(const std::string& filePath, GLuint shaderProgram);
-	//Mesh(const T* vertexData, size_t vertexCount, const GLushort* indexData, size_t indexCount);
-	Mesh(GLuint vertexArrayObject)
-		: m_uiVertexArrayObject(vertexArrayObject) {}
+	Mesh(std::vector<T> vertexList, std::vector<GLushort> indexList);
 	~Mesh();
 
-	inline void loadMesh(const std::string& path);
 	inline const GLuint vertexArrayObject() const { return m_vertexArrayObject; }
 	void render();
 
@@ -89,28 +91,9 @@ public:
 
 private:
 
-	enum class VertexInputType
-	{
-		VertexPosition,
-		VertexTextureCoord,
-		VertexNormal,
-		VertexTangent,
-		VertexColor,
-
-		NumOfBuffers,
-	};
-
-	void setupVertexInput(GLuint shaderProgram, const T* vertexData, size_t vertexCount, const GLushort* indexData, size_t indexCount);
-	void processMesh(aiMesh* pModel);
-	
-	// Template specialization
-	void recursiveProcess(aiNode* pNode, const aiScene* pScene);
-	void processIndices(aiMesh* pModel);
+	void setupVertexInput();
 
 	GLuint m_vertexArrayObject;
-	GLuint m_indexBuffer;
-	size_t m_vertexCount;
-	GLuint m_vertexArrayBuffer[VertexInputType::NumOfBuffers];
 
 	std::vector<T> m_vertexList;
 	std::vector<GLushort> m_indexList;
@@ -119,83 +102,15 @@ private:
 // ----------------------------------------------------------------------------
 
 template <class T>
-Mesh<T>::Mesh(const std::string& filePath, GLuint shaderProgram)
+Mesh<T>::Mesh(std::vector<T> vertexList, std::vector<GLushort> indexList)
+	: m_vertexList(vertexList), m_indexList(indexList) 
 {
-	assert(filePath.length() != 0 && "Invalid file path specified.");
-	loadMesh(filePath);
-	setupVertexInput(shaderProgram, m_vertexList.data(), m_vertexCount, m_indexList.data(), m_indexList.size());
+	setupVertexInput();
 }
 
 template <class T>
 Mesh<T>::~Mesh()
 {
-}
-
-// ----------------------------------------------------------------------------
-
-template <class T>
-void Mesh<T>::loadMesh(const std::string& path)
-{
-	Assimp::Importer assimpImporter;
-
-	const aiScene* pScene = assimpImporter.ReadFile(path.c_str(),
-		aiProcess_Triangulate |
-		aiProcess_GenSmoothNormals |
-		aiProcess_FlipUVs |
-		aiProcess_CalcTangentSpace |
-		aiProcess_ImproveCacheLocality);
-
-	if (pScene == nullptr)
-	{
-		std::cout << "Mesh load failed!: " << path << " " << assimpImporter.GetErrorString() << std::endl;
-		return;
-	}
-	else if (pScene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || pScene->mRootNode == false)
-	{
-		std::cout << "Failed to load file " << path << " " << assimpImporter.GetErrorString() << std::endl;
-		return;
-	}
-	else
-	{
-		std::cout << "Mesh loaded successfully: " << path << std::endl;
-	}
-
-	recursiveProcess(pScene->mRootNode, pScene);
-}
-
-// ----------------------------------------------------------------------------
-
-template <class T>
-void Mesh<T>::recursiveProcess(aiNode* pNode, const aiScene* pScene)
-{
-	// Process
-	for (unsigned int i = 0; i < pNode->mNumMeshes; i++)
-	{
-		aiMesh* mesh = pScene->mMeshes[pNode->mMeshes[i]];
-		processMesh(mesh);
-	}
-
-	// Recursion
-	for (unsigned int i = 0; i < pNode->mNumChildren; i++)
-	{
-		recursiveProcess(pNode->mChildren[i], pScene);
-	}
-}
-
-// ----------------------------------------------------------------------------
-
-template <class T>
-void Mesh<T>::processIndices(aiMesh* pModel)
-{
-	for (unsigned int i = 0; i < pModel->mNumFaces; i++)
-	{
-		aiFace face = pModel->mFaces[i];
-
-		for (unsigned int j = 0; j < face.mNumIndices; j++)
-		{
-			m_indexList.push_back(face.mIndices[j]);
-		}
-	}
 }
 
 // ----------------------------------------------------------------------------
@@ -321,6 +236,16 @@ inline GLuint Mesh<T>::vaoQuadSetup()
 	glBindVertexArray(0);
 
 	return quadVertexArray;
+}
+
+// ----------------------------------------------------------------------------
+
+template<class T>
+void Mesh<T>::render()
+{
+	glBindVertexArray(m_vertexArrayObject);
+	glDrawElements(GL_TRIANGLES, (GLsizei)m_indexList.size(), GL_UNSIGNED_SHORT, 0);
+	glBindVertexArray(0);
 }
 
 // ----------------------------------------------------------------------------

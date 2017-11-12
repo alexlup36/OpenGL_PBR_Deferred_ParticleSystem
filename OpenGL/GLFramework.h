@@ -4,7 +4,8 @@
 #include "OpenGLApp.h"
 #include "RenderTarget.h"
 #include <memory>
-#include "Mesh.h"
+#include "Model.h"
+#include "TextureMan.h"
 
 class GUI;
 class Camera;
@@ -34,14 +35,24 @@ private:
 	// Shaders
 	std::unique_ptr<Shader> m_basicShader = nullptr;
 	std::unique_ptr<Shader> m_quadShader = nullptr;
-	std::unique_ptr<Shader> m_phongShader = nullptr;
+	std::unique_ptr<Shader> m_phongColorShader = nullptr;
+	std::unique_ptr<Shader> m_phongTextureShader = nullptr;
+	std::unique_ptr<Shader> m_parallaxMapping = nullptr;
+	std::unique_ptr<Shader> m_normalMapping = nullptr;
+	std::unique_ptr<Shader> m_simplePBR = nullptr;
+	std::unique_ptr<Shader> m_pbr = nullptr;
+
+	// Textures
+	Texture2D* m_brick1Diffuse = nullptr;
 
 	// FPS camera
 	std::unique_ptr<Camera> m_pCamera1;
 	// Render target
 	std::unique_ptr<RenderTarget> m_pRT;
 
-	std::unique_ptr<Mesh<VertexPTNT>> m_pNanosuitMesh;
+	std::unique_ptr<Model<VertexPN>> m_pTorusModel;
+	std::unique_ptr<Model<VertexPN>> m_pMonkeyModel;
+	std::unique_ptr<Model<VertexPTNT>> m_pPlaneModel;
 };
 
 #endif // GLFRAMEWORK_H
