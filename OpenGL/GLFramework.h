@@ -44,6 +44,9 @@ private:
 
 	// Textures
 	Texture2D* m_brick1Diffuse = nullptr;
+	Texture2D* m_brick1Displacement = nullptr;
+	Texture2D* m_brick1Normal = nullptr;
+	Texture2D* m_brick1Specular = nullptr;
 
 	// FPS camera
 	std::unique_ptr<Camera> m_pCamera1;

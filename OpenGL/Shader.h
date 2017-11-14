@@ -32,6 +32,42 @@ enum class ShaderUniform
 	Count,
 };
 
+enum class PointLightUniform
+{
+	Position,
+	Attenuation,
+	ColorAmbientComp,
+	ColorDiffuseComp,
+	ColorSpecularComp,
+
+	Count,
+};
+
+enum class DirLightUniform
+{
+	Direction,
+	ColorAmbientComp,
+	ColorDiffuseComp,
+	ColorSpecularComp,
+
+	Count,
+};
+
+enum class SpotLightUniform
+{
+	Position,
+	ColorAmbientComp,
+	ColorDiffuseComp,
+	ColorSpecularComp,
+	Attenuation,
+	Direction,
+	Exponent,
+	Cutoff,
+	CosCutoff,
+
+	Count,
+};
+
 class Shader
 {
 public:
@@ -48,6 +84,9 @@ private:
 	GLuint m_program;
 
 	GLint m_shaderUniforms[static_cast<int>(ShaderUniform::Count)];
+	GLint m_pointLightsUniforms[MAX_POINT_LIGHTS][static_cast<int>(PointLightUniform::Count)];
+	GLint m_dirLightsUniforms[MAX_DIR_LIGHTS][static_cast<int>(DirLightUniform::Count)];
+	GLint m_spotLightsUniforms[MAX_SPOT_LIGHTS][static_cast<int>(SpotLightUniform::Count)];
 
 private:
 	void readShaderFromFile(const std::string& shaderFilePath, std::string& outShaderCode);

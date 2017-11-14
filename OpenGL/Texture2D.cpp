@@ -18,6 +18,8 @@ Texture2D::Texture2D(const std::string& sFileName, TextureType type, bool bImmut
 	// Store texture path
 	m_sTexturePath = sFileName;
 
+	m_textureType = type;
+
 	// --------------------------------------------------------------------------
 	// Load texture data from file
 
@@ -57,10 +59,12 @@ Texture2D::Texture2D(const std::string& sFileName, TextureType type, bool bImmut
 
 	switch (type)
 	{
-	case TextureType::Diffuse:
+	case TextureType::Diffuse1:
+	case TextureType::Diffuse2:
 		m_bSRGB = true;
 		break;
-	case TextureType::Normal:
+	case TextureType::Normal1:
+	case TextureType::Normal2:
 		m_bSRGB = false;
 		break;
 	case TextureType::Specular:
@@ -232,24 +236,27 @@ Texture2D::~Texture2D()
 
 // ----------------------------------------------------------------------------
 
-void Texture2D::Bind(unsigned int unit, GLuint program)
+void Texture2D::bind(GLuint program)
 {
-	assert( unit >= 0 && unit <= 32 );
+	unsigned int textureType = static_cast<int>(m_textureType);
+	unsigned int textureTypeCount = static_cast<int>(TextureType::Count);
+	assert( textureType >= 0 && textureType <= textureTypeCount && textureType <= 32 &&
+			"Invalid texture type specified.");
 
 	// Set the texture unit
-	glActiveTexture( GLenum(GL_TEXTURE0 + unit) );
+	glActiveTexture( GLenum(GL_TEXTURE0 + textureType) );
 
 	// Bind the texture
 	glBindTexture( GL_TEXTURE_2D, m_uiTexture );
 
-	switch (unit)
+	switch (textureType)
 	{
 	case 0:
 	{
 		// Bind the diffuse sampler
-		int location = glGetUniformLocation(program, "diffuseTexture");
+		int location = glGetUniformLocation(program, "diffuseTexture1");
 
-		glUniform1i(location, unit);
+		glUniform1i(location, textureType);
 		break;
 	}
 	case 1:
@@ -257,15 +264,15 @@ void Texture2D::Bind(unsigned int unit, GLuint program)
 		// Bind the diffuse sampler2
 		int location = glGetUniformLocation(program, "diffuseTexture2");
 
-		glUniform1i(location, unit);
+		glUniform1i(location, textureType);
 		break;
 	}
 	case 2:
 	{
 		// Bind the normal map sampler
-		int location = glGetUniformLocation(program, "normalTexture");
+		int location = glGetUniformLocation(program, "normalTexture1");
 
-		glUniform1i(location, unit);
+		glUniform1i(location, textureType);
 		break;
 	}
 	case 3:
@@ -273,7 +280,7 @@ void Texture2D::Bind(unsigned int unit, GLuint program)
 		// Bind the normal map sampler2
 		int location = glGetUniformLocation(program, "normalTexture2");
 
-		glUniform1i(location, unit);
+		glUniform1i(location, textureType);
 		break;
 	}
 	case 4:
@@ -281,7 +288,7 @@ void Texture2D::Bind(unsigned int unit, GLuint program)
 		// Bind the displacement map sampler
 		int location = glGetUniformLocation(program, "displacementTexture");
 
-		glUniform1i(location, unit);
+		glUniform1i(location, textureType);
 		break;
 	}
 	case 5:
@@ -289,7 +296,7 @@ void Texture2D::Bind(unsigned int unit, GLuint program)
 		// Bind the specular map sampler
 		int location = glGetUniformLocation(program, "specularTexture");
 
-		glUniform1i(location, unit);
+		glUniform1i(location, textureType);
 		break;
 	}
 			
@@ -300,7 +307,7 @@ void Texture2D::Bind(unsigned int unit, GLuint program)
 
 // ----------------------------------------------------------------------------
 
-GLuint Texture2D::GetHandler()
+GLuint Texture2D::getHandler()
 {
 	return m_uiTexture;
 }

@@ -53,6 +53,72 @@ Shader::Shader(const std::string& vsFilePath, const std::string& psFilePath)
 	m_shaderUniforms[static_cast<int>(ShaderUniform::SpecularTexture)] = glGetUniformLocation(m_program, "specularTexture");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::DisplacementTexture)] = glGetUniformLocation(m_program, "displacementTexture");
 
+	// Initialize dir lights uniform locations
+	for (auto dirLightIndex = 0; dirLightIndex < MAX_DIR_LIGHTS; ++dirLightIndex)
+	{
+		// Get the location for the current light uniform
+		std::string sLightIndex = std::to_string(dirLightIndex);
+		std::string sTemp = "dirLight[" + sLightIndex + "].";
+		std::string sShaderLocation;
+
+		sShaderLocation = sTemp + "direction";
+		m_dirLightsUniforms[dirLightIndex][static_cast<int>(DirLightUniform::Direction)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "ambientComp";
+		m_dirLightsUniforms[dirLightIndex][static_cast<int>(DirLightUniform::ColorAmbientComp)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "diffuseComp";
+		m_dirLightsUniforms[dirLightIndex][static_cast<int>(DirLightUniform::ColorDiffuseComp)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "specularComp";
+		m_dirLightsUniforms[dirLightIndex][static_cast<int>(DirLightUniform::ColorSpecularComp)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+	}
+
+	// Initialize point lights uniform locations
+	for (auto pointLightIndex = 0; pointLightIndex < MAX_POINT_LIGHTS; ++pointLightIndex)
+	{
+		// Get the location for the current light uniform
+		std::string sLightIndex = std::to_string(pointLightIndex);
+		std::string sTemp = "pointLight[" + sLightIndex + "].";
+		std::string sShaderLocation;
+
+		sShaderLocation = sTemp + "position";
+		m_dirLightsUniforms[pointLightIndex][static_cast<int>(PointLightUniform::Position)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "attenuation";
+		m_dirLightsUniforms[pointLightIndex][static_cast<int>(PointLightUniform::Attenuation)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "ambientComp";
+		m_dirLightsUniforms[pointLightIndex][static_cast<int>(PointLightUniform::ColorAmbientComp)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "diffuseComp";
+		m_dirLightsUniforms[pointLightIndex][static_cast<int>(PointLightUniform::ColorDiffuseComp)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "specularComp";
+		m_dirLightsUniforms[pointLightIndex][static_cast<int>(PointLightUniform::ColorSpecularComp)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+	}
+
+	// Initialize spot lights uniform locations
+	for (auto spotLightIndex = 0; spotLightIndex < MAX_SPOT_LIGHTS; ++spotLightIndex)
+	{
+		// Get the location for the current light uniform
+		std::string sLightIndex = std::to_string(spotLightIndex);
+		std::string sTemp = "spotLight[" + sLightIndex + "].";
+		std::string sShaderLocation;
+
+		sShaderLocation = sTemp + "position";
+		m_dirLightsUniforms[spotLightIndex][static_cast<int>(SpotLightUniform::Position)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "attenuation";
+		m_dirLightsUniforms[spotLightIndex][static_cast<int>(SpotLightUniform::Attenuation)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "ambientComp";
+		m_dirLightsUniforms[spotLightIndex][static_cast<int>(SpotLightUniform::ColorAmbientComp)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "diffuseComp";
+		m_dirLightsUniforms[spotLightIndex][static_cast<int>(SpotLightUniform::ColorDiffuseComp)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "specularComp";
+		m_dirLightsUniforms[spotLightIndex][static_cast<int>(SpotLightUniform::ColorSpecularComp)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "dirrection";
+		m_dirLightsUniforms[spotLightIndex][static_cast<int>(SpotLightUniform::Direction)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "exponent";
+		m_dirLightsUniforms[spotLightIndex][static_cast<int>(SpotLightUniform::Exponent)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "cutoff";
+		m_dirLightsUniforms[spotLightIndex][static_cast<int>(SpotLightUniform::Cutoff)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "cosCutoff";
+		m_dirLightsUniforms[spotLightIndex][static_cast<int>(SpotLightUniform::CosCutoff)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+	}
+
 	// Delete shader objects
 	glDeleteShader(vsObject);
 	glDeleteShader(psObject);

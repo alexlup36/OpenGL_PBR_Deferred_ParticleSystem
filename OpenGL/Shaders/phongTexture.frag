@@ -15,11 +15,17 @@ uniform vec3 viewPos;
 uniform float shininess;
 uniform float specularStrength;
 
-uniform sampler2D diffuseTexture;
+uniform sampler2D diffuseTexture1;
+uniform sampler2D normalTexture1;
+uniform sampler2D displacementTexture;
+uniform sampler2D specularTexture;
 
 void main()
 {
-	vec4 diffuseColor = vec4(texture(diffuseTexture, vUV).xyz, 1.0f);
+	vec4 diffuseColor = vec4(texture(diffuseTexture1, vUV).xyz, 1.0f);
+	vec4 normalValue = vec4(texture(normalTexture1, vUV).xyz, 1.0f);
+	vec4 displacementValue = vec4(texture(displacementTexture, vUV).xyz, 1.0f);
+	vec4 specularValue = vec4(texture(specularTexture, vUV).xyz, 1.0f);
 
 	vec3 tangent = vTan;
 	vec3 bitangent = vBitan;
@@ -33,7 +39,7 @@ void main()
 	
 	// Diffuse component
 	vec3 normal = normalize(vNorm);
-	vec3 dir = normalize(-lightDir - vPosWorld);
+	vec3 dir = normalize(-lightDir);
 	float diffuse = max(dot(normal, dir), 0.0f);
 	vec3 diffuseComponent = diffuse * lightColor;
 

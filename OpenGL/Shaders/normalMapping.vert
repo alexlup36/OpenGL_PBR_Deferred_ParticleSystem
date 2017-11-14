@@ -1,9 +1,10 @@
 #version 330 core
 
 in layout(location = 0) vec3 vertexPosition;
-in layout(location = 1) vec2 vertexTexCoord;
-in layout(location = 2) vec3 vertexNormal;
+in layout(location = 1) vec3 vertexNormal;
+in layout(location = 2) vec2 vertexTexCoord;
 in layout(location = 3) vec3 vertexTangent;
+in layout(location = 4) vec3 vertexBitangent;
 
 out vec2 texCoord;
 out vec3 vertexW;

@@ -29,9 +29,11 @@ struct Material
 	float fMatShineness;
 };
 
-uniform sampler2D diffuseSampler;
-uniform sampler2D normalSampler;
-uniform sampler2D displacementSampler;
+uniform sampler2D diffuseTexture1;
+uniform sampler2D normalTexture1;
+uniform sampler2D displacementTexture;
+uniform sampler2D specularTexture;
+
 uniform float dispMapScale;
 uniform DirectionalLight dirLight;
 uniform PointLight pointLight[MAX_POINT_LIGHTS];
@@ -155,7 +157,7 @@ vec2 ParallaxMapping(vec2 texCoord, vec3 viewDirection)
 	vec2 deltaTexCoords = p / layerCount;
 	// Set initial values
 	vec2 currentTexCoord = texCoord;
-	float currentDepthMapValue = texture(displacementSampler, currentTexCoord).r;
+	float currentDepthMapValue = texture(displacementTexture, currentTexCoord).r;
 	
 	while (currentLayerDepth < currentDepthMapValue)
 	{
@@ -163,7 +165,7 @@ vec2 ParallaxMapping(vec2 texCoord, vec3 viewDirection)
 		currentTexCoord -= deltaTexCoords;
 		
 		// Get the depth map value at the current texture coordinate
-		currentDepthMapValue = texture(displacementSampler, currentTexCoord).r;
+		currentDepthMapValue = texture(displacementTexture, currentTexCoord).r;
 	
 		// Increment the current layer depth
 		currentLayerDepth += layerDepth;
@@ -173,7 +175,7 @@ vec2 ParallaxMapping(vec2 texCoord, vec3 viewDirection)
 	vec2 prevTexCoord = currentTexCoord + deltaTexCoords;
 	// Get the depth value after and before the collision
 	float afterDepth = currentDepthMapValue - currentLayerDepth;
-	float beforeDepth = texture(displacementSampler, prevTexCoord).r - currentLayerDepth + layerDepth;
+	float beforeDepth = texture(displacementTexture, prevTexCoord).r - currentLayerDepth + layerDepth;
 	
 	// Do the interpolation
 	float weight = afterDepth / (afterDepth - beforeDepth);
@@ -196,8 +198,8 @@ void main()
 	}
 	
 	// Sample the diffuse and normal textures
-	vec4 diffuseColor = texture(diffuseSampler, texCoordParallax);
-	vec3 normal = normalize(TBNMatrix * (2.0f * texture(normalSampler, texCoordParallax).xyz - 1.0f));
+	vec4 diffuseColor = texture(diffuseTexture1, texCoordParallax);
+	vec3 normal = normalize(TBNMatrix * (2.0f * texture(normalTexture1, texCoordParallax).xyz - 1.0f));
 	
 	// Calculate lighting using the Phong model texture
 	color += blinnPhongShading(normal, diffuseColor);

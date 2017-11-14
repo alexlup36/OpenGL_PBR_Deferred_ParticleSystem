@@ -151,7 +151,10 @@ void GLFramework::draw(double dt)
 	// TODO - replace with the camera position
 	m_phongTextureShader->set<glm::vec3&>(ShaderUniform::ViewPos, glm::vec3(0.0f, 0.0f, 0.0f));
 	m_phongTextureShader->set<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
-	m_brick1Diffuse->Bind(0, m_phongTextureShader->program());
+	m_brick1Diffuse->bind(m_phongTextureShader->program());
+	m_brick1Displacement->bind(m_phongTextureShader->program());
+	m_brick1Normal->bind(m_phongTextureShader->program());
+	m_brick1Specular->bind(m_phongTextureShader->program());
 	// Draw triangles
 	m_pPlaneModel->render();
 
@@ -236,7 +239,10 @@ void GLFramework::setupScene()
 	m_pbr = std::make_unique<Shader>(".\\Shaders\\pbr.vert", ".\\Shaders\\pbr.frag");
 
 	// Load textures
-	m_brick1Diffuse = TextureMan::Instance().getTexture("..//Assets//Textures//brick1//brick_diffuse.jpg", TextureType::Diffuse);
+	m_brick1Diffuse = TextureMan::Instance().getTexture("..//Assets//Textures//brick1//brick_diffuse.jpg", TextureType::Diffuse1);
+	m_brick1Displacement = TextureMan::Instance().getTexture("..//Assets//Textures//brick1/brick_displacement.jpg", TextureType::Displacement);
+	m_brick1Normal = TextureMan::Instance().getTexture("..//Assets//Textures//brick1//brick_normal.jpg", TextureType::Normal1);
+	m_brick1Specular = TextureMan::Instance().getTexture("..//Assets//Textures//brick1//brick_specular.jpg", TextureType::Specular);
 
 	// Load meshes
 	m_pTorusModel = std::make_unique<Model<VertexPN>>("..//Assets//torus.obj");
