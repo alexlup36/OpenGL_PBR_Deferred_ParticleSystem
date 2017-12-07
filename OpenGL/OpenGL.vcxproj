@@ -123,7 +123,9 @@
     <ClCompile Include="GLFramework.cpp" />
     <ClCompile Include="GUI.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="LightData.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MaterialData.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="OpenGLApp.cpp" />
@@ -139,6 +141,10 @@
     <ClInclude Include="GLFramework.h" />
     <ClInclude Include="GUI.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="Light.h" />
+    <ClInclude Include="LightData.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="MaterialData.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="OpenGLApp.h" />

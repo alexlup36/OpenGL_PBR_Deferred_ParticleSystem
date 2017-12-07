@@ -11,16 +11,16 @@ out vec3 vertexW;
 out mat3 TBNMatrix;
 out vec3 normalW;
 
-uniform mat4 mMatrix;
-uniform mat4 vMatrix;
-uniform mat4 pMatrix;
-uniform mat4 nMatrix;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+uniform mat4 normalMat;
 
 void calculateTNBMatrix()
 {
 	// Transform the normal, tangent and calculate binormals
-	vec3 n = normalize(mat3(nMatrix) * vertexNormal);
-	vec3 t = normalize(mat3(nMatrix) * vertexTangent);
+	vec3 n = normalize(mat3(normalMat) * vertexNormal);
+	vec3 t = normalize(mat3(normalMat) * vertexTangent);
 	
 	// Make sure the t and n vectors are orthogonal
 	t = normalize(t - dot(t, n) * n);
@@ -34,11 +34,11 @@ void calculateTNBMatrix()
 void main()
 {
 	// Calculate fragment position in screen space
-	gl_Position = pMatrix * vMatrix * mMatrix * vec4(vertexPosition, 1.0f);
+	gl_Position = projection * view * model * vec4(vertexPosition, 1.0f);
 	
 	// Calculate vertex position in world coordinates
-	vertexW 	= vec3(mMatrix * vec4(vertexPosition, 1.0f));
-	normalW 	= normalize(mat3(nMatrix) * vertexNormal);
+	vertexW 	= vec3(model * vec4(vertexPosition, 1.0f));
+	normalW 	= normalize(mat3(normalMat) * vertexNormal);
 	
 	// Pass the texture coordinates
 	texCoord	= vertexTexCoord;

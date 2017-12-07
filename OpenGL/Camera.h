@@ -8,27 +8,32 @@
 class Camera
 {
 public:
-	Camera(int windowWidth, int windowHeight);
+	Camera(GLFWwindow* window, int windowWidth, int windowHeight);
 	~Camera();
 
 	void updateView();
+	void updateProj(int windowWidth, int windowHeight, float fov, float near, float far);
 	void processInput(GLFWwindow* window, double deltaTime);
 
 	inline const glm::mat4& viewMatrix() const { return m_viewMat; }
+	inline const glm::mat4& projMatrix() const { return m_projMat; }
+	inline const glm::vec3& viewPos() const { return m_positionVec; }
 
 private:
-	bool m_bFirstUse;
-
 	glm::vec3 m_positionVec;
 	glm::vec3 m_frontVec;
 	glm::vec3 m_upVec;
 
-	float m_fYaw, m_fPitch;
-	float m_fLastX, m_fLastY;
-
-	float m_fFOV;
+	double m_fYaw, m_fPitch;
 
 	glm::mat4 m_viewMat;
+	glm::mat4 m_projMat;
+
+	int m_windowWidth;
+	int m_windowHeight;
+
+	double m_windowCenterX;
+	double m_windowCenterY;
 };
 
 #endif // CAMERA_H

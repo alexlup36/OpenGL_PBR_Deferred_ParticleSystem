@@ -7,9 +7,9 @@
 #define PI_2 1.57079632679489661923
 #define PI_4 0.785398163397448309616
 
-#define MAX_POINT_LIGHTS 10
-#define MAX_DIRECTIONAL_LIGHTS 10
-#define MAX_SPOT_LIGHTS 10 
+#define MAX_POINT_LIGHTS 1
+#define MAX_DIR_LIGHTS 1
+#define MAX_SPOT_LIGHTS 1
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -18,36 +18,31 @@
 
 struct DirectionalLight
 {
-    vec3 lightDirection;
-	vec3 ambientLight;
-	vec3 diffuseLight;
-	vec3 specularLight;
+    vec3 direction;
+	vec3 color;
 };
 
 struct PointLight
 {
-    vec3 lightPosition;
-	vec3 ambientLight;
-	vec3 diffuseLight;
-	vec3 specularLight;
+    vec3 position;
 	vec3 attenuation;
+	vec3 color;
 };
 
 struct SpotLight
 {
-	vec3 lightPosition;
-	vec3 ambientLight;
-	vec3 diffuseLight;
-	vec3 specularLight;
-	vec3 spotLightDirection;
-	float spotLightExponent;
-	float spotLightCutoff;
-	float spotLightCosCutoff;
+	vec3 position;
+	vec3 attenuation;
+	vec3 color;
+	vec3 direction;
+	float exponent;
+	float cutoff;
+	float coscutoff;
 };
 
 struct PBRMaterial
 {
-	vec3 albedo;
+	vec3 color;
 	float metallic;
 	float roughness;
 	float ao;
@@ -134,18 +129,18 @@ vec3 fresnel_schilck(float cosTheta, vec3 baseReflectivity)
 // ------------------------------------------------------------------
 
 // Point light attenuation
-float calculateAttenuationDistance(vec3 vertexPosW, vec3 lightPosW)
+float calculateAttenuationDistance(vec3 vertexW, vec3 lightPosW)
 {
-	float distance = length(lightPosW - vertexPosW);
+	float distance = length(lightPosW - vertexW);
 	return 1.0f / (distance * distance);
 }
 
 // ------------------------------------------------------------------
 
 // Point light attenuation
-float calculateAttenuationQuadratic(vec3 vertexPosW, vec3 lightPosW, vec3 attenuation)
+float calculateAttenuationQuadratic(vec3 vertexW, vec3 lightPosW, vec3 attenuation)
 {
-	float distance = length(lightPosW - vertexPosW);
+	float distance = length(lightPosW - vertexW);
 	return 1.0f / (attenuation.z + attenuation.y * distance + attenuation.x * (distance * distance));
 }
 
@@ -153,25 +148,27 @@ float calculateAttenuationQuadratic(vec3 vertexPosW, vec3 lightPosW, vec3 attenu
 // ------------------------------------------------------------------
 
 // Uniforms
-uniform DirectionalLight dirLight[MAX_DIRECTIONAL_LIGHTS];
+
+// Light sources
+uniform DirectionalLight dirLight[MAX_DIR_LIGHTS];
 uniform PointLight pointLight[MAX_POINT_LIGHTS];
 uniform SpotLight spotLight[MAX_SPOT_LIGHTS];
-uniform int dirLightCount;
-uniform int pointLightCount;
-uniform int spotLightCount;
 
+// Material
 uniform PBRMaterial material;
 
-uniform vec3 eyePosW;
-uniform vec4 lightPosW;
+// Camera
+uniform vec3 viewPos;
+
+// Normal mapping
+uniform float dispMapScale;
 
 // ------------------------------------------------------------------
 
 in VS_OUT
 {
-	vec2 texCoord;
-	vec3 vertexNormal;
-	vec3 vertexPosW;
+	vec3 normalW;
+	vec3 vertexW;
 } fs_in;
 
 // ------------------------------------------------------------------
@@ -180,55 +177,124 @@ out vec4 color;
 
 // ------------------------------------------------------------------
 
-void main()
+vec4 pbrShadingPoint(vec3 normal)
 {
-	// Light color
-	vec3 lightColor = vec3(23.47f, 21.31f, 20.79f);
-	// Fragment normal direction
-	vec3 n = normalize(fs_in.vertexNormal);
+	vec3 totalAmbient = vec3(0.0f, 0.0f, 0.0f);
+	vec3 totalIrradiance = vec3(0.0f, 0.0f, 0.0f);
+
 	// View direction
-	vec3 v = normalize(eyePosW - fs_in.vertexPosW);
-	// Point/directional light direction
-	vec3 l = normalize(pointLight[0].lightPosition - fs_in.vertexPosW);
-	// Cos theta
-	float cosTheta = max(dot(n, l), 0.0f);
-	// Calculate attenuation
-	float attenuation = calculateAttenuationQuadratic(fs_in.vertexPosW, pointLight[0].lightPosition, pointLight[0].attenuation);
-	// Calculate radiance
-	vec3 radiance = pointLight[0].diffuseLight * attenuation * cosTheta;
-	// Calculate the halfway vector
-	vec3 h = normalize(v + l);
+	vec3 v = normalize(viewPos - fs_in.vertexW);
+	// Fragment normal direction
+	vec3 n = normalize(normal);
 
 	// Calculate f0 - base reflectivity
-	vec3 f0 = calculateBaseReflectivity(material.albedo, material.metallic);
-	// Calculate Schlick's approximation for the Fresnel factor
-	vec3 F = fresnel_schilck(max(dot(h, v), 0.0f), f0);
-	// Calculate the geometry function
-	float GF = gf_smith(n, v, l, roughnessRemapDielectrics(material.roughness));
-	// Calculate the normal distribution function
-	float NDF = ndf_ggxtr(n, h, material.roughness);
-	// Calculate BRDF Cook-Torrance
-	vec3 nom = NDF * GF * F;
-	float denom = 4.0f * max(dot(n, v), 0.0f) * cosTheta + 0.001f;
-	vec3 brdf = nom / denom;
+	vec3 f0 = calculateBaseReflectivity(material.color, material.metallic);
 
-	// Calculate refracted/reflected incoming light ratio
-	vec3 ks = F;
-	vec3 kd = vec3(1.0f) - ks;
-	// Cancel kd if the material is metallic
-	kd *= (1.0f - material.metallic);
+	for (int i = 0; i < MAX_POINT_LIGHTS; ++i)
+	{
+		// Point/directional light direction
+		vec3 l = normalize(pointLight[i].position - fs_in.vertexW);
+		// Calculate attenuation
+		float attenuation = calculateAttenuationQuadratic(fs_in.vertexW, pointLight[i].position, pointLight[i].attenuation);
 
-	// Calculate irradiance
-	vec3 lambert = material.albedo / PI;
-	vec3 irradiance = (kd * lambert + brdf) * radiance;
+		// Cos theta
+		float cosTheta = max(dot(n, l), 0.0f);
+		// Calculate radiance
+		vec3 radiance = pointLight[i].color * attenuation * cosTheta;
+		// Calculate the halfway vector
+		vec3 h = normalize(v + l);
+		// Calculate Schlick's approximation for the Fresnel factor
+		vec3 F = fresnel_schilck(max(dot(h, v), 0.0f), f0);
+		// Calculate the geometry function
+		float GF = gf_smith(n, v, l, roughnessRemapDielectrics(material.roughness));
+		// Calculate the normal distribution function
+		float NDF = ndf_ggxtr(n, h, material.roughness);
+		// Calculate BRDF Cook-Torrance
+		vec3 nom = NDF * GF * F;
+		float denom = 4.0f * max(dot(n, v), 0.0f) * cosTheta + 0.001f;
+		vec3 brdf = nom / denom;
 
-	// Calculate ambient lighting
-	vec3 ambient = vec3(0.03f) * material.albedo * material.ao;
-	// Calculate fragment final color
-	vec3 col = ambient + irradiance;
+		// Calculate refracted/reflected incoming light ratio
+		vec3 ks = F;
+		vec3 kd = vec3(1.0f) - ks;
+		// Cancel kd if the material is metallic
+		kd *= (1.0f - material.metallic);
 
-	// Fragment color
-	color = vec4(col, 1.0f);
+		// Calculate irradiance
+		vec3 lambert = material.color / PI;
+		totalIrradiance += (kd * lambert + brdf) * radiance;
+		// Calculate ambient lighting
+		totalAmbient += vec3(0.03f) * material.color * material.ao;
+	}
+
+	return vec4(totalAmbient + totalIrradiance, 1.0f);
+}
+
+// ------------------------------------------------------------------
+
+vec4 pbrShadingDir(vec3 normal)
+{
+	vec3 totalAmbient = vec3(0.0f, 0.0f, 0.0f);
+	vec3 totalIrradiance = vec3(0.0f, 0.0f, 0.0f);
+
+	// View direction
+	vec3 v = normalize(viewPos - fs_in.vertexW);
+	// Fragment normal direction
+	vec3 n = normalize(normal);
+
+	// Calculate f0 - base reflectivity
+	vec3 f0 = calculateBaseReflectivity(material.color, material.metallic);
+
+	for (int i = 0; i < MAX_DIR_LIGHTS; ++i)
+	{
+		// Directional light direction
+		vec3 l = -normalize(dirLight[i].direction);
+		// Cos theta
+		float cosTheta = max(dot(n, l), 0.0f);
+		// Calculate radiance
+		vec3 radiance = dirLight[i].color * cosTheta;
+		// Calculate the halfway vector
+		vec3 h = normalize(v + l);
+
+		// Calculate Schlick's approximation for the Fresnel factor
+		vec3 F = fresnel_schilck(max(dot(h, v), 0.0f), f0);
+
+		// Calculate the geometry function
+		float GF = gf_smith(n, v, l, roughnessRemapDielectrics(material.roughness));
+		// Calculate the normal distribution function
+		float NDF = ndf_ggxtr(n, h, material.roughness);
+		// Calculate BRDF Cook-Torrance
+		vec3 nom = NDF * GF * F;
+		float denom = 4.0f * max(dot(n, v), 0.0f) * cosTheta + 0.001f;
+		vec3 brdf = nom / denom;
+
+		// Calculate refracted/reflected incoming light ratio
+		vec3 ks = F;
+		vec3 kd = vec3(1.0f) - ks;
+		// Cancel kd if the material is metallic
+		kd *= (1.0f - material.metallic);
+
+		// Calculate irradiance
+		vec3 lambert = material.color / PI;
+		totalIrradiance += (kd * lambert + brdf) * radiance;
+
+		// Calculate ambient lighting
+		totalAmbient += vec3(0.03f) * material.color * material.ao;
+	}
+
+	return vec4(totalAmbient + totalIrradiance, 1.0f);
+}
+
+// ------------------------------------------------------------------
+
+void main()
+{
+	color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Calculate lighting
+	vec3 normal = normalize(fs_in.normalW);
+	color += pbrShadingDir(normal);
+	//color += pbrShadingPoint(normal);
 }
 
 // ------------------------------------------------------------------

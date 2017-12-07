@@ -39,7 +39,7 @@ private:
 	std::unique_ptr<Shader> m_phongTextureShader = nullptr;
 	std::unique_ptr<Shader> m_parallaxMapping = nullptr;
 	std::unique_ptr<Shader> m_normalMapping = nullptr;
-	std::unique_ptr<Shader> m_simplePBR = nullptr;
+	std::unique_ptr<Shader> m_colorPBR = nullptr;
 	std::unique_ptr<Shader> m_pbr = nullptr;
 
 	// Textures
@@ -47,6 +47,23 @@ private:
 	Texture2D* m_brick1Displacement = nullptr;
 	Texture2D* m_brick1Normal = nullptr;
 	Texture2D* m_brick1Specular = nullptr;
+
+	// PBR textures
+	Texture2D* m_brick1RoughnessPBR = nullptr;
+	Texture2D* m_brick1MetallnessPBR = nullptr;
+	Texture2D* m_brick1AmbientOcclusionPBR = nullptr;
+	// Rusted iron
+	Texture2D* m_rustedIronAlbedo = nullptr;
+	Texture2D* m_rustedIronRoughness = nullptr;
+	Texture2D* m_rustedIronMetallic = nullptr;
+	Texture2D* m_rustedIronAmbientOcclusion = nullptr;
+	Texture2D* m_rustedIronNormal = nullptr;
+	// Gold
+	Texture2D* m_goldAlbedo = nullptr;
+	Texture2D* m_goldRoughness = nullptr;
+	Texture2D* m_goldMetallic = nullptr;
+	Texture2D* m_goldAmbientOcclusion = nullptr;
+	Texture2D* m_goldNormal = nullptr;
 
 	// FPS camera
 	std::unique_ptr<Camera> m_pCamera1;
@@ -56,6 +73,8 @@ private:
 	std::unique_ptr<Model<VertexPN>> m_pTorusModel;
 	std::unique_ptr<Model<VertexPN>> m_pMonkeyModel;
 	std::unique_ptr<Model<VertexPTNT>> m_pPlaneModel;
+	std::unique_ptr<Model<VertexPN>> m_pLightModel;
+	std::unique_ptr<Model<VertexPTNT>> m_pSphereModel;
 };
 
 #endif // GLFRAMEWORK_H

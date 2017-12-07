@@ -20,11 +20,16 @@ public:
 	static void onResize(GLFWwindow* window, int w, int h);
 
 	static float camereaSpeed() { return m_fCameraSpeed; }
+	static float movementSpeed() { return m_fMovementSpeed; }
+	static bool fpsCameraEnabled() { return m_bFPSCameraEnabled; }
+	static void setFPSCameraEnabled(bool enable) { m_bFPSCameraEnabled = enable; }
 
 private:
 	Input() {}
 
 	static float m_fCameraSpeed;
+	static float m_fMovementSpeed;
+	static bool m_bFPSCameraEnabled;
 
 public:
 	Input(Input const&) = delete;

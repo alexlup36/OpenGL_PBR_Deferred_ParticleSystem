@@ -162,7 +162,7 @@ bool OpenGLApp::setOpenGLState() const
 #endif // DEBUG
 
 	// Set clear color
-	glClearColor(0.01f, 0.01f, 0.01f, 1.0f);
+	glClearColor(0.2f, 0.1f, 0.3f, 1.0f);
 
 	// Enable face culling
 	//glEnable(GL_CULL_FACE);

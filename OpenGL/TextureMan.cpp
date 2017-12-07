@@ -44,39 +44,26 @@ Texture2D* TextureMan::getTexture(const std::string& texturePath,
 	auto& texture = m_textureMap.find(texturePath);
 	if (texture != m_textureMap.end())
 	{
-		// We found the texture
-		return texture->second;
-	}
-	else
-	{
-		// Create texture
-		Texture2D* newTexture = new Texture2D(texturePath, textureType);
-		if (newTexture != nullptr)
-		{
-			// Add texture to cache
-			m_textureMap[texturePath] = newTexture;
-			return newTexture;
-		}
+		if (texture->second->getTextureType() == textureType)
+			// We found the texture
+			return texture->second;
 		else
 		{
-			std::cout << "Failed to create texture: " << texturePath << "\n";
-			assert(newTexture);
-			return nullptr;
+			// Create texture
+			Texture2D* newTexture = new Texture2D(texturePath, textureType);
+			if (newTexture != nullptr)
+			{
+				// Add texture to cache
+				m_textureMap[texturePath] = newTexture;
+				return newTexture;
+			}
+			else
+			{
+				std::cout << "Failed to create texture: " << texturePath << "\n";
+				assert(newTexture);
+				return nullptr;
+			}
 		}
-	}
-}
-
-// ----------------------------------------------------------------------------s
-
-Texture2D* TextureMan::getPBRTexture(const std::string& texturePath,
-	PBRTextureType textureType)
-{
-	// Look for the texture
-	auto& texture = m_textureMap.find(texturePath);
-	if (texture != m_textureMap.end())
-	{
-		// We found the texture
-		return texture->second;
 	}
 	else
 	{

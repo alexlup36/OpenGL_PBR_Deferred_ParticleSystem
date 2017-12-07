@@ -27,7 +27,6 @@ public:
 
 	void addTexture(Texture2D* texture);
 	Texture2D* getTexture(const std::string& textureName, TextureType textureType);
-	Texture2D* getPBRTexture(const std::string& texturePath, PBRTextureType textureType);
 
 private:
 	std::vector<Texture2D*> m_vTextureList;

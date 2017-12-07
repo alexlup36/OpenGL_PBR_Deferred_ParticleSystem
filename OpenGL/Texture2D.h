@@ -13,28 +13,25 @@ enum class TextureType
 	Specular,
 	Displacement,
 
-	Count,
-};
-
-enum class PBRTextureType
-{
-	Albedo,
+	// PBR texture types
 	Roughness,
 	AmbientOcclusion,
 	Metalness,
+
+	Count,
 };
 
 class Texture2D
 {
 public:
-	Texture2D( GLuint textureHandler );
+	Texture2D(GLuint textureHandler);
 	Texture2D(const std::string& sFileName, TextureType type, bool bImmutableStorage = true, bool bEnableMipmaps = true);
-	Texture2D(const std::string& sFileName, PBRTextureType type, bool bImmutableStorage = true, bool bEnableMipmaps = true);
-	virtual ~Texture2D();
+	virtual ~Texture2D() {}
 
 	void bind(GLuint program);
 	GLuint getHandler();
 	inline const std::string& getPath() const { return m_sTexturePath; }
+	inline const TextureType getTextureType() const { return m_textureType; }
 
 protected:
 

@@ -4,7 +4,9 @@
 
 // ----------------------------------------------------------------------------
 
-float Input::m_fCameraSpeed = 2.5f;
+float Input::m_fCameraSpeed = 1.5f;
+float Input::m_fMovementSpeed = 0.5f;
+bool Input::m_bFPSCameraEnabled = true;
 
 // ----------------------------------------------------------------------------
 
@@ -39,6 +41,12 @@ void Input::onKeyPressed(GLFWwindow* window, int key, int scanCode, int action, 
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 	{
+		if (m_bFPSCameraEnabled)
+		{
+			setFPSCameraEnabled(false);
+			return;
+		}
+
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 		return;
 	}
