@@ -24,6 +24,7 @@ TextureMan::~TextureMan()
 
 // ----------------------------------------------------------------------------
 
+template<typename Texture2D>
 void TextureMan::addTexture(Texture2D* texture)
 {
 	// If the texture doesn't exist in the map, add it

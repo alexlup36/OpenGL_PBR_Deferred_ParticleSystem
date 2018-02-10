@@ -70,6 +70,29 @@ bool GUI::setup(GLFWwindow* window, int w, int h)
 
 	TwAddVarCB(bar, "FPS Camera", TW_TYPE_BOOLCPP, setFPSCamera, getFPSCamera, NULL, "label='FPS Camera'");
 
+	enum lightType
+	{
+		DIR_LIGHT,
+		POINT_LIGHT,
+		SPOT_LIGHT,
+	};
+	lightType dLight0 = lightType::DIR_LIGHT;
+	lightType pLight0 = lightType::POINT_LIGHT;
+	const int dirLightCount = 2;
+	TwEnumVal dirLight[dirLightCount] = { {lightType::POINT_LIGHT, "dirLight0"}, {lightType::DIR_LIGHT, "dirLight1"} };
+	TwType dirLightType = TwDefineEnum("DirLight", dirLight, dirLightCount);
+	int x = TwAddVarRW(bar, "DirLights", dirLightType, &dLight0, "");
+	x = TwAddVarRW(bar, "DirLights", dirLightType, &pLight0, "");
+
+	//{
+	//	// ShapeEV associates Shape enum values with labels that will be displayed instead of enum values
+	//	TwEnumVal shapeEV[NUM_SHAPES] = { { SHAPE_TEAPOT, "Teapot" },{ SHAPE_TORUS, "Torus" },{ SHAPE_CONE, "Cone" } };
+	//	// Create a type for the enum shapeEV
+	//	TwType shapeType = TwDefineEnum("ShapeType", shapeEV, NUM_SHAPES);
+	//	// add 'g_CurrentShape' to 'bar': this is a variable of type ShapeType. Its key shortcuts are [<] and [>].
+	//	TwAddVarRW(bar, "Shape", shapeType, &g_CurrentShape, " keyIncr='<' keyDecr='>' help='Change object shape.' ");
+	//}
+
 	// -----------------------------------------------------------------
 	// Light setup
 	TwStructMember lightMembers[] =

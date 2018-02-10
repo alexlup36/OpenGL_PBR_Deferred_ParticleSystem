@@ -69,6 +69,8 @@ uniform sampler2D roughnessTexture;
 uniform sampler2D metalnessTexture;
 uniform sampler2D aoTexture;
 
+uniform bool isMetal;
+
 // Parallax mapping
 uniform float dispMapScale;
 
@@ -80,11 +82,24 @@ float ndf_ggxtr(vec3 normal, vec3 halfway, float roughness)
 {
 	float roughness2 = roughness * roughness;
 	float roughness4 = roughness2 * roughness2;
-	float nDoth = dot(normal, halfway);
+	float nDoth = max(dot(normal, halfway), 0.0f);
 	float nDoth2 = nDoth * nDoth;
 
 	float nom = roughness4;
 	float denom = nDoth2 * (roughness4 - 1.0f) + 1.0f;
+	denom = PI * denom * denom;
+
+	return nom / denom;
+}
+
+float ndf_ggxtr2(vec3 normal, vec3 halfway, float roughness)
+{
+	float roughness2 = roughness * roughness;
+	float nDoth = max(dot(normal, halfway), 0.0f);
+	float nDoth2 = nDoth * nDoth;
+
+	float nom = roughness2;
+	float denom = nDoth2 * (roughness2 - 1.0f) + 1.0f;
 	denom = PI * denom * denom;
 
 	return nom / denom;
@@ -138,7 +153,7 @@ vec3 calculateBaseReflectivity(vec3 surfaceColor, float metalic)
 {
 	// Surface reflection at zero incidence
 	vec3 f0 = vec3(0.04f);
-	return mix(f0, surfaceColor, metalic);
+	return mix(surfaceColor, surfaceColor, metalic);
 }
 
 // ------------------------------------------------------------------
@@ -277,10 +292,10 @@ vec4 pbrShadingPoint(vec3 normal)
 		// Calculate irradiance
 		vec3 lambert = material.color / PI;
 		totalIrradiance += (kd * lambert + brdf) * radiance;
-
-		// Calculate ambient lighting
-		totalAmbient += vec3(0.03f) * material.color * material.ao;
 	}
+
+	// Calculate ambient lighting
+	totalAmbient += vec3(0.03f) * material.color * material.ao;
 
 	return vec4(totalAmbient + totalIrradiance, 1.0f);
 }
@@ -294,35 +309,53 @@ vec4 pbrShadingDir(vec3 normal)
 
 	// View direction
 	vec3 v = normalize(viewPos - fs_in.vertexW);
+	//return vec4(v, 1.0f);
+
 	// Fragment normal direction
 	vec3 n = normalize(normal);
+	//return vec4(n, 1.0f);
 
 	// Calculate f0 - base reflectivity
 	vec3 f0 = calculateBaseReflectivity(material.color, material.metallic);
+	//return vec4(f0, 1.0f);
 
 	for (int i = 0; i < MAX_DIR_LIGHTS; ++i)
 	{
 		// Directional light direction
 		vec3 l = -normalize(dirLight[i].direction);
+		//return vec4(l, 1.0f);
+		
 		// Cos theta
 		float cosTheta = max(dot(n, l), 0.0f);
+		//return vec4(cosTheta, 0.0f, 0.0f, 1.0f);
+
 		// Calculate radiance
 		vec3 radiance = dirLight[i].color * cosTheta;
+		//return vec4(radiance, 1.0f);
+
 		// Calculate the halfway vector
 		vec3 h = normalize(v + l);
+		//return vec4(h, 1.0f);
 
 		// Calculate Schlick's approximation for the Fresnel factor
 		vec3 F = fresnel_schilck(max(dot(h, v), 0.0f), f0);
-		return vec4(F, 1.0f);
+		//return vec4(F, 1.0f);
 
 		// Calculate the geometry function
 		float GF = gf_smith(n, v, l, roughnessRemapDielectrics(material.roughness));
+		//return vec4(GF, 0.0f, 0.0f, 1.0f);
+
 		// Calculate the normal distribution function
 		float NDF = ndf_ggxtr(n, h, material.roughness);
+		//float NDF = ndf_ggxtr(n, h, 0.8f); // roughness^4
+		//float NDF = ndf_ggxtr2(n, h, 0.8f); // roughness^2
+		//return vec4(NDF, 0.0f, 0.0f, 1.0f);
+
 		// Calculate BRDF Cook-Torrance
 		vec3 nom = NDF * GF * F;
 		float denom = 4.0f * max(dot(n, v), 0.0f) * cosTheta + 0.001f;
 		vec3 brdf = nom / denom;
+		//return vec4(brdf, 1.0f);
 
 		// Calculate refracted/reflected incoming light ratio
 		vec3 ks = F;
@@ -338,6 +371,7 @@ vec4 pbrShadingDir(vec3 normal)
 		totalAmbient += vec3(0.03f) * material.color * material.ao;
 	}
 
+	//return vec4(totalAmbient, 1.0f);
 	return vec4(totalAmbient + totalIrradiance, 1.0f);
 }
 
@@ -369,12 +403,18 @@ void main()
 	material.metallic = texture(metalnessTexture, texCoord).x;
 	material.ao = texture(aoTexture, texCoord).x;
 
+	//color = vec4(material.roughness, 0.0f, 0.0f, 1.0f);
+	//color = vec4(material.metallic, 0.0f, 0.0f, 1.0f);
+	//color = vec4(material.color, 1.0f);
+	//color = vec4(material.ao, 0.0f, 0.0f, 1.0f);
+	//return;
+
 	// Default
 	color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// Calculate lighting
 	color += pbrShadingDir(n);
-	//color += pbrShadingPoint(n);
+	color += pbrShadingPoint(n);
 }
 
 // ------------------------------------------------------------------

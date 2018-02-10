@@ -7,6 +7,7 @@
 #include <map>
 
 #include "Texture2D.h"
+#include "Texture3D.h"
 
 // ----------------------------------------------------------------------------
 
@@ -25,7 +26,8 @@ public:
 		return refInstance;
 	}
 
-	void addTexture(Texture2D* texture);
+	template<typename T>
+	void addTexture(T* texture);
 	Texture2D* getTexture(const std::string& textureName, TextureType textureType);
 
 private:

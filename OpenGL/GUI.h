@@ -29,6 +29,8 @@ public:
 	float m_dispMapScale = 0.1f;
 	glm::vec3 m_lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec4 m_objectColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	//PointLight* m_pCurrentPointLight = LightData::getInstance().pointLight1;
 };
 
 #endif // GUI_H
