@@ -158,10 +158,14 @@ void GLFramework::draw(double dt)
 	m_pbr->set<glm::mat4>(ShaderUniform::ProjMat, p);
 	// Camera
 	m_pbr->set<glm::vec3>(ShaderUniform::ViewPos, m_pCamera1->viewPos());
+	// Displacement mapping
+	m_pbr->setScalar<float>(ShaderUniform::DisplacementMapScale, -1.0f);
 	// Light
 	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
 	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
 	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
+	m_pbr->setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
+	m_pbr->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
 	// Draw triangles
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
