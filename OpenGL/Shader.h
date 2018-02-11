@@ -28,6 +28,7 @@ enum class ShaderUniform
 
 	// Parallax mapping / normal mapping
 	DisplacementMapScale,
+	NormalMapScale,
 
 	// HDR
 	Gamma,
@@ -37,6 +38,9 @@ enum class ShaderUniform
 	NormalTexture,
 	SpecularTexture,
 	DisplacementTexture,
+
+	// Debug
+	DisplayMode,
 
 	Count,
 };

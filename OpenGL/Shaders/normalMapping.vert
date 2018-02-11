@@ -19,8 +19,8 @@ uniform mat4 normalMat;
 void calculateTNBMatrix()
 {
 	// Transform the normal, tangent and calculate binormals
-	vec3 n = normalize(mat3(normalMat) * vertexNormal);
-	vec3 t = normalize(mat3(normalMat) * vertexTangent);
+	vec3 n = normalize(vec3(normalMat * vec4(vertexNormal, 0.0f)));
+	vec3 t = normalize(vec3(normalMat * vec4(vertexTangent, 0.0f)));
 	
 	// Make sure the t and n vectors are orthogonal
 	t = normalize(t - dot(t, n) * n);

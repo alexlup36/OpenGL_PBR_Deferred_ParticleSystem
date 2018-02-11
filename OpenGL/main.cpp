@@ -5,6 +5,13 @@ int main(void)
 	int windowWidth = 1600;
 	int windowHeight = 900;
 
+	/*const int val1 = 0x0000001u;
+	const int val2 = 0x0000002u;
+	const int val3 = 0x000000Au;
+	std::cout << val1 << std::endl;
+	std::cout << val2 << std::endl;
+	std::cout << val3 << std::endl;*/
+
 	// Create GLFramework instance
 	std::unique_ptr<GLFramework> glFramework = std::make_unique<GLFramework>(windowWidth, windowHeight);
 	// Initialize GLFramework

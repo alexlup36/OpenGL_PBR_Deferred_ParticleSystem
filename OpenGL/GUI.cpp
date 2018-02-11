@@ -44,7 +44,8 @@ bool GUI::setup(GLFWwindow* window, int w, int h)
 
 	TwAddVarRW(bar, "ObjectShininess", TW_TYPE_FLOAT, &m_shininess, "min=1 max=256 step=0.1 help='Power of 2'");
 	TwAddVarRW(bar, "ObjectSpecularStrength", TW_TYPE_FLOAT, &m_specularStrength, "min=0 max=1 step=0.01 ");
-	TwAddVarRW(bar, "ObjectDispMapScale", TW_TYPE_FLOAT, &m_dispMapScale, "min=0 max=5 step=0.1 ");
+	TwAddVarRW(bar, "ObjectDispMapScale", TW_TYPE_FLOAT, &m_dispMapScale, "min=0 max=5 step=0.001 ");
+	TwAddVarRW(bar, "NormalMapScale", TW_TYPE_FLOAT, &m_normalMapScale, "min=0 max=5 step=0.1 ");
 
 	//TwAddVarRW(bar, "ObjRotation", TW_TYPE_QUAT4F, m_rotation,
 	//	" label='Object rotation' opened=true help='Change the object orientation.' ");
@@ -69,6 +70,17 @@ bool GUI::setup(GLFWwindow* window, int w, int h)
 	TwAddVarRW(bar, "LightColor", TW_TYPE_COLOR3F, static_cast<void*>(&m_lightColor[0]), " label='Light color' ");
 
 	TwAddVarCB(bar, "FPS Camera", TW_TYPE_BOOLCPP, setFPSCamera, getFPSCamera, NULL, "label='FPS Camera'");
+
+	TwEnumVal display[DisplayMode::COUNT] = { 
+		{ DisplayMode::DIFFUSE, "Albedo" }, 
+		{ DisplayMode::NORMAL, "VertexNormal" },
+		{ DisplayMode::NORMAL_TEX, "TextureNormal" },
+		{ DisplayMode::DIRLIGHT_SHADING, "Dir light shading" },
+		{ DisplayMode::POINTLIGHT_SHADING, "Point light shading" },
+		{ DisplayMode::FINAL, "Final color" } };
+
+	TwType displayType = TwDefineEnum("DisplayMode", display, DisplayMode::COUNT);
+	TwAddVarRW(bar, "DisplayMode", displayType, &m_displayMode, " label='Display Mode' ");
 
 	enum lightType
 	{

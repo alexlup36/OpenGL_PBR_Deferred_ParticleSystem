@@ -284,11 +284,11 @@ void GLFramework::draw(double dt)
 	// Draw quad - parallax mapping
 
 	position = glm::vec3(0.0f, -1.0f, -2.0f);
-	scaleFactor = 1.0f;
+	scaleFactor = 0.1f;
 	m = glm::mat4();
 	m = glm::translate(m, position);
-	m = glm::rotate(m, 20.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-	m = glm::scale(m, glm::vec3(scaleFactor, 1.0f, scaleFactor));
+	m = glm::rotate(m, 0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+	m = glm::scale(m, glm::vec3(scaleFactor, 0.001f, scaleFactor));
 	p = m_pCamera1->projMatrix();
 	v = m_pCamera1->viewMatrix();
 	normalMat = glm::transpose(glm::inverse(m));
@@ -299,10 +299,14 @@ void GLFramework::draw(double dt)
 	// Set uniforms
 
 	// Set textures
-	m_brick1Diffuse->bind(m_normalMapping->program());
+	/*m_brick1Diffuse->bind(m_normalMapping->program());
 	m_brick1Displacement->bind(m_normalMapping->program());
 	m_brick1Normal->bind(m_normalMapping->program());
-	m_brick1Specular->bind(m_normalMapping->program());
+	m_brick1Specular->bind(m_normalMapping->program());*/
+
+	m_toyBoxDiffuse->bind(m_normalMapping->program());
+	m_toyBoxDisplacement->bind(m_normalMapping->program());
+	m_toyBoxNormal->bind(m_normalMapping->program());
 
 	// Point light
 	//m_normalMapping->setPointLight<glm::vec3&>(PointLightUniform::ColorAmbientComp, 0, pointLight1.ambientComp);
@@ -320,6 +324,8 @@ void GLFramework::draw(double dt)
 
 	// Disp map scale
 	m_normalMapping->setScalar<float>(ShaderUniform::DisplacementMapScale, m_pGUI->m_dispMapScale);
+	// Normal map scale
+	m_normalMapping->setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
 
 	// Set material
 	auto& mat1 = MaterialData::getInstance().mat1;
@@ -341,6 +347,9 @@ void GLFramework::draw(double dt)
 
 	m_normalMapping->set<glm::vec3>(ShaderUniform::ViewPos, m_pCamera1->viewPos());
 	m_normalMapping->setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
+
+	// Debug display
+	m_normalMapping->setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
 	
 	// Draw triangles
 	m_pPlaneModel->render();
@@ -437,6 +446,10 @@ void GLFramework::setupScene()
 	m_brick1Normal = TextureMan::Instance().getTexture("..//Assets//Textures//brick1//brick_normal.jpg", TextureType::Normal1);
 	m_brick1Specular = TextureMan::Instance().getTexture("..//Assets//Textures//brick1//brick_specular.jpg", TextureType::Specular);
 
+	m_toyBoxDiffuse = TextureMan::Instance().getTexture("..//Assets//Textures//toybox//toy_box_diffuse.png", TextureType::Diffuse1);
+	m_toyBoxDisplacement = TextureMan::Instance().getTexture("..//Assets//Textures//toybox//toy_box_disp.png", TextureType::Displacement);
+	m_toyBoxNormal = TextureMan::Instance().getTexture("..//Assets//Textures//toybox//toy_box_normal.png", TextureType::Normal1);
+
 	m_brick1RoughnessPBR = TextureMan::Instance().getTexture("..//Assets//Textures//brick1//brick_specular.jpg", TextureType::Roughness);
 	m_brick1MetallnessPBR = TextureMan::Instance().getTexture("..//Assets//Textures//brick1/brick_specular.jpg", TextureType::Metalness);
 	m_brick1AmbientOcclusionPBR = TextureMan::Instance().getTexture("..//Assets//Textures//brick1//brick_displacement.jpg", TextureType::AmbientOcclusion);
@@ -480,7 +493,7 @@ void GLFramework::setupScene()
 	// Load meshes
 	m_pTorusModel = std::make_unique<Model<VertexPN>>("..//Assets//torus.obj");
 	//m_pMonkeyModel = std::make_unique<Model<VertexPN>>("..//Assets//mymodel.obj");
-	m_pPlaneModel = std::make_unique<Model<VertexPTNT>>("..//Assets//plane.obj");
+	m_pPlaneModel = std::make_unique<Model<VertexPTNT>>("..//Assets//plane2.obj");
 	m_pLightModel = std::make_unique<Model<VertexPN>>("..//Assets//sphere.obj");
 	m_pSphereModel = std::make_unique<Model<VertexPTNT>>("..//Assets//planet.obj");
 

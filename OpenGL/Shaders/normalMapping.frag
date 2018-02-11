@@ -62,6 +62,7 @@ uniform float specularStrength;
 
 // Normal mapping
 uniform float dispMapScale;
+uniform float normalMapScale;
 
 // Material
 uniform Material material;
@@ -71,6 +72,15 @@ uniform float gamma;
 
 // Camera
 uniform vec3 viewPos;
+
+// Debug
+uniform int displayMode;
+const int DIFFUSE = 0x00;
+const int NORMAL = 0x01;
+const int NORMAL_TEX = 0x02;
+const int DIRLIGHT_SHADING = 0x03;
+const int POINTLIGHT_SHADING = 0x04;
+const int FINAL = 0x05;
 
 // Input
 in vec2 texCoord;
@@ -163,7 +173,7 @@ vec4 blinnPhongShading(vec3 normal, vec4 color)
 		totalAmbient += dirLight[i].ambientComp * material.ambientComp;
 	
 		// Calculate diffuse component ---------------------------------------------------------------
-		vec3 lightDir = normalize(-dirLight[i].direction);
+		vec3 lightDir = -normalize(dirLight[i].direction);
 		float diffuse = max(dot(normal, lightDir), 0.0f);
 		totalDiffuse += diffuse * dirLight[i].diffuseComp * material.diffuseComp;
 	
@@ -236,9 +246,39 @@ void main()
 	
 	// Sample the diffuse and normal textures
 	vec4 diffuseColor = texture(diffuseTexture1, texCoordParallax);
-	vec3 normal = normalize(TBNMatrix * (2.0f * texture(normalTexture1, texCoordParallax).xyz - 1.0f));
-	
+	vec3 normal = texture(normalTexture1, texCoordParallax).xyz;
+	normal = normalize(2.0f * normal - 1.0f);
+	normal = normalize(TBNMatrix * normal) * normalMapScale;
+
 	// Calculate lighting using the Phong model texture
-	color += blinnPhongShading(normal, diffuseColor);
+	//color += blinnPhongShading(normal, diffuseColor);
 	//color += blinnPhongShadingPoint(normal, diffuseColor);
+
+	// Debug
+	switch (displayMode)
+	{
+		case DIFFUSE:
+			color = diffuseColor;
+			break;
+		case NORMAL:
+			color = vec4(normalW, 1.0f);
+			break;
+		case NORMAL_TEX:
+			color = vec4(normal, 1.0f);
+			break;
+		case DIRLIGHT_SHADING:
+			color += blinnPhongShading(normal, diffuseColor);
+			break;
+		case POINTLIGHT_SHADING:
+			color += blinnPhongShadingPoint(normal, diffuseColor);
+			break;
+		case FINAL:
+		{
+			color += blinnPhongShading(normal, diffuseColor);
+			//color += blinnPhongShadingPoint(normal, diffuseColor);
+			break;
+		}
+		default:
+			color = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+	}
 }

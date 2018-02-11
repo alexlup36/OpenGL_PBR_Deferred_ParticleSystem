@@ -48,6 +48,10 @@ private:
 	Texture2D* m_brick1Normal = nullptr;
 	Texture2D* m_brick1Specular = nullptr;
 
+	Texture2D* m_toyBoxDiffuse = nullptr;
+	Texture2D* m_toyBoxNormal = nullptr;
+	Texture2D* m_toyBoxDisplacement = nullptr;
+
 	// PBR textures
 	Texture2D* m_brick1RoughnessPBR = nullptr;
 	Texture2D* m_brick1MetallnessPBR = nullptr;

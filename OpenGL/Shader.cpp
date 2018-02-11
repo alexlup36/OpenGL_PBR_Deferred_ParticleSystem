@@ -48,7 +48,9 @@ Shader::Shader(const std::string& vsFilePath, const std::string& psFilePath)
 	m_shaderUniforms[static_cast<int>(ShaderUniform::SpecularStrength)] = glGetUniformLocation(m_program, "specularStrength");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::RenderedTexture)] = glGetUniformLocation(m_program, "renderedTexture");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::DisplacementMapScale)] = glGetUniformLocation(m_program, "dispMapScale");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::NormalMapScale)] = glGetUniformLocation(m_program, "normalMapScale");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::Gamma)] = glGetUniformLocation(m_program, "gamma");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::DisplayMode)] = glGetUniformLocation(m_program, "displayMode");
 
 	m_shaderUniforms[static_cast<int>(ShaderUniform::DiffuseTexture)] = glGetUniformLocation(m_program, "diffuseTexture");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::NormalTexture)] = glGetUniformLocation(m_program, "normalTexture");
