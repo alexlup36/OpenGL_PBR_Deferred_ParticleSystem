@@ -163,12 +163,19 @@ uniform vec3 viewPos;
 // Normal mapping
 uniform float dispMapScale;
 
+// Shadow map
+uniform sampler2D depthTexture;
+
+// Gamma
+uniform float gamma;
+
 // ------------------------------------------------------------------
 
 in VS_OUT
 {
 	vec3 normalW;
 	vec3 vertexW;
+	vec2 vertexUV;
 } fs_in;
 
 // ------------------------------------------------------------------
@@ -186,6 +193,8 @@ vec4 pbrShadingPoint(vec3 normal)
 	vec3 v = normalize(viewPos - fs_in.vertexW);
 	// Fragment normal direction
 	vec3 n = normalize(normal);
+
+	return vec4(n, 1.0f);
 
 	// Calculate f0 - base reflectivity
 	vec3 f0 = calculateBaseReflectivity(material.color, material.metallic);
@@ -291,10 +300,17 @@ void main()
 {
 	color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
+	// Sample depth map
+	vec3 depth = texture(depthTexture, fs_in.vertexUV).xyz;
+
 	// Calculate lighting
 	vec3 normal = normalize(fs_in.normalW);
-	color += pbrShadingDir(normal);
-	//color += pbrShadingPoint(normal);
+	//color += pbrShadingDir(normal);
+	color += pbrShadingPoint(normal);
+
+	// Do gamma correction
+	color.rgb = pow(color.rgb, vec3(1.0f / gamma));
+	color.a = 1.0f;
 }
 
 // ------------------------------------------------------------------

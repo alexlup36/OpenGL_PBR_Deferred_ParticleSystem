@@ -160,6 +160,8 @@
     <None Include="Shaders\basic.vert" />
     <None Include="Shaders\cube.frag" />
     <None Include="Shaders\cube.vert" />
+    <None Include="Shaders\depthMap.frag" />
+    <None Include="Shaders\depthMap.vert" />
     <None Include="Shaders\glslangValidator.exe" />
     <None Include="Shaders\normalMapping.frag" />
     <None Include="Shaders\normalMapping.vert" />

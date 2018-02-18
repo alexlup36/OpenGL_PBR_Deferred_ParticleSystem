@@ -4,7 +4,6 @@ layout(location = 0) out vec4 fragmentColor;
 
 in vec3 vPosWorld;
 in vec3 vNorm;
-in vec2 vUV;
 
 uniform vec3 lightDir;
 uniform vec3 lightColor;

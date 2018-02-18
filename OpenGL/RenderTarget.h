@@ -6,7 +6,8 @@
 class RenderTarget
 {
 public:
-	RenderTarget(GLint internalFormat,
+	RenderTarget(bool createColor,
+		GLint internalFormat,
 		GLenum elementFormat,
 		GLenum elementType,
 		GLsizei width,
@@ -18,17 +19,25 @@ public:
 	bool initialize();
 
 	void renderToTexture();
-	void renderToScreen(int x, int y, int width, int height, GLuint textureUnit);
+	void renderColorToScreen(int x, int y, int width, int height, GLuint textureUnit);
+	void renderDepthToScreen(int x, int y, int width, int height, GLuint textureUnit);
 
 	// Getters/setters
 	inline const GLsizei width() const { return m_width; }
 	inline const GLsizei height() const { return m_height; }
 
+	// Get handles to color and depth buffer
+	inline const GLuint colorTexture() const { return m_uiColorTexture; }
+	inline const GLuint depthTexture() const { return m_uiDepthTexture; }
+
 	static const GLuint screenQuadVAO() { return m_uiScreenQuadVAO; }
 
 private:
 
+	GLbitfield m_clearMask = 0;
+
 	bool m_depthEnabled;
+	bool m_colorEnabled;
 
 	GLint m_internalFormat;
 	GLenum m_elementFormat;

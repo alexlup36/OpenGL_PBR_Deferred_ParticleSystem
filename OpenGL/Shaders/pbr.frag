@@ -69,10 +69,15 @@ uniform sampler2D roughnessTexture;
 uniform sampler2D metalnessTexture;
 uniform sampler2D aoTexture;
 
+uniform sampler2D depthMap;
+
 uniform bool isMetal;
 
 // Parallax mapping
 uniform float dispMapScale;
+
+// Gamma
+uniform float gamma;
 
 // ------------------------------------------------------------------
 // ------------------------------------------------------------------
@@ -409,12 +414,19 @@ void main()
 	//color = vec4(material.ao, 0.0f, 0.0f, 1.0f);
 	//return;
 
+	// Sample depth map
+	vec3 depth = texture(depthMap, texCoord).xyz;
+
 	// Default
 	color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// Calculate lighting
 	color += pbrShadingDir(n);
 	color += pbrShadingPoint(n);
+
+	// Do gamma correction
+	color.rgb = pow(color.rgb, vec3(1.0f / gamma));
+	color.a = 1.0f;
 }
 
 // ------------------------------------------------------------------

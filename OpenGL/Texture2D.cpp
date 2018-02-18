@@ -6,9 +6,10 @@
 
 // ----------------------------------------------------------------------------
 
-Texture2D::Texture2D(GLuint textureHandler)
+Texture2D::Texture2D(GLuint textureHandler, TextureType textureType)
 {
 	m_uiTexture = textureHandler;
+	m_textureType = textureType;
 }
 
 // ----------------------------------------------------------------------------
@@ -214,6 +215,14 @@ void Texture2D::bind(GLuint program)
 	{
 		// Bind the specular map sampler
 		int location = glGetUniformLocation(program, "aoTexture");
+
+		glUniform1i(location, textureType);
+		break;
+	}
+	case TextureType::Depth:
+	{
+		// Bind the depth/shadow map sampler
+		int location = glGetUniformLocation(program, "depthTexture");
 
 		glUniform1i(location, textureType);
 		break;

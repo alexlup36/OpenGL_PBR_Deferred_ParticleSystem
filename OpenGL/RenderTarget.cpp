@@ -6,10 +6,10 @@ GLuint RenderTarget::m_uiScreenQuadVAO = -1;
 
 // ----------------------------------------------------------------------------
 
-RenderTarget::RenderTarget(GLint internalFormat, GLenum elementFormat,
+RenderTarget::RenderTarget(bool createColor, GLint internalFormat, GLenum elementFormat,
 	GLenum elementType, GLsizei width, GLsizei height,
 	bool createDepth, GLenum depthFormat)
-	: m_internalFormat(internalFormat), m_elementFormat(elementFormat),
+	: m_colorEnabled(createColor), m_internalFormat(internalFormat), m_elementFormat(elementFormat),
 	m_elementType(elementType), m_width(width), m_height(height),
 	m_depthEnabled(createDepth), m_depthFormat(depthFormat)
 {
@@ -28,20 +28,40 @@ bool RenderTarget::initialize()
 	glBindFramebuffer(GL_FRAMEBUFFER, m_uiFramebuffer);
 
 	// Create a render target color texture
-	glGenTextures(1, &m_uiColorTexture);
-	glBindTexture(GL_TEXTURE_2D, m_uiColorTexture);
-	glTexImage2D(GL_TEXTURE_2D, 
-		0, 
-		m_internalFormat, 
-		m_width, 
-		m_height, 
-		0, 
-		m_elementFormat, 
-		m_elementType, 
-		nullptr);
-	// Filtering
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	if (m_colorEnabled)
+	{
+		glGenTextures(1, &m_uiColorTexture);
+		glBindTexture(GL_TEXTURE_2D, m_uiColorTexture);
+		glTexImage2D(GL_TEXTURE_2D,
+			0,
+			m_internalFormat,
+			m_width,
+			m_height,
+			0,
+			m_elementFormat,
+			m_elementType,
+			nullptr);
+		// Filtering
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+		// Color attachment tracking index
+		unsigned int colorAttachmentIndex = 0;
+
+		// Attach the color texture to the render target
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorAttachmentIndex, m_uiColorTexture, 0);
+
+		// Set the list of draw buffers
+		GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+		glDrawBuffers(1, drawBuffers);
+	}
+	else
+	{
+		// A framebuffer is not complete without a color buffer so 
+		// we must specify that we are not going to render any color info
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+	}
 
 	// Create the render target depth texture
 	if (m_depthEnabled)
@@ -58,18 +78,13 @@ bool RenderTarget::initialize()
 		glBindTexture(GL_TEXTURE_2D, m_uiDepthTexture);
 		glTexImage2D(GL_TEXTURE_2D, 0, m_depthFormat, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_uiDepthTexture, 0);
 	}
-
-	// Color attachment tracking index
-	unsigned int colorAttachmentIndex = 0;
-
-	// Attach the color texture to the render target
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorAttachmentIndex, m_uiColorTexture, 0);
-
-	// Set the list of draw buffers
-	GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-	glDrawBuffers(1, drawBuffers);
 
 	// Check framebuffer status
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -80,6 +95,11 @@ bool RenderTarget::initialize()
 
 	// Setup the vao for the rendering quad
 	m_uiScreenQuadVAO = renderTextureToScreenSetup();
+
+	if (m_colorEnabled)
+		m_clearMask |= GL_COLOR_BUFFER_BIT;
+	if (m_depthEnabled)
+		m_clearMask |= GL_DEPTH_BUFFER_BIT;
 
 	// Success
 	return true;
@@ -130,24 +150,40 @@ void RenderTarget::renderToTexture()
 
 	// Set viewport and clear color and depth
 	glViewport(0, 0, m_width, m_height);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// Clear
+	glClear(m_clearMask);
 }
 
 // ----------------------------------------------------------------------------
 
-void RenderTarget::renderToScreen(int x, int y, int width, int height, GLuint textureUnit)
+void RenderTarget::renderColorToScreen(int x, int y, int width, int height, GLuint textureUnit)
 {
 	// Bind the default framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// Set the viewport and clear the color and depth buffers
 	glViewport(x, y, width, height);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	// Clear
+	glClear(m_clearMask);
 	// Bind the rendered texture to texture unit
 	// Activate texture unit 0
 	glActiveTexture(GL_TEXTURE0 + textureUnit);
 	// Bind the rendered texture to texture unit
 	glBindTexture(GL_TEXTURE_2D, m_uiColorTexture);
+}
+
+void RenderTarget::renderDepthToScreen(int x, int y, int width, int height, GLuint textureUnit)
+{
+	// Bind the default framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	// Set the viewport and clear the color and depth buffers
+	glViewport(x, y, width, height);
+	// Clear
+	glClear(m_clearMask);
+	// Bind the rendered texture to texture unit
+	// Activate texture unit 0
+	glActiveTexture(GL_TEXTURE0 + textureUnit);
+	// Bind the rendered texture to texture unit
+	glBindTexture(GL_TEXTURE_2D, m_uiDepthTexture);
 }
 
 // ----------------------------------------------------------------------------

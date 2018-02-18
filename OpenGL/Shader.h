@@ -17,6 +17,7 @@ enum class ShaderUniform
 	NormalMat,
 	ViewMat,
 	ProjMat,
+	LightMat,
 
 	LightDir,
 	LightColor,
@@ -38,6 +39,7 @@ enum class ShaderUniform
 	NormalTexture,
 	SpecularTexture,
 	DisplacementTexture,
+	DepthTexture,
 
 	// Debug
 	DisplayMode,

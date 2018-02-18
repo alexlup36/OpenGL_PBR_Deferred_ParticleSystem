@@ -10,6 +10,7 @@ out VS_OUT
 {
 	vec3 normalW;
 	vec3 vertexW;
+	vec2 vertexUV;
 } vs_out;
 
 uniform mat4 model;
@@ -26,4 +27,6 @@ void main()
 	vs_out.vertexW 	= vec3(model * vec4(vertexPosition, 1.0f));
 	// Calculate normal direction in world coordinates
 	vs_out.normalW 	= normalize(mat3(normalMat) * vertexNormal);
+	// Vertex uv
+	vs_out.vertexUV = vertexTexCoord;
 }

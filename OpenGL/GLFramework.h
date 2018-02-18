@@ -24,6 +24,8 @@ public:
 
 private:
 	virtual void setupScene();
+	virtual void drawScene();
+	virtual void drawSceneToDepth();
 
 	// User interface manager
 	GUI* m_pGUI;
@@ -31,6 +33,10 @@ private:
 	// VAO
 	GLuint m_cubeVAO;
 	GLuint m_quadVAO;
+
+	// Depth map size
+	GLsizei m_depthMapWidth = 1024;
+	GLsizei m_depthMapHeight = 1024;
 
 	// Shaders
 	std::unique_ptr<Shader> m_basicShader = nullptr;
@@ -41,8 +47,11 @@ private:
 	std::unique_ptr<Shader> m_normalMapping = nullptr;
 	std::unique_ptr<Shader> m_colorPBR = nullptr;
 	std::unique_ptr<Shader> m_pbr = nullptr;
+	std::unique_ptr<Shader> m_depth = nullptr;
 
 	// Textures
+	std::unique_ptr<Texture2D> m_depthMap = nullptr;
+
 	Texture2D* m_brick1Diffuse = nullptr;
 	Texture2D* m_brick1Displacement = nullptr;
 	Texture2D* m_brick1Normal = nullptr;
@@ -73,12 +82,19 @@ private:
 	std::unique_ptr<Camera> m_pCamera1;
 	// Render target
 	std::unique_ptr<RenderTarget> m_pRT;
+	std::unique_ptr<RenderTarget> m_pDT;
 
 	std::unique_ptr<Model<VertexPN>> m_pTorusModel;
 	std::unique_ptr<Model<VertexPN>> m_pMonkeyModel;
 	std::unique_ptr<Model<VertexPTNT>> m_pPlaneModel;
 	std::unique_ptr<Model<VertexPN>> m_pLightModel;
 	std::unique_ptr<Model<VertexPTNT>> m_pSphereModel;
+	std::unique_ptr<Model<VertexPTNT>> m_bunny;
+	std::unique_ptr<Model<VertexPTNT>> m_dragon;
+	std::unique_ptr<Model<VertexPTNT>> m_lucy;
+	std::unique_ptr<Model<VertexPTNT>> m_armadillo;
+	std::unique_ptr<Model<VertexPTNT>> m_tyra;
+	std::unique_ptr<Model<VertexPTNT>> m_buddha;
 };
 
 #endif // GLFRAMEWORK_H

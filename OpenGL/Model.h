@@ -72,10 +72,10 @@ void Model<T>::loadModel(const std::string& filePath)
 
 	const aiScene* pScene = assimpImporter.ReadFile(filePath.c_str(),
 		aiProcess_Triangulate |
-		/*aiProcess_GenSmoothNormals |*/
+		aiProcess_GenSmoothNormals |
 		aiProcess_FlipUVs |
-		aiProcess_CalcTangentSpace /*|*/
-	/*aiProcess_ImproveCacheLocality*/);
+		aiProcess_CalcTangentSpace |
+		aiProcess_ImproveCacheLocality);
 
 	if (!pScene || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || pScene->mRootNode == false)
 	{

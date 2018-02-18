@@ -40,6 +40,7 @@ Shader::Shader(const std::string& vsFilePath, const std::string& psFilePath)
 	m_shaderUniforms[static_cast<int>(ShaderUniform::NormalMat)] = glGetUniformLocation(m_program, "normalMat");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::ViewMat)] = glGetUniformLocation(m_program, "view");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::ProjMat)] = glGetUniformLocation(m_program, "projection");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::LightMat)] = glGetUniformLocation(m_program, "lightVP");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::LightDir)] = glGetUniformLocation(m_program, "lightDir");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::LightColor)] = glGetUniformLocation(m_program, "lightColor");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::ObjectColor)] = glGetUniformLocation(m_program, "objectColor");
@@ -56,6 +57,7 @@ Shader::Shader(const std::string& vsFilePath, const std::string& psFilePath)
 	m_shaderUniforms[static_cast<int>(ShaderUniform::NormalTexture)] = glGetUniformLocation(m_program, "normalTexture");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::SpecularTexture)] = glGetUniformLocation(m_program, "specularTexture");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::DisplacementTexture)] = glGetUniformLocation(m_program, "displacementTexture");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::DepthTexture)] = glGetUniformLocation(m_program, "depthTexture");
 
 	// Initialize dir lights uniform locations
 	for (auto dirLightIndex = 0; dirLightIndex < MAX_DIR_LIGHTS; ++dirLightIndex)

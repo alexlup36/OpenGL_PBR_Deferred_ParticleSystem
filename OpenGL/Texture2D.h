@@ -12,6 +12,7 @@ enum class TextureType
 	Normal2,
 	Specular,
 	Displacement,
+	Depth,
 
 	// PBR texture types
 	Roughness,
@@ -24,7 +25,7 @@ enum class TextureType
 class Texture2D
 {
 public:
-	Texture2D(GLuint textureHandler);
+	Texture2D(GLuint textureHandler, TextureType textureType);
 	Texture2D(const std::string& sFileName, TextureType type, bool bImmutableStorage = true, bool bEnableMipmaps = true);
 	virtual ~Texture2D() {}
 

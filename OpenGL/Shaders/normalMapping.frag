@@ -54,6 +54,9 @@ uniform sampler2D normalTexture1;
 uniform sampler2D displacementTexture;
 uniform sampler2D specularTexture;
 
+// Shadow map
+uniform sampler2D depthMap;
+
 // Light sources
 uniform DirectionalLight dirLight[MAX_DIR_LIGHTS];
 uniform PointLight pointLight[MAX_POINT_LIGHTS];
@@ -250,6 +253,9 @@ void main()
 	normal = normalize(2.0f * normal - 1.0f);
 	normal = normalize(TBNMatrix * normal) * normalMapScale;
 
+	// Sample depth map
+	vec3 depth = texture(depthMap, texCoord).xyz;
+
 	// Calculate lighting using the Phong model texture
 	//color += blinnPhongShading(normal, diffuseColor);
 	//color += blinnPhongShadingPoint(normal, diffuseColor);
@@ -281,4 +287,8 @@ void main()
 		default:
 			color = vec4(0.0f, 0.0f, 1.0f, 1.0f);
 	}
+
+	// Do gamma correction
+	color.rgb = pow(color.rgb, vec3(1.0f / gamma));
+	color.a = 1.0f;
 }
