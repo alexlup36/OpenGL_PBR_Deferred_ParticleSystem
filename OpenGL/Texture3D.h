@@ -12,8 +12,10 @@ enum class Face { Top, Bottom, Left, Right, Front, Back, Count };
 class Texture3D
 {
 public:
-	Texture3D(const std::string& name, const std::vector<std::string>& facePaths);
+	Texture3D(const std::string& name, const std::vector<std::string> &facePaths);
 	~Texture3D();
+
+	void bind(GLuint program);
 
 	inline GLuint getHandler() const { return m_uiTexture; }
 	inline const std::string& getName() const { return m_textureName; }

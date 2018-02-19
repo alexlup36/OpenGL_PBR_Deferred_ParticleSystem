@@ -38,6 +38,34 @@ void TextureMan::addTexture(Texture2D* texture)
 
 // ----------------------------------------------------------------------------
 
+Texture3D* TextureMan::getTexture(const std::string& textureName, const std::vector<std::string> &faceNames)
+{
+	// Look for the texture
+	auto& texture = m_textureCubeMap.find(textureName);
+	if (texture != m_textureCubeMap.end())
+	{
+		// We found the texture
+		return texture->second;
+	}
+	else
+	{
+		// Create texture
+		Texture3D* newTexture = new Texture3D(textureName, faceNames);
+		if (newTexture != nullptr)
+		{
+			// Add texture to cache
+			m_textureCubeMap[textureName] = newTexture;
+			return newTexture;
+		}
+		else
+		{
+			std::cout << "Failed to create texture: " << textureName << "\n";
+			assert(newTexture);
+			return nullptr;
+		}
+	}
+}
+
 Texture2D* TextureMan::getTexture(const std::string& texturePath, 
 	TextureType textureType)
 {

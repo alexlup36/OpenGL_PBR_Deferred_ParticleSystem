@@ -139,5 +139,7 @@
     <None Include="Shaders\phongTexture.vert" />
     <None Include="Shaders\depthMap.frag" />
     <None Include="Shaders\depthMap.vert" />
+    <None Include="Shaders\cubemap.frag" />
+    <None Include="Shaders\cubemap.vert" />
   </ItemGroup>
 </Project>

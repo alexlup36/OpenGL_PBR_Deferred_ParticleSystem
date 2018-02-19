@@ -215,6 +215,15 @@ void GLFramework::setupScene()
 	m_goldAmbientOcclusion = TextureMan::Instance().getTexture("..//Assets//Textures//pbr//gold//ao.png", TextureType::AmbientOcclusion);
 	m_goldNormal = TextureMan::Instance().getTexture("..//Assets//Textures//pbr//gold//normal.png", TextureType::Normal1);
 
+	// Load cube maps
+	std::vector<std::string> facePaths = { "..//Assets//Textures//skybox2//back.jpg",
+		"..//Assets//Textures//skybox2//bottom.jpg", 
+		"..//Assets//Textures//skybox2//front.jpg",
+		"..//Assets//Textures//skybox2//left.jpg",
+		"..//Assets//Textures//skybox2//right.jpg",
+		"..//Assets//Textures//skybox2//top.jpg" };
+	m_cubeMap1 = TextureMan::Instance().getTexture("skybox1", facePaths);
+
 	// Setup PBR material
 
 	// Test brick
@@ -246,11 +255,11 @@ void GLFramework::setupScene()
 	m_pLightModel = std::make_unique<Model<VertexPN>>("..//Assets//sphere.obj");
 	m_pSphereModel = std::make_unique<Model<VertexPTNT>>("..//Assets//planet.obj");
 	m_bunny = std::make_unique<Model<VertexPTNT>>("..//Assets//models//bunny.obj");
-	m_dragon = std::make_unique<Model<VertexPTNT>>("..//Assets//models//dragon.obj");
-	m_buddha = std::make_unique<Model<VertexPTNT>>("..//Assets//models//buddha.obj");
-	m_lucy = std::make_unique<Model<VertexPTNT>>("..//Assets//models//lucy.obj");
-	m_armadillo = std::make_unique<Model<VertexPTNT>>("..//Assets//models//armadillo.obj");
-	m_tyra = std::make_unique<Model<VertexPTNT>>("..//Assets//models//tyra.obj");
+	//m_dragon = std::make_unique<Model<VertexPTNT>>("..//Assets//models//dragon.obj");
+	//m_buddha = std::make_unique<Model<VertexPTNT>>("..//Assets//models//buddha.obj");
+	//m_lucy = std::make_unique<Model<VertexPTNT>>("..//Assets//models//lucy.obj");
+	//m_armadillo = std::make_unique<Model<VertexPTNT>>("..//Assets//models//armadillo.obj");
+	//m_tyra = std::make_unique<Model<VertexPTNT>>("..//Assets//models//tyra.obj");
 
 	// Generate VAO
 	m_cubeVAO = Mesh<int>::vaoCubeSetup();
@@ -448,7 +457,7 @@ void GLFramework::drawScene()
 	m_bunny->render();
 
 	// Draw dragon
-	scaleFactor = 0.5f;
+	/*scaleFactor = 0.5f;
 	position = glm::vec3(-2.0f, 0.0f, -2.0f);
 	m = glm::mat4();
 	m = glm::translate(m, position);
@@ -458,7 +467,7 @@ void GLFramework::drawScene()
 	normalMat = glm::transpose(glm::inverse(m));
 	m_colorPBR->set<glm::mat4>(ShaderUniform::ModelMat, m);
 	m_colorPBR->set<glm::mat4>(ShaderUniform::NormalMat, normalMat);
-	m_dragon->render();
+	m_dragon->render();*/
 
 	// ---------------------------------------------------------------------
 

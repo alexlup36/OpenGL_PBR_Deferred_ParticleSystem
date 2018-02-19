@@ -5,7 +5,7 @@
 // ----------------------------------------------------------------------------
 // Constructor/Destructor
 
-Texture3D::Texture3D(const std::string& name, const std::vector<std::string>& facePaths)
+Texture3D::Texture3D(const std::string& name, const std::vector<std::string> &facePaths)
 {
 	m_textureName = name;
 	m_facePaths.resize(facePaths.size());
@@ -53,6 +53,25 @@ Texture3D::Texture3D(const std::string& name, const std::vector<std::string>& fa
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	
 }
+
+// ----------------------------------------------------------------------------
+
+void Texture3D::bind(GLuint program)
+{
+	// Set the texture unit
+	int textureUnit = 0;
+	glActiveTexture(GLenum(GL_TEXTURE0 + textureUnit));
+
+	// Bind the texture
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_uiTexture);
+		
+	// Bind the cube map sampler
+	int location = glGetUniformLocation(program, "envMap");
+
+	glUniform1i(location, textureUnit);
+}
+
+// ----------------------------------------------------------------------------
 
 Texture3D::~Texture3D()
 {

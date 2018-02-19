@@ -77,6 +77,9 @@ private:
 	Texture2D* m_goldMetallic = nullptr;
 	Texture2D* m_goldAmbientOcclusion = nullptr;
 	Texture2D* m_goldNormal = nullptr;
+	
+	// Cube maps
+	Texture3D* m_cubeMap1 = nullptr;
 
 	// FPS camera
 	std::unique_ptr<Camera> m_pCamera1;
