@@ -64,13 +64,13 @@ void GLFramework::draw(double dt)
 	// ------------------------------------------------------------------------
 	// Do drawing here
 
-	// Render to the depth map
+	// Render to the depth map setup
 	m_pDT->renderToTexture();
 
 	// Render scene to depth map
 	drawSceneToDepth();
 
-	// Render to texture
+	// Render to texture setup
 	m_pRT->renderToTexture();
 
 	// Draw scene
@@ -188,6 +188,7 @@ void GLFramework::setupScene()
 	m_colorPBR = std::make_unique<Shader>(".\\Shaders\\simplePBR.vert", ".\\Shaders\\simplePBR.frag");
 	m_pbr = std::make_unique<Shader>(".\\Shaders\\pbr.vert", ".\\Shaders\\pbr.frag");
 	m_depth = std::make_unique<Shader>(".\\Shaders\\depthMap.vert", ".\\Shaders\\depthMap.frag");
+	m_skyBox = std::make_unique<Shader>(".\\Shaders\\cubemap.vert", ".\\Shaders\\cubemap.frag");
 
 	// Load textures
 	m_brick1Diffuse = TextureMan::Instance().getTexture("..//Assets//Textures//brick1//brick_diffuse.jpg", TextureType::Diffuse1);
@@ -216,13 +217,23 @@ void GLFramework::setupScene()
 	m_goldNormal = TextureMan::Instance().getTexture("..//Assets//Textures//pbr//gold//normal.png", TextureType::Normal1);
 
 	// Load cube maps
-	std::vector<std::string> facePaths = { "..//Assets//Textures//skybox2//back.jpg",
-		"..//Assets//Textures//skybox2//bottom.jpg", 
-		"..//Assets//Textures//skybox2//front.jpg",
+	std::vector<std::string> facePaths = {
+		"..//Assets//Textures//skybox2//right.jpg", 
 		"..//Assets//Textures//skybox2//left.jpg",
-		"..//Assets//Textures//skybox2//right.jpg",
-		"..//Assets//Textures//skybox2//top.jpg" };
+		"..//Assets//Textures//skybox2//top.jpg",
+		"..//Assets//Textures//skybox2//bottom.jpg",
+		"..//Assets//Textures//skybox2//back.jpg",
+		"..//Assets//Textures//skybox2//front.jpg" };
 	m_cubeMap1 = TextureMan::Instance().getTexture("skybox1", facePaths);
+
+	facePaths = {
+		"..//Assets//Textures//skybox1//right.bmp",
+		"..//Assets//Textures//skybox1//left.bmp",
+		"..//Assets//Textures//skybox1//top.bmp",
+		"..//Assets//Textures//skybox1//bottom.bmp",
+		"..//Assets//Textures//skybox1//front.bmp",
+		"..//Assets//Textures//skybox1//back.bmp" };
+	m_cubeMap2 = TextureMan::Instance().getTexture("skybox2", facePaths);
 
 	// Setup PBR material
 
@@ -264,6 +275,7 @@ void GLFramework::setupScene()
 	// Generate VAO
 	m_cubeVAO = Mesh<int>::vaoCubeSetup();
 	m_quadVAO = Mesh<int>::vaoQuadSetup();
+	m_skyboxVAO = Mesh<int>::vaoSkyboxSetup();
 
 	// Generate and bind vertex array object (Required for OpenGL context > 3.1)
 	GLuint vertexArrayObject = 0;
@@ -274,7 +286,7 @@ void GLFramework::setupScene()
 void GLFramework::drawScene()
 {
 	// Do rendering
-	glm::mat4 m, v, p, mvp, normalMat;
+	glm::mat4 m, v, p, normalMat;
 
 	// Get lights
 	auto& pointLight1 = LightData::getInstance().pointLight1;
@@ -628,6 +640,30 @@ void GLFramework::drawScene()
 
 	// Draw triangles
 	m_pPlaneModel->render();
+
+	// ------------------------------------------------------------------------
+	// Render the skybox
+
+	// Set the depth function to less or equal
+	glDepthFunc(GL_LEQUAL);
+	// Activate the skybox shader
+	m_skyBox->useShader();
+	// Get rid of the translation component from the view matrix
+	// We don't want the skybox to move together with the player
+	v = glm::mat4x4(glm::mat3x3(m_pCamera1->viewMatrix()));
+	p = m_pCamera1->projMatrix();
+	m_skyBox->set<glm::mat4>(ShaderUniform::ViewMat, v);
+	m_skyBox->set<glm::mat4>(ShaderUniform::ProjMat, p);
+	// Bind the cube VAO
+	glBindVertexArray(m_skyboxVAO);
+	// Bind the environment texture
+	m_cubeMap2->bind(m_skyBox->program());
+	// Draw the cube
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	// Set the depth function to default
+	glDepthFunc(GL_LESS);
+
+	// ------------------------------------------------------------------------
 }
 
 void GLFramework::drawSceneToDepth()

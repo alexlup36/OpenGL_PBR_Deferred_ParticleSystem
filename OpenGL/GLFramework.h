@@ -33,6 +33,7 @@ private:
 	// VAO
 	GLuint m_cubeVAO;
 	GLuint m_quadVAO;
+	GLuint m_skyboxVAO;
 
 	// Depth map size
 	GLsizei m_depthMapWidth = 1024;
@@ -48,6 +49,7 @@ private:
 	std::unique_ptr<Shader> m_colorPBR = nullptr;
 	std::unique_ptr<Shader> m_pbr = nullptr;
 	std::unique_ptr<Shader> m_depth = nullptr;
+	std::unique_ptr<Shader> m_skyBox = nullptr;
 
 	// Textures
 	std::unique_ptr<Texture2D> m_depthMap = nullptr;
@@ -80,6 +82,7 @@ private:
 	
 	// Cube maps
 	Texture3D* m_cubeMap1 = nullptr;
+	Texture3D* m_cubeMap2 = nullptr;
 
 	// FPS camera
 	std::unique_ptr<Camera> m_pCamera1;

@@ -1,7 +1,7 @@
 #version 330 core
 
 // Direction vector representing a 3D texture coordinate
-in vec3 textureDir;
+in vec3 texCoords;
 
 // Output colour
 out vec4 fragmentColor;
@@ -11,5 +11,5 @@ uniform samplerCube envMap;
 
 void main()
 {
-    fragmentColor = texture(envMap, textureDir);
+    fragmentColor = texture(envMap, texCoords);
 }

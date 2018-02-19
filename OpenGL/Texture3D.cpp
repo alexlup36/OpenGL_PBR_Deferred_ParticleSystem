@@ -23,7 +23,7 @@ Texture3D::Texture3D(const std::string& name, const std::vector<std::string> &fa
 
 		// Load face texture data
 		int uiWidth, uiHeight, uiComponents;
-		unsigned char* sImageData = SOIL_load_image(facePath.c_str(), &uiWidth, &uiHeight, &uiComponents, 4);
+		unsigned char* sImageData = SOIL_load_image(facePath.c_str(), &uiWidth, &uiHeight, &uiComponents, SOIL_LOAD_AUTO);
 
 		if (sImageData != nullptr)
 			std::cout << "Texture data loaded successfully " << facePath << std::endl;

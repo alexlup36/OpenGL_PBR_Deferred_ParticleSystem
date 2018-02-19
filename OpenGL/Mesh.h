@@ -88,6 +88,7 @@ public:
 
 	static GLuint vaoCubeSetup();
 	static GLuint vaoQuadSetup();
+	static GLuint vaoSkyboxSetup();
 
 private:
 
@@ -236,6 +237,78 @@ inline GLuint Mesh<T>::vaoQuadSetup()
 	glBindVertexArray(0);
 
 	return quadVertexArray;
+}
+
+// ----------------------------------------------------------------------------
+template<class T>
+inline GLuint Mesh<T>::vaoSkyboxSetup()
+{
+	// Create skybox vertex object
+	GLuint skyboxVertexArray;
+	glGenVertexArrays(1, &skyboxVertexArray);
+	glBindVertexArray(skyboxVertexArray);
+
+	// Quad vertex data
+	static const GLfloat skyboxVertexData[] = {
+		// positions          
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		-1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f
+	};
+	// Create sky box vertex buffer
+	GLuint skyboxVertexBuffer;
+	glGenBuffers(1, &skyboxVertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertexData),
+		static_cast<const void*>(skyboxVertexData),
+		GL_STATIC_DRAW);
+
+	// Vertex attribute
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
+
+	// Unbind vertex array object
+	glBindVertexArray(0);
+
+	return skyboxVertexArray;
 }
 
 // ----------------------------------------------------------------------------
