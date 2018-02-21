@@ -73,9 +73,6 @@ uniform Material material;
 // HDR
 uniform float gamma;
 
-// Camera
-uniform vec3 viewPos;
-
 // Debug
 uniform int displayMode;
 const int DIFFUSE = 0x00;
@@ -90,13 +87,15 @@ in vec2 texCoord;
 in vec3 vertexW;
 in mat3 TBNMatrix;
 in vec3 normalW;
+in vec3 viewPosTangent;
+in vec3 fragmentPosTangent;
 
 // Output
 out vec4 color;
 
 // ----------------------------------------------------------------------------
 
-vec4 phongShading(vec3 normal, vec4 color)
+vec4 phongShading(vec3 normal, vec4 color, vec3 viewDirection)
 {
 	vec3 totalAmbient = vec3(0.0f, 0.0f, 0.0f);
 	vec3 totalDiffuse = vec3(0.0f, 0.0f, 0.0f);
@@ -108,12 +107,11 @@ vec4 phongShading(vec3 normal, vec4 color)
 		totalAmbient += dirLight[i].ambientComp * material.ambientComp;
 
 		// Calculate diffuse component
-		vec3 lightDir = normalize(dirLight[i].direction);
+		vec3 lightDir = normalize(TBNMatrix * normalize(dirLight[i].direction));
 		float diffuse = max(dot(normal, lightDir), 0.0f);
 		totalDiffuse += diffuse * dirLight[i].diffuseComp * material.diffuseComp;
 	
 		// Calculate specular component
-		vec3 viewDirection = normalize(viewPos - vertexW);
 		vec3 reflectionDirection = normalize(reflect(-lightDir, normal));
 		float specular = pow(max(dot(viewDirection, reflectionDirection), 0.0f), material.shineness);
 		totalSpecular += specular * dirLight[i].specularComp * material.specularComp * specularStrength;
@@ -124,7 +122,7 @@ vec4 phongShading(vec3 normal, vec4 color)
 
 // ----------------------------------------------------------------------------
 
-vec4 blinnPhongShadingPoint(vec3 normal, vec4 color)
+vec4 blinnPhongShadingPoint(vec3 normal, vec4 color, vec3 viewDirection)
 {
 	vec3 totalAmbient = vec3(0.0f, 0.0f, 0.0f);
 	vec3 totalDiffuse = vec3(0.0f, 0.0f, 0.0f);
@@ -137,7 +135,8 @@ vec4 blinnPhongShadingPoint(vec3 normal, vec4 color)
 		
 		// Calculate diffuse component ---------------------------------------------------------------
 		vec3 diffuseComponent, lightVector;
-		lightVector = (pointLight[i].position - vertexW);
+		vec3 lightPosTangent = TBNMatrix * pointLight[i].position;
+		lightVector = (lightPosTangent - fragmentPosTangent);
 		
 		float distance = length(lightVector);
 		vec3 lightDir = normalize(lightVector);
@@ -145,7 +144,6 @@ vec4 blinnPhongShadingPoint(vec3 normal, vec4 color)
 		diffuseComponent = diffuse * pointLight[i].diffuseComp * material.diffuseComp;
 		
 		// Calculate specular component --------------------------------------------------------------
-		vec3 viewDirection = normalize(viewPos - vertexW);
 		vec3 halfWayDirection = normalize(lightDir + viewDirection);
 		float specular = pow(max(dot(normal, halfWayDirection), 0.0f), material.shineness);
 		vec3 specularComponent = specular * pointLight[i].specularComp * 
@@ -164,7 +162,7 @@ vec4 blinnPhongShadingPoint(vec3 normal, vec4 color)
 
 // ----------------------------------------------------------------------------
 
-vec4 blinnPhongShading(vec3 normal, vec4 color)
+vec4 blinnPhongShading(vec3 normal, vec4 color, vec3 viewDirection)
 {
 	vec3 totalAmbient = vec3(0.0f, 0.0f, 0.0f);
 	vec3 totalDiffuse = vec3(0.0f, 0.0f, 0.0f);
@@ -172,16 +170,18 @@ vec4 blinnPhongShading(vec3 normal, vec4 color)
 
 	for (int i = 0; i < MAX_DIR_LIGHTS; i++)
 	{
+		// Transform light direction to tangent space
+
+
 		// Calculate ambient component ---------------------------------------------------------------
 		totalAmbient += dirLight[i].ambientComp * material.ambientComp;
 	
 		// Calculate diffuse component ---------------------------------------------------------------
-		vec3 lightDir = -normalize(dirLight[i].direction);
+		vec3 lightDir = -normalize(TBNMatrix * normalize(dirLight[i].direction));
 		float diffuse = max(dot(normal, lightDir), 0.0f);
 		totalDiffuse += diffuse * dirLight[i].diffuseComp * material.diffuseComp;
 	
 		// Calculate specular component --------------------------------------------------------------
-		vec3 viewDirection = normalize(viewPos - vertexW);
 		vec3 halfWayDirection = normalize(lightDir + viewDirection);
 		float specular = pow(max(dot(normal, halfWayDirection), 0.0f), material.shineness);
 		totalSpecular += specular * dirLight[i].specularComp * material.specularComp * specularStrength;
@@ -192,7 +192,17 @@ vec4 blinnPhongShading(vec3 normal, vec4 color)
 
 // ----------------------------------------------------------------------------
 
-vec2 ParallaxMapping(vec2 texCoord, vec3 viewDirection)
+vec2 parallaxMapping(vec2 texCoord, vec3 viewDirection)
+{
+	float height = texture(displacementTexture, texCoord).r;
+	vec2 offset = viewDirection.xy * (height * dispMapScale);
+	
+	return texCoord - offset;
+}
+
+// ----------------------------------------------------------------------------
+
+vec2 parallaxOcclusionMapping(vec2 texCoord, vec3 viewDirection)
 {
 	// Number of depth layers
 	const float minLayerCount = 8;
@@ -240,25 +250,20 @@ void main()
 	color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	
 	// Parallax displacement mapping
-	vec3 viewDirectionTangent = normalize(TBNMatrix * (viewPos - vertexW));
-	vec2 texCoordParallax = ParallaxMapping(texCoord, viewDirectionTangent);
+	vec3 viewDirectionTangent = normalize(viewPosTangent - fragmentPosTangent);
+	vec2 texCoordParallax = parallaxMapping(texCoord, viewDirectionTangent);
 	if (texCoordParallax.x > 1.0f || texCoordParallax.y > 1.0f || texCoordParallax.x < 0.0f || texCoordParallax.y < 0.0f)
-	{
 		discard;
-	}
 	
 	// Sample the diffuse and normal textures
 	vec4 diffuseColor = texture(diffuseTexture1, texCoordParallax);
+	// The normal is already in tangent space so we don't need to transform it using the TBN matrix
 	vec3 normal = texture(normalTexture1, texCoordParallax).xyz;
-	normal = normalize(2.0f * normal - 1.0f);
-	normal = normalize(TBNMatrix * normal) * normalMapScale;
-
-	// Sample depth map
-	vec3 depth = texture(depthMap, texCoord).xyz;
+	normal = normalMapScale * normalize(2.0f * normal - 1.0f);
 
 	// Calculate lighting using the Phong model texture
-	//color += blinnPhongShading(normal, diffuseColor);
-	//color += blinnPhongShadingPoint(normal, diffuseColor);
+	//color += blinnPhongShading(normal, diffuseColor, viewDirectionTangent);
+	//color += blinnPhongShadingPoint(normal, diffuseColor, viewDirectionTangent);
 
 	// Debug
 	switch (displayMode)
@@ -273,15 +278,15 @@ void main()
 			color = vec4(normal, 1.0f);
 			break;
 		case DIRLIGHT_SHADING:
-			color += blinnPhongShading(normal, diffuseColor);
+			color += blinnPhongShading(normal, diffuseColor, viewDirectionTangent);
 			break;
 		case POINTLIGHT_SHADING:
-			color += blinnPhongShadingPoint(normal, diffuseColor);
+			color += blinnPhongShadingPoint(normal, diffuseColor, viewDirectionTangent);
 			break;
 		case FINAL:
 		{
-			color += blinnPhongShading(normal, diffuseColor);
-			//color += blinnPhongShadingPoint(normal, diffuseColor);
+			color += blinnPhongShading(normal, diffuseColor, viewDirectionTangent);
+			//color += blinnPhongShadingPoint(normal, diffuseColor, viewDirectionTangent);
 			break;
 		}
 		default:

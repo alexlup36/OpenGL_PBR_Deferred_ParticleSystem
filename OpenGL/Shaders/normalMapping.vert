@@ -10,11 +10,14 @@ out vec2 texCoord;
 out vec3 vertexW;
 out mat3 TBNMatrix;
 out vec3 normalW;
+out vec3 viewPosTangent;
+out vec3 fragmentPosTangent;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 uniform mat4 normalMat;
+uniform vec3 viewPos;
 
 void calculateTNBMatrix()
 {
@@ -28,7 +31,7 @@ void calculateTNBMatrix()
 	vec3 b = normalize(cross(t, n)); // Order important
 	
 	// Create the TBN matrix
-	TBNMatrix = mat3(t, b, n);
+	TBNMatrix = transpose(mat3(t, b, n));
 }
 
 void main()
@@ -45,4 +48,9 @@ void main()
 	
 	// Calculate the TNB matrix for normal mapping
 	calculateTNBMatrix();
+
+	// Calculate the view direction vector in tangent space
+	viewPosTangent = TBNMatrix * viewPos;
+	// Calculate the fragment position in tangent space
+	fragmentPosTangent = TBNMatrix * vertexW;
 }
