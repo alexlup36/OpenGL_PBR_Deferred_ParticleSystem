@@ -597,11 +597,11 @@ void GLFramework::drawScene()
 	m_toyBoxNormal->bind(m_normalMapping->program());
 
 	// Point light
-	//m_normalMapping->setPointLight<glm::vec3&>(PointLightUniform::ColorAmbientComp, 0, pointLight1.ambientComp);
-	//m_normalMapping->setPointLight<glm::vec3&>(PointLightUniform::ColorDiffuseComp, 0, pointLight1.diffuseComp);
-	//m_normalMapping->setPointLight<glm::vec3&>(PointLightUniform::ColorSpecularComp, 0, pointLight1.specularComp);
-	//m_normalMapping->setPointLight<glm::vec3&>(PointLightUniform::Position, 0, pointLight1.direction);
-	//m_normalMapping->setPointLight<glm::vec3&>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
+	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::ColorAmbientComp, 0, pointLight1.ambientComp);
+	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::ColorDiffuseComp, 0, pointLight1.diffuseComp);
+	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::ColorSpecularComp, 0, pointLight1.specularComp);
+	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
+	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
 
 	// Directional light
 	directionalLight1 = LightData::getInstance().directionalLight1;

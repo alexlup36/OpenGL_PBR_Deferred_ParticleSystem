@@ -156,7 +156,7 @@ vec4 blinnPhongShadingPoint(vec3 normal, vec4 color, vec3 viewDirection)
 		totalDiffuse += diffuseComponent * attenuation;
 		totalSpecular += specularComponent * attenuation * specularStrength;
 	}
-	
+
 	return vec4(totalAmbient + totalDiffuse, 1.0f) * color + vec4(totalSpecular, 1.0f);
 }
 
@@ -304,10 +304,6 @@ void main()
 	vec3 normal = texture(normalTexture1, texCoordParallax).xyz;
 	normal = normalMapScale * normalize(2.0f * normal - 1.0f);
 
-	// Calculate lighting using the Phong model texture
-	//color += blinnPhongShading(normal, diffuseColor, viewDirectionTangent);
-	//color += blinnPhongShadingPoint(normal, diffuseColor, viewDirectionTangent);
-
 	// Debug
 	switch (displayMode)
 	{
@@ -328,8 +324,8 @@ void main()
 			break;
 		case FINAL:
 		{
-			color += blinnPhongShading(normal, diffuseColor, viewDirectionTangent);
-			//color += blinnPhongShadingPoint(normal, diffuseColor, viewDirectionTangent);
+			//color += blinnPhongShading(normal, diffuseColor, viewDirectionTangent);
+			color += blinnPhongShadingPoint(normal, diffuseColor, viewDirectionTangent);
 			break;
 		}
 		default:
