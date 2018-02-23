@@ -58,9 +58,6 @@ uniform DirectionalLight dirLight[MAX_DIR_LIGHTS];
 uniform PointLight pointLight[MAX_POINT_LIGHTS];
 uniform SpotLight spotLight[MAX_SPOT_LIGHTS];
 
-// Camera
-uniform vec3 viewPos;
-
 // Samplers
 uniform sampler2D diffuseTexture1;
 uniform sampler2D normalTexture1;
@@ -69,15 +66,43 @@ uniform sampler2D roughnessTexture;
 uniform sampler2D metalnessTexture;
 uniform sampler2D aoTexture;
 
-uniform sampler2D depthMap;
-
-uniform bool isMetal;
+// Shadow mapping
+uniform sampler2D shadowMap;
 
 // Parallax mapping
 uniform float dispMapScale;
+uniform float normalMapScale;
+
+// Debug
+uniform int displayMode;
+const int DIFFUSE = 0x00;
+const int NORMAL = 0x01;
+const int NORMAL_TEX = 0x02;
+const int DIRLIGHT_SHADING = 0x03;
+const int POINTLIGHT_SHADING = 0x04;
+const int FINAL = 0x05;
 
 // Gamma
 uniform float gamma;
+
+// ------------------------------------------------------------------
+
+in VS_OUT
+{
+	vec2 texCoord;
+	vec3 normalW;
+	vec3 vertexW;
+	mat3 TBNMatrix;
+	vec3 viewPosTangent;
+	vec3 fragmentPosTangent;
+} fs_in;
+
+// Store PBR properties from the PBR texture
+PBRMaterial material;
+
+// ------------------------------------------------------------------
+
+out vec4 color;
 
 // ------------------------------------------------------------------
 // ------------------------------------------------------------------
@@ -188,88 +213,30 @@ float calculateAttenuationQuadratic(vec3 vertexPosW, vec3 lightPosW, vec3 attenu
 	return 1.0f / (attenuation.z + attenuation.y * distance + attenuation.x * (distance * distance));
 }
 
-
-// ----------------------------------------------------------------------------
-
-vec2 ParallaxMapping(vec2 texCoord, vec3 viewDirection)
-{
-	// Number of depth layers
-	const float minLayerCount = 8;
-	const float maxLayerCount = 32;
-	float layerCount = mix(maxLayerCount, minLayerCount, abs(dot(vec3(0.0f, 0.0f, 1.0f), viewDirection)));
-	// Calculate the size of each layer
-	float layerDepth = 1.0f / layerCount;
-	// Depth of the current layer
-	float currentLayerDepth = 0.0f;
-	// Texture offset for each depth layer
-	vec2 p = viewDirection.xy * dispMapScale;
-	vec2 deltaTexCoords = p / layerCount;
-	// Set initial values
-	vec2 currentTexCoord = texCoord;
-	float currentDepthMapValue = texture(displacementTexture, currentTexCoord).r;
-	
-	while (currentLayerDepth < currentDepthMapValue)
-	{
-		// Adjust the texture coordinates for the current depth values
-		currentTexCoord -= deltaTexCoords;
-		
-		// Get the depth map value at the current texture coordinate
-		currentDepthMapValue = texture(displacementTexture, currentTexCoord).r;
-	
-		// Increment the current layer depth
-		currentLayerDepth += layerDepth;
-	}
-	
-	// Get the previous tex coordinate
-	vec2 prevTexCoord = currentTexCoord + deltaTexCoords;
-	// Get the depth value after and before the collision
-	float afterDepth = currentDepthMapValue - currentLayerDepth;
-	float beforeDepth = texture(displacementTexture, prevTexCoord).r - currentLayerDepth + layerDepth;
-	
-	// Do the interpolation
-	float weight = afterDepth / (afterDepth - beforeDepth);
-	
-	return prevTexCoord * weight + currentTexCoord * (1.0f - weight);
-}
-
 // ------------------------------------------------------------------
 
-in VS_OUT
-{
-	vec2 texCoord;
-	vec3 normalW;
-	vec3 vertexW;
-	mat3 TBNMatrix;
-} fs_in;
-
-// Store PBR properties from the PBR texture
-PBRMaterial material;
-
-// ------------------------------------------------------------------
-
-out vec4 color;
-
-// ------------------------------------------------------------------
-
-vec4 pbrShadingPoint(vec3 normal)
+vec4 pbrShadingPoint(vec3 normal, vec3 viewDirection)
 {
 	vec3 totalAmbient = vec3(0.0f, 0.0f, 0.0f);
 	vec3 totalIrradiance = vec3(0.0f, 0.0f, 0.0f);
 
 	// View direction
-	vec3 v = normalize(viewPos - fs_in.vertexW);
+	vec3 v = viewDirection;
 	// Fragment normal direction
-	vec3 n = normalize(normal);
+	vec3 n = normal;
 
 	// Calculate f0 - base reflectivity
 	vec3 f0 = calculateBaseReflectivity(material.color, material.metallic);
 
 	for (int i = 0; i < MAX_POINT_LIGHTS; ++i)
 	{
+		// Calculate light position in tangent space
+		vec3 lightPosTangent = fs_in.TBNMatrix * pointLight[i].position;
+
 		// Point light direction
-		vec3 l = normalize(pointLight[i].position - fs_in.vertexW);
+		vec3 l = normalize(lightPosTangent - fs_in.fragmentPosTangent);
 		// Calculate attenuation
-		float attenuation = calculateAttenuationQuadratic(fs_in.vertexW, pointLight[i].position, pointLight[i].attenuation);
+		float attenuation = calculateAttenuationQuadratic(fs_in.fragmentPosTangent, lightPosTangent, pointLight[i].attenuation);
 		// Cos theta
 		float cosTheta = max(dot(n, l), 0.0f);
 		// Calculate radiance
@@ -307,17 +274,17 @@ vec4 pbrShadingPoint(vec3 normal)
 
 // ------------------------------------------------------------------
 
-vec4 pbrShadingDir(vec3 normal)
+vec4 pbrShadingDir(vec3 normal, vec3 viewDirection)
 {
 	vec3 totalAmbient = vec3(0.0f, 0.0f, 0.0f);
 	vec3 totalIrradiance = vec3(0.0f, 0.0f, 0.0f);
 
 	// View direction
-	vec3 v = normalize(viewPos - fs_in.vertexW);
+	vec3 v = viewDirection;
 	//return vec4(v, 1.0f);
 
 	// Fragment normal direction
-	vec3 n = normalize(normal);
+	vec3 n = normal;
 	//return vec4(n, 1.0f);
 
 	// Calculate f0 - base reflectivity
@@ -326,8 +293,8 @@ vec4 pbrShadingDir(vec3 normal)
 
 	for (int i = 0; i < MAX_DIR_LIGHTS; ++i)
 	{
-		// Directional light direction
-		vec3 l = -normalize(dirLight[i].direction);
+		// Directional light direction in tangent space
+		vec3 l = -normalize(fs_in.TBNMatrix * normalize(dirLight[i].direction));
 		//return vec4(l, 1.0f);
 		
 		// Cos theta
@@ -380,53 +347,175 @@ vec4 pbrShadingDir(vec3 normal)
 	return vec4(totalAmbient + totalIrradiance, 1.0f);
 }
 
+// ----------------------------------------------------------------------------
+
+vec2 parallaxMapping(vec2 texCoord, vec3 viewDirection)
+{
+	float height = texture(displacementTexture, texCoord).r;
+	vec2 offset = viewDirection.xy * (height * dispMapScale);
+	
+	return texCoord - offset;
+}
+
+// ----------------------------------------------------------------------------
+
+vec2 steepParallaxMapping(vec2 texCoord, vec3 viewDirection)
+{
+	const float minLayers = 8.0f;
+	const float maxLayers = 32.0f;
+
+	// Number of depth layers
+	float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0f, 0.0f, 1.0f), viewDirection)));
+	// Calculate the size of each layer
+	float layerDepth = 1.0f / numLayers;
+	// Depth of the current layer
+	float currentLayerDepth = 0.0f;
+	// Calculate the amount to shift the tex coordinate for each layer
+	vec2 p = viewDirection.xy * dispMapScale;
+	vec2 texCoordDelta = p / numLayers;
+
+	vec2 currentTexCoords = texCoord;
+	float currentDepthMapValue = texture(displacementTexture, currentTexCoords).r;
+	while (currentLayerDepth < currentDepthMapValue)
+	{
+		// Shift the texture coordinates along the p
+		currentTexCoords -= texCoordDelta;
+		// Get the depthmap value at the current texture coordinate
+		currentDepthMapValue = texture(displacementTexture, currentTexCoords).r;
+		// Get the depth of the next layer
+		currentLayerDepth += layerDepth;
+	}
+
+	return currentTexCoords;
+}
+
+// ----------------------------------------------------------------------------
+
+vec2 parallaxOcclusionMapping(vec2 texCoord, vec3 viewDirection)
+{
+	const float minLayers = 8.0f;
+	const float maxLayers = 32.0f;
+
+	// Number of depth layers
+	float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0f, 0.0f, 1.0f), viewDirection)));
+	// Calculate the size of each layer
+	float layerDepth = 1.0f / numLayers;
+	// Depth of the current layer
+	float currentLayerDepth = 0.0f;
+	// Calculate the amount to shift the tex coordinate for each layer
+	vec2 p = viewDirection.xy * dispMapScale;
+	vec2 texCoordDelta = p / numLayers;
+
+	vec2 currentTexCoords = texCoord;
+	float currentDepthMapValue = texture(displacementTexture, currentTexCoords).r;
+	while (currentLayerDepth < currentDepthMapValue)
+	{
+		// Shift the texture coordinates along the p
+		currentTexCoords -= texCoordDelta;
+		// Get the depthmap value at the current texture coordinate
+		currentDepthMapValue = texture(displacementTexture, currentTexCoords).r;
+		// Get the depth of the next layer
+		currentLayerDepth += layerDepth;
+	}
+
+	// Get the texture coordinates before the collision
+	vec2 prevTexCoords = currentTexCoords + texCoordDelta;
+
+	// Linear interpolation between the depth before the collision and after the collision
+	// The weight is represented by how far each depth is from the depth of the current layer
+	float depthAfterCollision = currentDepthMapValue - currentLayerDepth;
+	float depthBeforeCollision = texture(displacementTexture, prevTexCoords).r - currentLayerDepth + layerDepth;
+
+	// Calculate the weight for the interpolation
+	float weight = depthAfterCollision / (depthAfterCollision - depthBeforeCollision);
+
+	// Interpolate the prev texture coordinates and the current texture coordinates based
+	// on the weight calculated before
+	vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0f - weight);
+
+	return finalTexCoords;
+}
+
 // ------------------------------------------------------------------
 
 void main()
 {
-	vec2 texCoord = fs_in.texCoord;
-
-	if (dispMapScale != -1.0f)
-	{
-		// Parallax displacement mapping
-		vec3 viewDirectionTangent = normalize(fs_in.TBNMatrix * (viewPos - fs_in.vertexW));
-		vec2 texCoordParallax = ParallaxMapping(fs_in.texCoord, viewDirectionTangent);
-		if (texCoordParallax.x > 1.0f || texCoordParallax.y > 1.0f || texCoordParallax.x < 0.0f || texCoordParallax.y < 0.0f)
-		{
-			discard;
-		}
-		texCoord = texCoordParallax;
-	}
-
-	// Sample the diffuse texture
-	material.color = texture(diffuseTexture1, texCoord).xyz;
-	// Sample the normal texture
-	vec3 n = normalize(fs_in.TBNMatrix * (2.0f * texture(normalTexture1, texCoord).xyz - 1.0f));
-	// Sample the PBR textures	
-	// PBR material initialize
-	material.roughness = texture(roughnessTexture, texCoord).x;
-	material.metallic = texture(metalnessTexture, texCoord).x;
-	material.ao = texture(aoTexture, texCoord).x;
-
-	//color = vec4(material.roughness, 0.0f, 0.0f, 1.0f);
-	//color = vec4(material.metallic, 0.0f, 0.0f, 1.0f);
-	//color = vec4(material.color, 1.0f);
-	//color = vec4(material.ao, 0.0f, 0.0f, 1.0f);
-	//return;
-
-	// Sample depth map
-	vec3 depth = texture(depthMap, texCoord).xyz;
-
-	// Default
 	color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
+	// --------------------------------------
+	// Parallax displacement mapping
+	vec3 viewDirectionTangent = normalize(fs_in.viewPosTangent - fs_in.fragmentPosTangent);
+	
+	// Normal parallax mapping
+	//vec2 texCoordParallax = parallaxMapping(fs_in.texCoord, viewDirectionTangent);
+	// Steep parallax mapping
+	//vec2 texCoordParallax = steepParallaxMapping(fs_in.texCoord, viewDirectionTangent);
+	// Parallax occlusion mapping
+	//vec2 texCoordParallax = parallaxOcclusionMapping(fs_in.texCoord, viewDirectionTangent);
+	// No parallax mapping
+	vec2 texCoordParallax = fs_in.texCoord;
+	
+	if (texCoordParallax.x > 1.0f || texCoordParallax.y > 1.0f || texCoordParallax.x < 0.0f || texCoordParallax.y < 0.0f)
+		discard;
+
+	// --------------------------------------
+
+	// Get PBR material
+	// Sample the diffuse texture
+	material.color = texture(diffuseTexture1, texCoordParallax).xyz;
+	// The normal is already in tangent space so we don't need to transform it using the TBN matrix
+	vec3 normal = texture(normalTexture1, texCoordParallax).xyz;
+	normal = normalMapScale * normalize(2.0f * normal - 1.0f);
+	// Sample the PBR textures	
+	// PBR material initialize
+	material.roughness = texture(roughnessTexture, texCoordParallax).x;
+	material.metallic = texture(metalnessTexture, texCoordParallax).x;
+	material.ao = texture(aoTexture, texCoordParallax).x;
+
+	// --------------------------------------
+
+	// Shadow mapping
+	// Sample depth map
+	vec3 depth = texture(shadowMap, texCoordParallax).xyz;
+
+	// --------------------------------------
+
 	// Calculate lighting
-	color += pbrShadingDir(n);
-	color += pbrShadingPoint(n);
+	// Debug
+	switch (displayMode)
+	{
+		case DIFFUSE:
+			color = vec4(material.color, 1.0f);
+			break;
+		case NORMAL:
+			color = vec4(fs_in.normalW, 1.0f);
+			break;
+		case NORMAL_TEX:
+			color = vec4(normal, 1.0f);
+			break;
+		case DIRLIGHT_SHADING:
+			color += pbrShadingDir(normal, viewDirectionTangent);
+			break;
+		case POINTLIGHT_SHADING:
+			color += pbrShadingPoint(normal, viewDirectionTangent);
+			break;
+		case FINAL:
+		{
+			color += pbrShadingDir(normal, viewDirectionTangent);
+			color += pbrShadingPoint(normal, viewDirectionTangent);
+			break;
+		}
+		default:
+			color = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+	}
+
+	// --------------------------------------
 
 	// Do gamma correction
 	color.rgb = pow(color.rgb, vec3(1.0f / gamma));
 	color.a = 1.0f;
+
+	// --------------------------------------
 }
 
 // ------------------------------------------------------------------

@@ -162,9 +162,9 @@
     <None Include="Shaders\cube.vert" />
     <None Include="Shaders\cubemap.frag" />
     <None Include="Shaders\cubemap.vert" />
-    <None Include="Shaders\depthMap.frag" />
-    <None Include="Shaders\depthMap.vert" />
     <None Include="Shaders\glslangValidator.exe" />
+    <None Include="Shaders\hdr.frag" />
+    <None Include="Shaders\hdr.vert" />
     <None Include="Shaders\normalMapping.frag" />
     <None Include="Shaders\normalMapping.vert" />
     <None Include="Shaders\parallaxMapping.frag" />
@@ -175,8 +175,8 @@
     <None Include="Shaders\phongColor.vert" />
     <None Include="Shaders\phongTexture.frag" />
     <None Include="Shaders\phongTexture.vert" />
-    <None Include="Shaders\quad.frag" />
-    <None Include="Shaders\quad.vert" />
+    <None Include="Shaders\shadowMap.frag" />
+    <None Include="Shaders\shadowMap.vert" />
     <None Include="Shaders\simplePBR.frag" />
     <None Include="Shaders\simplePBR.vert" />
   </ItemGroup>

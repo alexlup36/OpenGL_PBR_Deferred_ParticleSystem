@@ -55,7 +55,7 @@ uniform sampler2D displacementTexture;
 uniform sampler2D specularTexture;
 
 // Shadow map
-uniform sampler2D depthMap;
+uniform sampler2D shadowMap;
 
 // Light sources
 uniform DirectionalLight dirLight[MAX_DIR_LIGHTS];
@@ -170,9 +170,6 @@ vec4 blinnPhongShading(vec3 normal, vec4 color, vec3 viewDirection)
 
 	for (int i = 0; i < MAX_DIR_LIGHTS; i++)
 	{
-		// Transform light direction to tangent space
-
-
 		// Calculate ambient component ---------------------------------------------------------------
 		totalAmbient += dirLight[i].ambientComp * material.ambientComp;
 	

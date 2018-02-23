@@ -180,14 +180,14 @@ void GLFramework::setupScene()
 
 	// Load shaders
 	m_basicShader = std::make_unique<Shader>(".\\Shaders\\basic.vert", ".\\Shaders\\basic.frag");
-	m_quadShader = std::make_unique<Shader>(".\\Shaders\\quad.vert", ".\\Shaders\\quad.frag");
+	m_quadShader = std::make_unique<Shader>(".\\Shaders\\hdr.vert", ".\\Shaders\\hdr.frag");
 	m_phongColorShader = std::make_unique<Shader>(".\\Shaders\\phongColor.vert", ".\\Shaders\\phongColor.frag");
 	m_phongTextureShader = std::make_unique<Shader>(".\\Shaders\\phongTexture.vert", ".\\Shaders\\phongTexture.frag");
 	m_normalMapping = std::make_unique<Shader>(".\\Shaders\\normalMapping.vert", ".\\Shaders\\normalMapping.frag");
 	m_parallaxMapping = std::make_unique<Shader>(".\\Shaders\\parallaxMapping.vert", ".\\Shaders\\parallaxMapping.frag");
 	m_colorPBR = std::make_unique<Shader>(".\\Shaders\\simplePBR.vert", ".\\Shaders\\simplePBR.frag");
 	m_pbr = std::make_unique<Shader>(".\\Shaders\\pbr.vert", ".\\Shaders\\pbr.frag");
-	m_depth = std::make_unique<Shader>(".\\Shaders\\depthMap.vert", ".\\Shaders\\depthMap.frag");
+	m_depth = std::make_unique<Shader>(".\\Shaders\\shadowMap.vert", ".\\Shaders\\shadowMap.frag");
 	m_skyBox = std::make_unique<Shader>(".\\Shaders\\cubemap.vert", ".\\Shaders\\cubemap.frag");
 
 	// Load textures
@@ -380,12 +380,19 @@ void GLFramework::drawScene()
 	m_pbr->set<glm::vec3>(ShaderUniform::ViewPos, m_pCamera1->viewPos());
 	// Displacement mapping
 	m_pbr->setScalar<float>(ShaderUniform::DisplacementMapScale, -1.0f);
+	// Normal map scale
+	m_pbr->setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
 	// Light
 	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
 	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
 	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
 	m_pbr->setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
 	m_pbr->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
+	// Gamma
+	m_pbr->setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
+	// Debug display
+	m_pbr->setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
+
 	// Draw triangles
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -418,12 +425,19 @@ void GLFramework::drawScene()
 	m_pbr->set<glm::vec3>(ShaderUniform::ViewPos, m_pCamera1->viewPos());
 	// Displacement mapping
 	m_pbr->setScalar<float>(ShaderUniform::DisplacementMapScale, -1.0f);
+	// Normal map scale
+	m_pbr->setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
 	// Light
 	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
 	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
 	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
 	m_pbr->setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
 	m_pbr->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
+	// Gamma
+	m_pbr->setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
+	// Debug display
+	m_pbr->setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
+	
 	// Draw triangles
 	m_pSphereModel->render();
 
@@ -511,6 +525,8 @@ void GLFramework::drawScene()
 	m_pbr->set<glm::vec3>(ShaderUniform::ViewPos, m_pCamera1->viewPos());
 	// Displacement mapping
 	m_pbr->setScalar<float>(ShaderUniform::DisplacementMapScale, -1.0f);
+	// Normal map scale
+	m_pbr->setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
 	// Light
 	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
 	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
@@ -519,6 +535,8 @@ void GLFramework::drawScene()
 	m_pbr->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
 	// Gamma
 	m_pbr->setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
+	// Debug display
+	m_pbr->setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
 	// Draw triangles
 	m_pSphereModel->render();
 
