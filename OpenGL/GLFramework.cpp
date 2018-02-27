@@ -84,6 +84,11 @@ void GLFramework::draw(double dt)
 	m_quadShader->useShader();
 	GLuint textureUnit = 0;
 	m_pRT->renderColorToScreen(0, 0, windowWidth(), windowHeight(), textureUnit);
+	// Set tone mapper
+	m_quadShader->setScalar<int>(ShaderUniform::ToneMapper, static_cast<int>(m_pGUI->m_toneMapper));
+	m_quadShader->setScalar<float>(ShaderUniform::GammaHDR, m_pGUI->m_gammaHDR);
+	m_quadShader->setScalar<float>(ShaderUniform::Exposure, m_pGUI->m_exposure);
+	m_quadShader->setScalar<float>(ShaderUniform::ExposureBias, m_pGUI->m_exposureBias);
 	m_quadShader->setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
 	// Draw triangles
 	glDrawArrays(GL_TRIANGLES, 0, 6);

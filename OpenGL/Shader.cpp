@@ -52,6 +52,10 @@ Shader::Shader(const std::string& vsFilePath, const std::string& psFilePath)
 	m_shaderUniforms[static_cast<int>(ShaderUniform::NormalMapScale)] = glGetUniformLocation(m_program, "normalMapScale");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::Gamma)] = glGetUniformLocation(m_program, "gamma");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::DisplayMode)] = glGetUniformLocation(m_program, "displayMode");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::ToneMapper)] = glGetUniformLocation(m_program, "toneMapper");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::Exposure)] = glGetUniformLocation(m_program, "exposure");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::GammaHDR)] = glGetUniformLocation(m_program, "gammaHDR");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::ExposureBias)] = glGetUniformLocation(m_program, "exposureBias");
 
 	m_shaderUniforms[static_cast<int>(ShaderUniform::DiffuseTexture)] = glGetUniformLocation(m_program, "diffuseTexture");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::NormalTexture)] = glGetUniformLocation(m_program, "normalTexture");

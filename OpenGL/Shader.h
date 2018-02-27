@@ -41,6 +41,12 @@ enum class ShaderUniform
 	DisplacementTexture,
 	DepthTexture,
 
+	// Tone mapper
+	ToneMapper,
+	Exposure,
+	GammaHDR,
+	ExposureBias,
+
 	// Debug
 	DisplayMode,
 

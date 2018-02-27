@@ -14,7 +14,7 @@ public:
 	void draw();
 public:
 
-	enum DisplayMode
+	enum class DisplayMode
 	{
 		DIFFUSE = 0,
 		NORMAL = 1,
@@ -22,6 +22,18 @@ public:
 		DIRLIGHT_SHADING = 3,
 		POINTLIGHT_SHADING = 4,
 		FINAL = 5,
+
+		COUNT,
+	};
+
+	enum class ToneMapper 
+	{
+		NORMAL = 0,
+		GAMMA_CORRECTED,
+		REINHARD,
+		EXPOSURE_TONE_MAP,
+		JIM_TONE_MAP,
+		UNCHARTED,
 
 		COUNT,
 	};
@@ -42,10 +54,14 @@ public:
 	float m_dispMapScale = 0.0f;
 	float m_normalMapScale = 1.0f;
 	float m_gamma = 2.2f;
+	float m_gammaHDR = 1.0f;
+	float m_exposureBias = 2.0f;
+	float m_exposure = 1.0f;
 	glm::vec3 m_lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec4 m_objectColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
 	DisplayMode m_displayMode = DisplayMode::FINAL;
+	ToneMapper m_toneMapper = ToneMapper::NORMAL;
 
 	//PointLight* m_pCurrentPointLight = LightData::getInstance().pointLight1;
 };
