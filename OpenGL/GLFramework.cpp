@@ -250,6 +250,9 @@ void GLFramework::setupScene()
 	MaterialData::getInstance().matTexPBR1.roughness = m_brick1RoughnessPBR;
 	MaterialData::getInstance().matTexPBR1.ao = m_brick1AmbientOcclusionPBR;
 
+	// Fabric1
+	MaterialData::getInstance().matFabric1.albedo = 
+
 	// Rusted iron
 	MaterialData::getInstance().matRustedIron.albedo = m_rustedIronAlbedo;
 	MaterialData::getInstance().matRustedIron.metallic = m_rustedIronMetallic;
@@ -276,6 +279,7 @@ void GLFramework::setupScene()
 	//m_lucy = std::make_unique<Model<VertexPTNT>>("..//Assets//models//lucy.obj");
 	//m_armadillo = std::make_unique<Model<VertexPTNT>>("..//Assets//models//armadillo.obj");
 	//m_tyra = std::make_unique<Model<VertexPTNT>>("..//Assets//models//tyra.obj");
+	m_chair = std::make_unique<Model<VertexPTNT>>("..//Assets//models//chair.obj");
 
 	// Generate VAO
 	m_cubeVAO = Mesh<int>::vaoCubeSetup();

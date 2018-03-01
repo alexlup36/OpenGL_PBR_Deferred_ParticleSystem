@@ -59,6 +59,12 @@ private:
 	Texture2D* m_brick1Normal = nullptr;
 	Texture2D* m_brick1Specular = nullptr;
 
+	// Fabric1 pbr
+	Texture2D* m_fabric1Diffuse = nullptr;
+	Texture2D* m_fabric1Displacement = nullptr;
+	Texture2D* m_fabric1AmbientOcclusion = nullptr;
+	Texture2D* m_fabric1Normal = nullptr;
+
 	Texture2D* m_toyBoxDiffuse = nullptr;
 	Texture2D* m_toyBoxNormal = nullptr;
 	Texture2D* m_toyBoxDisplacement = nullptr;
@@ -101,6 +107,7 @@ private:
 	std::unique_ptr<Model<VertexPTNT>> m_armadillo;
 	std::unique_ptr<Model<VertexPTNT>> m_tyra;
 	std::unique_ptr<Model<VertexPTNT>> m_buddha;
+	std::unique_ptr<Model<VertexPTNT>> m_chair;
 };
 
 #endif // GLFRAMEWORK_H

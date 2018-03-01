@@ -22,6 +22,7 @@ public:
 	MaterialTexturePBR matTexPBR1;
 	MaterialTexturePBR matRustedIron;
 	MaterialTexturePBR matGold;
+	MaterialTexturePBR matFabric1;
 
 private:
 	MaterialData() {}
