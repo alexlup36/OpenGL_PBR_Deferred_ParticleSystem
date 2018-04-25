@@ -2,24 +2,30 @@
 #define CAMERA_H
 
 #include "Common.h"
+#include "Window.h"
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 
 class Camera
 {
 public:
-	Camera(GLFWwindow* window, int windowWidth, int windowHeight);
+	Camera(const Window& window, const char* cameraName, float fov, float near, float far);
 	~Camera();
 
 	void updateView();
-	void updateProj(int windowWidth, int windowHeight, float fov, float near, float far);
+	void setPerspectiveProjection(int windowWidth, int windowHeight, float fov, float near, float far);
+	void setOrthographicsProjection(float left, float right, float top, float bottom, float near, float far);
 	void processInput(GLFWwindow* window, double deltaTime);
 
 	inline const glm::mat4& viewMatrix() const { return m_viewMat; }
 	inline const glm::mat4& projMatrix() const { return m_projMat; }
 	inline const glm::vec3& viewPos() const { return m_positionVec; }
+	inline const char* cameraName() const { return m_cameraName; }
 
 private:
+
+	const char* m_cameraName;
+
 	glm::vec3 m_positionVec;
 	glm::vec3 m_frontVec;
 	glm::vec3 m_upVec;

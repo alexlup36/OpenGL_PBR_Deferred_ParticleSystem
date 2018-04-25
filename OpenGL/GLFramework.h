@@ -6,6 +6,7 @@
 #include <memory>
 #include "Model.h"
 #include "TextureMan.h"
+#include "Object.h"
 
 class GUI;
 class Camera;
@@ -14,7 +15,7 @@ class Shader;
 class GLFramework : public OpenGLApp
 {
 public:
-	GLFramework(int windowWidth, int windowHeight);
+	GLFramework(int windowWidth, int windowHeight, const CameraMan& cameraMan);
 	~GLFramework();
 
 	virtual void update(double dt);
@@ -24,7 +25,7 @@ public:
 
 private:
 	virtual void setupScene();
-	virtual void drawScene();
+	virtual void drawScene(double dt);
 	virtual void drawSceneToDepth();
 
 	// User interface manager
@@ -38,6 +39,9 @@ private:
 	// Depth map size
 	GLsizei m_depthMapWidth = 1024;
 	GLsizei m_depthMapHeight = 1024;
+
+	// CameraMan reference
+	const CameraMan& m_cameraMan;
 
 	// Shaders
 	std::unique_ptr<Shader> m_basicShader = nullptr;
@@ -90,8 +94,6 @@ private:
 	Texture3D* m_cubeMap1 = nullptr;
 	Texture3D* m_cubeMap2 = nullptr;
 
-	// FPS camera
-	std::unique_ptr<Camera> m_pCamera1;
 	// Render target
 	std::unique_ptr<RenderTarget> m_pRT;
 	std::unique_ptr<RenderTarget> m_pDT;
@@ -108,6 +110,9 @@ private:
 	std::unique_ptr<Model<VertexPTNT>> m_tyra;
 	std::unique_ptr<Model<VertexPTNT>> m_buddha;
 	std::unique_ptr<Model<VertexPTNT>> m_chair;
+
+	// Objects
+	std::unique_ptr<Object<VertexPTNT>> m_planeObject;
 };
 
 #endif // GLFRAMEWORK_H

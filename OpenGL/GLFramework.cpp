@@ -6,17 +6,18 @@
 
 #include "GUI.h"
 #include "Input.h"
-#include "Camera.h"
-#include "Shader.h"
 #include "Material.h"
 #include "Light.h"
 #include "LightData.h"
 #include "MaterialData.h"
+#include "Window.h"
+#include "CameraMan.h"
 
 // ----------------------------------------------------------------------------
 
-GLFramework::GLFramework(int windowWidth, int windowHeight)
-	: OpenGLApp(windowWidth, windowHeight)
+GLFramework::GLFramework(int windowWidth, int windowHeight, const CameraMan& cameraMan)
+	: OpenGLApp(windowWidth, windowHeight),
+	m_cameraMan(cameraMan)
 {
 	std::cout << "GLFramework start. \n";
 }
@@ -45,8 +46,8 @@ void GLFramework::update(double dt)
 	// Camera input
 	if (Input::fpsCameraEnabled())
 	{
-		m_pCamera1->processInput(window(), dt);
-		m_pCamera1->updateView();
+		m_cameraMan.getActiveCamera()->processInput(window(), dt);
+		m_cameraMan.getActiveCamera()->updateView();
 	}
 
 	// ------------------------------------------------------------------------
@@ -74,7 +75,7 @@ void GLFramework::draw(double dt)
 	m_pRT->renderToTexture();
 
 	// Draw scene
-	drawScene();
+	drawScene(dt);
 
 	// ------------------------------------------------------------------------
 
@@ -121,9 +122,13 @@ bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, 
 
 	// Initialize input
 	Input::getInstance().initialize(window());
+	Window windowData{};
+	windowData.window = window();
+	windowData.windowWidth = windowWidth();
+	windowData.windowHeight = windowHeight();
 
 	// Initalize camera
-	m_pCamera1 = std::make_unique<Camera>(window(), windowWidth(), windowHeight());
+	CameraMan::Instance().createCamera(windowData, "FPSCamera1", 60.0f, 0.001f, 1000.0f);
 
 	// Initialize RT
 	m_pRT = std::make_unique<RenderTarget>(true,
@@ -250,9 +255,6 @@ void GLFramework::setupScene()
 	MaterialData::getInstance().matTexPBR1.roughness = m_brick1RoughnessPBR;
 	MaterialData::getInstance().matTexPBR1.ao = m_brick1AmbientOcclusionPBR;
 
-	// Fabric1
-	MaterialData::getInstance().matFabric1.albedo = 
-
 	// Rusted iron
 	MaterialData::getInstance().matRustedIron.albedo = m_rustedIronAlbedo;
 	MaterialData::getInstance().matRustedIron.metallic = m_rustedIronMetallic;
@@ -266,6 +268,9 @@ void GLFramework::setupScene()
 	MaterialData::getInstance().matGold.roughness = m_goldRoughness;
 	MaterialData::getInstance().matGold.ao = m_goldAmbientOcclusion;
 	MaterialData::getInstance().matGold.normal = m_goldNormal;
+
+	// Load objects
+	m_planeObject = std::make_unique<Object<VertexPTNT>>("..//Assets//plane2.obj");
 
 	// Load meshes
 	m_pTorusModel = std::make_unique<Model<VertexPN>>("..//Assets//torus.obj");
@@ -292,7 +297,7 @@ void GLFramework::setupScene()
 	glBindVertexArray(vertexArrayObject);
 }
 
-void GLFramework::drawScene()
+void GLFramework::drawScene(double dt)
 {
 	// Do rendering
 	glm::mat4 m, v, p, normalMat;
@@ -308,8 +313,8 @@ void GLFramework::drawScene()
 	m = glm::translate(m, LightData::getInstance().pointLight1.direction);
 	m = glm::scale(m, glm::vec3(pointLightScale));
 	normalMat = glm::transpose(glm::inverse(m));
-	p = m_pCamera1->projMatrix();
-	v = m_pCamera1->viewMatrix();
+	p = m_cameraMan.getActiveCamera()->projMatrix();
+	v = m_cameraMan.getActiveCamera()->viewMatrix();
 	// Activate shader
 	m_phongColorShader->useShader();
 	// Set uniforms
@@ -320,7 +325,7 @@ void GLFramework::drawScene()
 	m_phongColorShader->set<glm::vec3>(ShaderUniform::LightColor, WHITE);
 	m_phongColorShader->set<glm::vec3>(ShaderUniform::LightDir, m_pGUI->m_lightDirection);
 	m_phongColorShader->set<glm::vec4>(ShaderUniform::ObjectColor, WHITE);
-	m_phongColorShader->set<glm::vec3>(ShaderUniform::ViewPos, m_pCamera1->viewPos());
+	m_phongColorShader->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
 	m_phongColorShader->setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
 	m_phongColorShader->setScalar<float>(ShaderUniform::SpecularStrength, m_pGUI->m_specularStrength);
 	// Draw triangles
@@ -334,14 +339,15 @@ void GLFramework::drawScene()
 	glBindVertexArray(m_cubeVAO);
 	float scaleFactor = 0.04f;
 	glm::vec3 position = glm::vec3(-1.0f, 0.0f, -2.0f);
+	glm::vec3 scale = glm::vec3(1.0f);
 	m = glm::mat4();
 	m = glm::scale(m, glm::vec3(scaleFactor));
 	m = glm::translate(m, position);
 	glm::mat4 rotMat = glm::toMat4(m_pGUI->m_rotation);
 	m = m * rotMat;
 	normalMat = glm::transpose(glm::inverse(m));
-	p = m_pCamera1->projMatrix();
-	v = m_pCamera1->viewMatrix();
+	p = m_cameraMan.getActiveCamera()->projMatrix();
+	v = m_cameraMan.getActiveCamera()->viewMatrix();
 	// Activate shader
 	m_phongColorShader->useShader();
 	// Set uniforms
@@ -352,7 +358,7 @@ void GLFramework::drawScene()
 	m_phongColorShader->set<glm::vec3>(ShaderUniform::LightColor, m_pGUI->m_lightColor);
 	m_phongColorShader->set<glm::vec3>(ShaderUniform::LightDir, m_pGUI->m_lightDirection);
 	m_phongColorShader->set<glm::vec4>(ShaderUniform::ObjectColor, m_pGUI->m_objectColor);
-	m_phongColorShader->set<glm::vec3>(ShaderUniform::ViewPos, m_pCamera1->viewPos());
+	m_phongColorShader->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
 	m_phongColorShader->setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
 	m_phongColorShader->setScalar<float>(ShaderUniform::SpecularStrength, m_pGUI->m_specularStrength);
 	// Draw triangles
@@ -372,8 +378,8 @@ void GLFramework::drawScene()
 	rotMat = glm::toMat4(m_pGUI->m_rotation);
 	m = m * rotMat;
 	normalMat = glm::transpose(glm::inverse(m));
-	p = m_pCamera1->projMatrix();
-	v = m_pCamera1->viewMatrix();
+	p = m_cameraMan.getActiveCamera()->projMatrix();
+	v = m_cameraMan.getActiveCamera()->viewMatrix();
 	// Activate shader
 	m_pbr->useShader();
 	// Bind depth map
@@ -386,7 +392,7 @@ void GLFramework::drawScene()
 	m_pbr->set<glm::mat4>(ShaderUniform::ViewMat, v);
 	m_pbr->set<glm::mat4>(ShaderUniform::ProjMat, p);
 	// Camera
-	m_pbr->set<glm::vec3>(ShaderUniform::ViewPos, m_pCamera1->viewPos());
+	m_pbr->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
 	// Displacement mapping
 	m_pbr->setScalar<float>(ShaderUniform::DisplacementMapScale, -1.0f);
 	// Normal map scale
@@ -417,8 +423,8 @@ void GLFramework::drawScene()
 	rotMat = glm::toMat4(m_pGUI->m_rotation);
 	m = m * rotMat;
 	normalMat = glm::transpose(glm::inverse(m));
-	p = m_pCamera1->projMatrix();
-	v = m_pCamera1->viewMatrix();
+	p = m_cameraMan.getActiveCamera()->projMatrix();
+	v = m_cameraMan.getActiveCamera()->viewMatrix();
 	// Activate shader
 	m_pbr->useShader();
 	// Bind depth map
@@ -431,7 +437,7 @@ void GLFramework::drawScene()
 	m_pbr->set<glm::mat4>(ShaderUniform::ViewMat, v);
 	m_pbr->set<glm::mat4>(ShaderUniform::ProjMat, p);
 	// Camera
-	m_pbr->set<glm::vec3>(ShaderUniform::ViewPos, m_pCamera1->viewPos());
+	m_pbr->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
 	// Displacement mapping
 	m_pbr->setScalar<float>(ShaderUniform::DisplacementMapScale, -1.0f);
 	// Normal map scale
@@ -463,8 +469,8 @@ void GLFramework::drawScene()
 	rotMat = glm::toMat4(m_pGUI->m_rotation);
 	m = m * rotMat;
 	normalMat = glm::transpose(glm::inverse(m));
-	p = m_pCamera1->projMatrix();
-	v = m_pCamera1->viewMatrix();
+	p = m_cameraMan.getActiveCamera()->projMatrix();
+	v = m_cameraMan.getActiveCamera()->viewMatrix();
 	// Activate shader
 	m_colorPBR->useShader();
 	// Set PBR material
@@ -479,7 +485,7 @@ void GLFramework::drawScene()
 	m_colorPBR->set<glm::mat4>(ShaderUniform::ViewMat, v);
 	m_colorPBR->set<glm::mat4>(ShaderUniform::ProjMat, p);
 	// Camera
-	m_colorPBR->set<glm::vec3>(ShaderUniform::ViewPos, m_pCamera1->viewPos());
+	m_colorPBR->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
 	// Light
 	m_colorPBR->setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
 	m_colorPBR->setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
@@ -517,8 +523,8 @@ void GLFramework::drawScene()
 	rotMat = glm::toMat4(m_pGUI->m_rotation);
 	m = m * rotMat;
 	normalMat = glm::transpose(glm::inverse(m));
-	p = m_pCamera1->projMatrix();
-	v = m_pCamera1->viewMatrix();
+	p = m_cameraMan.getActiveCamera()->projMatrix();
+	v = m_cameraMan.getActiveCamera()->viewMatrix();
 	// Activate shader
 	m_pbr->useShader();
 	// Bind depth map
@@ -531,7 +537,7 @@ void GLFramework::drawScene()
 	m_pbr->set<glm::mat4>(ShaderUniform::ViewMat, v);
 	m_pbr->set<glm::mat4>(ShaderUniform::ProjMat, p);
 	// Camera
-	m_pbr->set<glm::vec3>(ShaderUniform::ViewPos, m_pCamera1->viewPos());
+	m_pbr->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
 	// Displacement mapping
 	m_pbr->setScalar<float>(ShaderUniform::DisplacementMapScale, -1.0f);
 	// Normal map scale
@@ -561,8 +567,8 @@ void GLFramework::drawScene()
 	rotMat = glm::toMat4(m_pGUI->m_rotation);
 	m = m * rotMat;
 	normalMat = glm::transpose(glm::inverse(m));
-	p = m_pCamera1->projMatrix();
-	v = m_pCamera1->viewMatrix();
+	p = m_cameraMan.getActiveCamera()->projMatrix();
+	v = m_cameraMan.getActiveCamera()->viewMatrix();
 	// Activate shader
 	m_colorPBR->useShader();
 	// Bind depth map
@@ -579,7 +585,7 @@ void GLFramework::drawScene()
 	m_colorPBR->set<glm::mat4>(ShaderUniform::ViewMat, v);
 	m_colorPBR->set<glm::mat4>(ShaderUniform::ProjMat, p);
 	// Camerea
-	m_colorPBR->set<glm::vec3>(ShaderUniform::ViewPos, m_pCamera1->viewPos());
+	m_colorPBR->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
 	// Light
 	m_colorPBR->setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
 	m_colorPBR->setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
@@ -595,14 +601,23 @@ void GLFramework::drawScene()
 	// ------------------------------------------------------
 	// Draw quad - parallax mapping
 
+	// ------
+	// Test
+	m_planeObject->transform().SetPos(glm::vec3(0.0f, -1.0f, -2.0f));
+	m_planeObject->transform().SetScale(glm::vec3(0.1f, 0.001f, 0.1f));
+	m_planeObject->update(dt);
+	m_planeObject->render(m_pbr);
+
+	// ------
+
 	position = glm::vec3(0.0f, -1.0f, -2.0f);
 	scaleFactor = 0.1f;
 	m = glm::mat4();
 	m = glm::translate(m, position);
 	m = glm::rotate(m, 0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 	m = glm::scale(m, glm::vec3(scaleFactor, 0.001f, scaleFactor));
-	p = m_pCamera1->projMatrix();
-	v = m_pCamera1->viewMatrix();
+	p = m_cameraMan.getActiveCamera()->projMatrix();
+	v = m_cameraMan.getActiveCamera()->viewMatrix();
 	normalMat = glm::transpose(glm::inverse(m));
 
 	// Activate shader
@@ -659,11 +674,80 @@ void GLFramework::drawScene()
 	m_normalMapping->set<glm::mat4>(ShaderUniform::ViewMat, v);
 	m_normalMapping->set<glm::mat4>(ShaderUniform::ProjMat, p);
 
-	m_normalMapping->set<glm::vec3>(ShaderUniform::ViewPos, m_pCamera1->viewPos());
+	m_normalMapping->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
 	m_normalMapping->setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
 
 	// Debug display
 	m_normalMapping->setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
+
+	// Draw triangles
+	m_pPlaneModel->render();
+
+	// ------------------------------------------------------
+	// Draw pbr plane
+
+	position = glm::vec3(0.0f, -3.0f, -2.0f);
+	scaleFactor = 0.5f;
+	m = glm::mat4();
+	m = glm::translate(m, position);
+	m = glm::rotate(m, 0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+	m = glm::scale(m, glm::vec3(scaleFactor, 0.001f, scaleFactor));
+	p = m_cameraMan.getActiveCamera()->projMatrix();
+	v = m_cameraMan.getActiveCamera()->viewMatrix();
+	normalMat = glm::transpose(glm::inverse(m));
+
+	// Activate shader
+	m_pbr->useShader();
+
+	// Bind depth map
+	m_depthMap->bind(m_pbr->program());
+
+	// Set uniforms
+
+	// Set textures
+	MaterialData::getInstance().matRustedIron.bindTextures(m_pbr->program());
+
+	// Point light
+	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::ColorAmbientComp, 0, pointLight1.ambientComp);
+	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::ColorDiffuseComp, 0, pointLight1.diffuseComp);
+	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::ColorSpecularComp, 0, pointLight1.specularComp);
+	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
+	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
+
+	// Directional light
+	/*directionalLight1 = LightData::getInstance().directionalLight1;
+	m_normalMapping->setDirLight<glm::vec3>(DirLightUniform::ColorAmbientComp, 0, directionalLight1.ambientComp);
+	m_normalMapping->setDirLight<glm::vec3>(DirLightUniform::ColorDiffuseComp, 0, directionalLight1.diffuseComp);
+	m_normalMapping->setDirLight<glm::vec3>(DirLightUniform::ColorSpecularComp, 0, directionalLight1.specularComp);
+	m_normalMapping->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);*/
+
+	// Disp map scale
+	m_pbr->setScalar<float>(ShaderUniform::DisplacementMapScale, m_pGUI->m_dispMapScale);
+	// Normal map scale
+	m_pbr->setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
+
+	// Set material
+	/*auto& mat1 = MaterialData::getInstance().mat1;
+	m_normalMapping->setMaterial<glm::vec3>(MaterialUniform::AmbientComp, mat1.ambientComp);
+	m_normalMapping->setMaterial<glm::vec3>(MaterialUniform::DiffuseComp, mat1.diffuseComp);
+	m_normalMapping->setMaterial<glm::vec3>(MaterialUniform::SpecularComp, mat1.specularComp);
+	m_normalMapping->setMaterialScalar<float>(MaterialUniform::Shineness, mat1.shineness);
+	m_normalMapping->setScalar<float>(ShaderUniform::SpecularStrength, m_pGUI->m_specularStrength);*/
+
+	// Gamma
+	m_pbr->setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
+
+	// Matrices
+	m_pbr->set<glm::mat4>(ShaderUniform::ModelMat, m);
+	m_pbr->set<glm::mat4>(ShaderUniform::NormalMat, normalMat);
+	m_pbr->set<glm::mat4>(ShaderUniform::ViewMat, v);
+	m_pbr->set<glm::mat4>(ShaderUniform::ProjMat, p);
+
+	m_pbr->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
+	m_pbr->setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
+
+	// Debug display
+	m_pbr->setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
 
 	// Draw triangles
 	m_pPlaneModel->render();
@@ -677,8 +761,8 @@ void GLFramework::drawScene()
 	m_skyBox->useShader();
 	// Get rid of the translation component from the view matrix
 	// We don't want the skybox to move together with the player
-	v = glm::mat4x4(glm::mat3x3(m_pCamera1->viewMatrix()));
-	p = m_pCamera1->projMatrix();
+	v = glm::mat4x4(glm::mat3x3(m_cameraMan.getActiveCamera()->viewMatrix()));
+	p = m_cameraMan.getActiveCamera()->projMatrix();
 	m_skyBox->set<glm::mat4>(ShaderUniform::ViewMat, v);
 	m_skyBox->set<glm::mat4>(ShaderUniform::ProjMat, p);
 	// Bind the cube VAO

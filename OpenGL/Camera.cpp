@@ -7,23 +7,25 @@
 
 // ----------------------------------------------------------------------------
 
-Camera::Camera(GLFWwindow* window, int windowWidth, int windowHeight)
+Camera::Camera(const Window& window, const char* cameraName, float fov, float near, float far)
 	: m_positionVec(0.0f, 0.0f, 0.0f), 
 	m_frontVec(0.0f, 0.0f, -1.0f),
 	m_upVec(0.0f, 1.0f, 0.0f)
 {
-	m_windowWidth = windowWidth;
-	m_windowHeight = windowHeight;
+	m_windowWidth = window.windowWidth;
+	m_windowHeight = window.windowHeight;
 
-	m_windowCenterX = windowWidth * 0.5f;
-	m_windowCenterY = windowHeight * 0.5f;
+	m_windowCenterX = window.windowWidth * 0.5f;
+	m_windowCenterY = window.windowHeight * 0.5f;
 
-	glfwSetCursorPos(window, m_windowCenterX, m_windowCenterY);
+	glfwSetCursorPos(window.window, m_windowCenterX, m_windowCenterY);
 
 	m_fYaw = -90.0f;
 	m_fPitch = 0.0f;
 
-	updateProj(windowWidth, windowHeight, 60.0f, 0.01f, 10000.0f);
+	m_cameraName = cameraName;
+
+	setPerspectiveProjection(m_windowWidth, m_windowHeight, fov, near, far);
 }
 
 // ----------------------------------------------------------------------------
@@ -41,7 +43,7 @@ void Camera::updateView()
 
 // ----------------------------------------------------------------------------
 
-void Camera::updateProj(int windowWidth, int windowHeight, float fov, float near, float far)
+void Camera::setPerspectiveProjection(int windowWidth, int windowHeight, float fov, float near, float far)
 {
 	// Update window size
 	m_windowWidth = windowWidth;
@@ -50,6 +52,13 @@ void Camera::updateProj(int windowWidth, int windowHeight, float fov, float near
 	m_windowCenterY = windowHeight * 0.5f;
 	// Update projection matrix
 	m_projMat = glm::perspective(glm::radians(fov), static_cast<float>(m_windowWidth) / m_windowHeight, 0.01f, 10000.0f);
+}
+
+// ----------------------------------------------------------------------------
+
+void Camera::setOrthographicsProjection(float left, float right, float top, float bottom, float near, float far)
+{
+
 }
 
 // ----------------------------------------------------------------------------

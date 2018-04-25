@@ -1,4 +1,5 @@
 #include "GLFramework.h"
+#include "CameraMan.h"
 
 int main(void)
 {
@@ -12,8 +13,11 @@ int main(void)
 	std::cout << val2 << std::endl;
 	std::cout << val3 << std::endl;*/
 
+	// Get manager
+	CameraMan &cameraMan = CameraMan::Instance();
+
 	// Create GLFramework instance
-	std::unique_ptr<GLFramework> glFramework = std::make_unique<GLFramework>(windowWidth, windowHeight);
+	std::unique_ptr<GLFramework> glFramework = std::make_unique<GLFramework>(windowWidth, windowHeight, cameraMan);
 	// Initialize GLFramework
 	bool enableMultisampling = true;
 	bool enableSRGBFbSupport = true;
