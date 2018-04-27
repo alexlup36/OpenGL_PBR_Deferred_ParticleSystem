@@ -271,6 +271,7 @@ void GLFramework::setupScene()
 
 	// Load objects
 	m_planeObject = std::make_unique<Object<VertexPTNT>>("..//Assets//plane2.obj");
+	m_pointLightObject = std::make_unique<Object<VertexPN>>("..//Assets//sphere.obj");
 
 	// Load meshes
 	m_pTorusModel = std::make_unique<Model<VertexPN>>("..//Assets//torus.obj");
@@ -284,7 +285,7 @@ void GLFramework::setupScene()
 	//m_lucy = std::make_unique<Model<VertexPTNT>>("..//Assets//models//lucy.obj");
 	//m_armadillo = std::make_unique<Model<VertexPTNT>>("..//Assets//models//armadillo.obj");
 	//m_tyra = std::make_unique<Model<VertexPTNT>>("..//Assets//models//tyra.obj");
-	m_chair = std::make_unique<Model<VertexPTNT>>("..//Assets//models//chair.obj");
+	//m_chair = std::make_unique<Model<VertexPTNT>>("..//Assets//models//chair.obj");
 
 	// Generate VAO
 	m_cubeVAO = Mesh<int>::vaoCubeSetup();
@@ -306,451 +307,49 @@ void GLFramework::drawScene(double dt)
 	auto& pointLight1 = LightData::getInstance().pointLight1;
 	auto& directionalLight1 = LightData::getInstance().directionalLight1;
 
+	// ------
+
 	// ------------------------------------------------------------------------
-	// Draw point lights
-	float pointLightScale = 0.005f;
-	m = glm::mat4();
-	m = glm::translate(m, LightData::getInstance().pointLight1.direction);
-	m = glm::scale(m, glm::vec3(pointLightScale));
-	normalMat = glm::transpose(glm::inverse(m));
-	p = m_cameraMan.getActiveCamera()->projMatrix();
-	v = m_cameraMan.getActiveCamera()->viewMatrix();
-	// Activate shader
+	// Render Phong
 	m_phongColorShader->useShader();
-	// Set uniforms
-	m_phongColorShader->set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_phongColorShader->set<glm::mat4>(ShaderUniform::NormalMat, normalMat);
-	m_phongColorShader->set<glm::mat4>(ShaderUniform::ViewMat, v);
-	m_phongColorShader->set<glm::mat4>(ShaderUniform::ProjMat, p);
+	// Setup lighting
 	m_phongColorShader->set<glm::vec3>(ShaderUniform::LightColor, WHITE);
 	m_phongColorShader->set<glm::vec3>(ShaderUniform::LightDir, m_pGUI->m_lightDirection);
-	m_phongColorShader->set<glm::vec4>(ShaderUniform::ObjectColor, WHITE);
-	m_phongColorShader->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
-	m_phongColorShader->setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
-	m_phongColorShader->setScalar<float>(ShaderUniform::SpecularStrength, m_pGUI->m_specularStrength);
-	// Draw triangles
-	m_pLightModel->render();
-
-	// ------------------------------------------------------------------------
-
-	// Draw cube - phong
-
-	// Set matrices
-	glBindVertexArray(m_cubeVAO);
-	float scaleFactor = 0.04f;
-	glm::vec3 position = glm::vec3(-1.0f, 0.0f, -2.0f);
-	glm::vec3 scale = glm::vec3(1.0f);
-	m = glm::mat4();
-	m = glm::scale(m, glm::vec3(scaleFactor));
-	m = glm::translate(m, position);
-	glm::mat4 rotMat = glm::toMat4(m_pGUI->m_rotation);
-	m = m * rotMat;
-	normalMat = glm::transpose(glm::inverse(m));
-	p = m_cameraMan.getActiveCamera()->projMatrix();
-	v = m_cameraMan.getActiveCamera()->viewMatrix();
-	// Activate shader
-	m_phongColorShader->useShader();
 	// Set uniforms
-	m_phongColorShader->set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_phongColorShader->set<glm::mat4>(ShaderUniform::NormalMat, normalMat);
-	m_phongColorShader->set<glm::mat4>(ShaderUniform::ViewMat, v);
-	m_phongColorShader->set<glm::mat4>(ShaderUniform::ProjMat, p);
-	m_phongColorShader->set<glm::vec3>(ShaderUniform::LightColor, m_pGUI->m_lightColor);
-	m_phongColorShader->set<glm::vec3>(ShaderUniform::LightDir, m_pGUI->m_lightDirection);
-	m_phongColorShader->set<glm::vec4>(ShaderUniform::ObjectColor, m_pGUI->m_objectColor);
-	m_phongColorShader->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
+	m_phongColorShader->set<glm::vec4>(ShaderUniform::ObjectColor, WHITE);
 	m_phongColorShader->setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
 	m_phongColorShader->setScalar<float>(ShaderUniform::SpecularStrength, m_pGUI->m_specularStrength);
-	// Draw triangles
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	// Draw point light sphere
+	m_pointLightObject->transform().setPos(LightData::getInstance().pointLight1.direction);
+	m_pointLightObject->transform().setScale(glm::vec3(0.01f));
+	m_pointLightObject->transform().setRotation(m_pGUI->m_rotation);
+	m_pointLightObject->update(dt);
+	m_pointLightObject->render(m_phongColorShader);
 
 	// ------------------------------------------------------------------------
-
-	// Draw cube pbr
-
-	// Set matrices
-	glBindVertexArray(m_cubeVAO);
-	scaleFactor = 0.08f;
-	position = glm::vec3(-3.0f, 0.0f, -2.0f);
-	m = glm::mat4();
-	m = glm::scale(m, glm::vec3(scaleFactor));
-	m = glm::translate(m, position);
-	rotMat = glm::toMat4(m_pGUI->m_rotation);
-	m = m * rotMat;
-	normalMat = glm::transpose(glm::inverse(m));
-	p = m_cameraMan.getActiveCamera()->projMatrix();
-	v = m_cameraMan.getActiveCamera()->viewMatrix();
-	// Activate shader
+	// Render PBR
 	m_pbr->useShader();
-	// Bind depth map
-	m_depthMap->bind(m_pbr->program());
-	// Set PBR material
-	MaterialData::getInstance().matTexPBR1.bindTextures(m_pbr->program());
-	// Matrices
-	m_pbr->set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_pbr->set<glm::mat4>(ShaderUniform::NormalMat, normalMat);
-	m_pbr->set<glm::mat4>(ShaderUniform::ViewMat, v);
-	m_pbr->set<glm::mat4>(ShaderUniform::ProjMat, p);
-	// Camera
-	m_pbr->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
-	// Displacement mapping
-	m_pbr->setScalar<float>(ShaderUniform::DisplacementMapScale, -1.0f);
-	// Normal map scale
-	m_pbr->setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
-	// Light
+	// Setup lighting
 	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
 	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
 	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
-	m_pbr->setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
-	m_pbr->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
-	// Gamma
-	m_pbr->setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
-	// Debug display
-	m_pbr->setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
-
-	// Draw triangles
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-
-	// ---------------------------------------------------------------------
-	// Draw sphere rusted iron
-
-	// Set matrices
-	scaleFactor = 0.02f;
-	position = glm::vec3(-5.0f, 0.0f, -2.0f);
-	m = glm::mat4();
-	m = glm::scale(m, glm::vec3(scaleFactor));
-	m = glm::translate(m, position);
-	rotMat = glm::toMat4(m_pGUI->m_rotation);
-	m = m * rotMat;
-	normalMat = glm::transpose(glm::inverse(m));
-	p = m_cameraMan.getActiveCamera()->projMatrix();
-	v = m_cameraMan.getActiveCamera()->viewMatrix();
-	// Activate shader
-	m_pbr->useShader();
-	// Bind depth map
+	//m_pbr->setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
+	//m_pbr->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
+	// Set uniforms
 	m_depthMap->bind(m_pbr->program());
-	// Set PBR material
 	MaterialData::getInstance().matRustedIron.bindTextures(m_pbr->program());
-	// Matrices
-	m_pbr->set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_pbr->set<glm::mat4>(ShaderUniform::NormalMat, normalMat);
-	m_pbr->set<glm::mat4>(ShaderUniform::ViewMat, v);
-	m_pbr->set<glm::mat4>(ShaderUniform::ProjMat, p);
-	// Camera
-	m_pbr->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
-	// Displacement mapping
+	m_pbr->set<glm::vec2>(ShaderUniform::TextureOffset, m_pGUI->m_textureOffset);
+	m_pbr->set<glm::vec2>(ShaderUniform::TextureTile, m_pGUI->m_textureTile);
 	m_pbr->setScalar<float>(ShaderUniform::DisplacementMapScale, -1.0f);
-	// Normal map scale
 	m_pbr->setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
-	// Light
-	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
-	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
-	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
-	m_pbr->setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
-	m_pbr->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
-	// Gamma
 	m_pbr->setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
-	// Debug display
 	m_pbr->setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
-	
-	// Draw triangles
-	m_pSphereModel->render();
-
-	// ---------------------------------------------------------------------
-
-	// Draw stanford bunny
-
-	// Set matrices
-	scaleFactor = 0.5f;
-	position = glm::vec3(-1.0f, 0.0f, -2.0f);
-	m = glm::mat4();
-	m = glm::translate(m, position);
-	m = glm::scale(m, glm::vec3(scaleFactor));
-	rotMat = glm::toMat4(m_pGUI->m_rotation);
-	m = m * rotMat;
-	normalMat = glm::transpose(glm::inverse(m));
-	p = m_cameraMan.getActiveCamera()->projMatrix();
-	v = m_cameraMan.getActiveCamera()->viewMatrix();
-	// Activate shader
-	m_colorPBR->useShader();
-	// Set PBR material
-	auto& matPBR1 = MaterialData::getInstance().matPBR1;
-	m_colorPBR->setMaterial<glm::vec3>(MaterialPBRUniform::Color, matPBR1.albedo);
-	m_colorPBR->setMaterialScalar<float>(MaterialPBRUniform::AmbientOcclusion, matPBR1.ao);
-	m_colorPBR->setMaterialScalar<float>(MaterialPBRUniform::Roughness, matPBR1.roughness);
-	m_colorPBR->setMaterialScalar<float>(MaterialPBRUniform::Metallic, matPBR1.metallic);
-	// Matrices
-	m_colorPBR->set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_colorPBR->set<glm::mat4>(ShaderUniform::NormalMat, normalMat);
-	m_colorPBR->set<glm::mat4>(ShaderUniform::ViewMat, v);
-	m_colorPBR->set<glm::mat4>(ShaderUniform::ProjMat, p);
-	// Camera
-	m_colorPBR->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
-	// Light
-	m_colorPBR->setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
-	m_colorPBR->setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
-	m_colorPBR->setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
-	m_colorPBR->setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
-	m_colorPBR->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
-	// Gamma
-	m_colorPBR->setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
-	// Draw triangles
-	m_bunny->render();
-
-	// Draw dragon
-	/*scaleFactor = 0.5f;
-	position = glm::vec3(-2.0f, 0.0f, -2.0f);
-	m = glm::mat4();
-	m = glm::translate(m, position);
-	m = glm::scale(m, glm::vec3(scaleFactor));
-	rotMat = glm::toMat4(m_pGUI->m_rotation);
-	m = m * rotMat;
-	normalMat = glm::transpose(glm::inverse(m));
-	m_colorPBR->set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_colorPBR->set<glm::mat4>(ShaderUniform::NormalMat, normalMat);
-	m_dragon->render();*/
-
-	// ---------------------------------------------------------------------
-
-	// Draw sphere gold
-
-	// Set matrices
-	scaleFactor = 0.02f;
-	position = glm::vec3(-10.0f, 0.0f, -2.0f);
-	m = glm::mat4();
-	m = glm::scale(m, glm::vec3(scaleFactor));
-	m = glm::translate(m, position);
-	rotMat = glm::toMat4(m_pGUI->m_rotation);
-	m = m * rotMat;
-	normalMat = glm::transpose(glm::inverse(m));
-	p = m_cameraMan.getActiveCamera()->projMatrix();
-	v = m_cameraMan.getActiveCamera()->viewMatrix();
-	// Activate shader
-	m_pbr->useShader();
-	// Bind depth map
-	m_depthMap->bind(m_pbr->program());
-	// Set PBR material
-	MaterialData::getInstance().matGold.bindTextures(m_pbr->program());
-	// Matrices
-	m_pbr->set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_pbr->set<glm::mat4>(ShaderUniform::NormalMat, normalMat);
-	m_pbr->set<glm::mat4>(ShaderUniform::ViewMat, v);
-	m_pbr->set<glm::mat4>(ShaderUniform::ProjMat, p);
-	// Camera
-	m_pbr->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
-	// Displacement mapping
-	m_pbr->setScalar<float>(ShaderUniform::DisplacementMapScale, -1.0f);
-	// Normal map scale
-	m_pbr->setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
-	// Light
-	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
-	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
-	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
-	m_pbr->setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
-	m_pbr->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
-	// Gamma
-	m_pbr->setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
-	// Debug display
-	m_pbr->setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
-	// Draw triangles
-	m_pSphereModel->render();
-
-	// ------------------------------------------------------------------------
-	// Draw torus - simple color PBR
-
-	// Set matrices
-	scaleFactor = 0.1f;
-	position = glm::vec3(1.0f, 0.0f, -3.0f);
-	m = glm::mat4();
-	m = glm::scale(m, glm::vec3(scaleFactor));
-	m = glm::translate(m, position);
-	rotMat = glm::toMat4(m_pGUI->m_rotation);
-	m = m * rotMat;
-	normalMat = glm::transpose(glm::inverse(m));
-	p = m_cameraMan.getActiveCamera()->projMatrix();
-	v = m_cameraMan.getActiveCamera()->viewMatrix();
-	// Activate shader
-	m_colorPBR->useShader();
-	// Bind depth map
-	m_depthMap->bind(m_colorPBR->program());
-	// Set PBR material
-	matPBR1 = MaterialData::getInstance().matPBR1;
-	m_colorPBR->setMaterial<glm::vec3>(MaterialPBRUniform::Color, matPBR1.albedo);
-	m_colorPBR->setMaterialScalar<float>(MaterialPBRUniform::AmbientOcclusion, matPBR1.ao);
-	m_colorPBR->setMaterialScalar<float>(MaterialPBRUniform::Roughness, matPBR1.roughness);
-	m_colorPBR->setMaterialScalar<float>(MaterialPBRUniform::Metallic, matPBR1.metallic);
-	// Matrices
-	m_colorPBR->set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_colorPBR->set<glm::mat4>(ShaderUniform::NormalMat, normalMat);
-	m_colorPBR->set<glm::mat4>(ShaderUniform::ViewMat, v);
-	m_colorPBR->set<glm::mat4>(ShaderUniform::ProjMat, p);
-	// Camerea
-	m_colorPBR->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
-	// Light
-	m_colorPBR->setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
-	m_colorPBR->setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
-	m_colorPBR->setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
-	m_colorPBR->setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
-	m_colorPBR->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
-	// Gamma
-	m_colorPBR->setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
-
-	// Draw triangles
-	m_pTorusModel->render();
-
-	// ------------------------------------------------------
-	// Draw quad - parallax mapping
-
-	// ------
-	// Test
-	m_planeObject->transform().SetPos(glm::vec3(0.0f, -1.0f, -2.0f));
-	m_planeObject->transform().SetScale(glm::vec3(0.1f, 0.001f, 0.1f));
+	// Draw main plane
+	m_planeObject->transform().setPos(glm::vec3(0.0f, -1.0f, -2.0f));
+	m_planeObject->transform().setScale(glm::vec3(0.5f, 0.001f, 0.5f));
+	m_planeObject->transform().setRotation(m_pGUI->m_rotation);
 	m_planeObject->update(dt);
 	m_planeObject->render(m_pbr);
-
-	// ------
-
-	position = glm::vec3(0.0f, -1.0f, -2.0f);
-	scaleFactor = 0.1f;
-	m = glm::mat4();
-	m = glm::translate(m, position);
-	m = glm::rotate(m, 0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-	m = glm::scale(m, glm::vec3(scaleFactor, 0.001f, scaleFactor));
-	p = m_cameraMan.getActiveCamera()->projMatrix();
-	v = m_cameraMan.getActiveCamera()->viewMatrix();
-	normalMat = glm::transpose(glm::inverse(m));
-
-	// Activate shader
-	m_normalMapping->useShader();
-
-	// Bind depth map
-	m_depthMap->bind(m_normalMapping->program());
-
-	// Set uniforms
-
-	// Set textures
-	/*m_brick1Diffuse->bind(m_normalMapping->program());
-	m_brick1Displacement->bind(m_normalMapping->program());
-	m_brick1Normal->bind(m_normalMapping->program());
-	m_brick1Specular->bind(m_normalMapping->program());*/
-
-	m_toyBoxDiffuse->bind(m_normalMapping->program());
-	m_toyBoxDisplacement->bind(m_normalMapping->program());
-	m_toyBoxNormal->bind(m_normalMapping->program());
-
-	// Point light
-	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::ColorAmbientComp, 0, pointLight1.ambientComp);
-	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::ColorDiffuseComp, 0, pointLight1.diffuseComp);
-	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::ColorSpecularComp, 0, pointLight1.specularComp);
-	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
-	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
-
-	// Directional light
-	directionalLight1 = LightData::getInstance().directionalLight1;
-	m_normalMapping->setDirLight<glm::vec3>(DirLightUniform::ColorAmbientComp, 0, directionalLight1.ambientComp);
-	m_normalMapping->setDirLight<glm::vec3>(DirLightUniform::ColorDiffuseComp, 0, directionalLight1.diffuseComp);
-	m_normalMapping->setDirLight<glm::vec3>(DirLightUniform::ColorSpecularComp, 0, directionalLight1.specularComp);
-	m_normalMapping->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
-
-	// Disp map scale
-	m_normalMapping->setScalar<float>(ShaderUniform::DisplacementMapScale, m_pGUI->m_dispMapScale);
-	// Normal map scale
-	m_normalMapping->setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
-
-	// Set material
-	auto& mat1 = MaterialData::getInstance().mat1;
-	m_normalMapping->setMaterial<glm::vec3>(MaterialUniform::AmbientComp, mat1.ambientComp);
-	m_normalMapping->setMaterial<glm::vec3>(MaterialUniform::DiffuseComp, mat1.diffuseComp);
-	m_normalMapping->setMaterial<glm::vec3>(MaterialUniform::SpecularComp, mat1.specularComp);
-	m_normalMapping->setMaterialScalar<float>(MaterialUniform::Shineness, mat1.shineness);
-	m_normalMapping->setScalar<float>(ShaderUniform::SpecularStrength, m_pGUI->m_specularStrength);
-
-	// Gamma
-	m_normalMapping->setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
-
-	// Matrices
-	m_normalMapping->set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_normalMapping->set<glm::mat4>(ShaderUniform::NormalMat, normalMat);
-	m_normalMapping->set<glm::mat4>(ShaderUniform::ViewMat, v);
-	m_normalMapping->set<glm::mat4>(ShaderUniform::ProjMat, p);
-
-	m_normalMapping->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
-	m_normalMapping->setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
-
-	// Debug display
-	m_normalMapping->setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
-
-	// Draw triangles
-	m_pPlaneModel->render();
-
-	// ------------------------------------------------------
-	// Draw pbr plane
-
-	position = glm::vec3(0.0f, -3.0f, -2.0f);
-	scaleFactor = 0.5f;
-	m = glm::mat4();
-	m = glm::translate(m, position);
-	m = glm::rotate(m, 0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-	m = glm::scale(m, glm::vec3(scaleFactor, 0.001f, scaleFactor));
-	p = m_cameraMan.getActiveCamera()->projMatrix();
-	v = m_cameraMan.getActiveCamera()->viewMatrix();
-	normalMat = glm::transpose(glm::inverse(m));
-
-	// Activate shader
-	m_pbr->useShader();
-
-	// Bind depth map
-	m_depthMap->bind(m_pbr->program());
-
-	// Set uniforms
-
-	// Set textures
-	MaterialData::getInstance().matRustedIron.bindTextures(m_pbr->program());
-
-	// Point light
-	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::ColorAmbientComp, 0, pointLight1.ambientComp);
-	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::ColorDiffuseComp, 0, pointLight1.diffuseComp);
-	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::ColorSpecularComp, 0, pointLight1.specularComp);
-	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
-	m_normalMapping->setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
-
-	// Directional light
-	/*directionalLight1 = LightData::getInstance().directionalLight1;
-	m_normalMapping->setDirLight<glm::vec3>(DirLightUniform::ColorAmbientComp, 0, directionalLight1.ambientComp);
-	m_normalMapping->setDirLight<glm::vec3>(DirLightUniform::ColorDiffuseComp, 0, directionalLight1.diffuseComp);
-	m_normalMapping->setDirLight<glm::vec3>(DirLightUniform::ColorSpecularComp, 0, directionalLight1.specularComp);
-	m_normalMapping->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);*/
-
-	// Disp map scale
-	m_pbr->setScalar<float>(ShaderUniform::DisplacementMapScale, m_pGUI->m_dispMapScale);
-	// Normal map scale
-	m_pbr->setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
-
-	// Set material
-	/*auto& mat1 = MaterialData::getInstance().mat1;
-	m_normalMapping->setMaterial<glm::vec3>(MaterialUniform::AmbientComp, mat1.ambientComp);
-	m_normalMapping->setMaterial<glm::vec3>(MaterialUniform::DiffuseComp, mat1.diffuseComp);
-	m_normalMapping->setMaterial<glm::vec3>(MaterialUniform::SpecularComp, mat1.specularComp);
-	m_normalMapping->setMaterialScalar<float>(MaterialUniform::Shineness, mat1.shineness);
-	m_normalMapping->setScalar<float>(ShaderUniform::SpecularStrength, m_pGUI->m_specularStrength);*/
-
-	// Gamma
-	m_pbr->setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
-
-	// Matrices
-	m_pbr->set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_pbr->set<glm::mat4>(ShaderUniform::NormalMat, normalMat);
-	m_pbr->set<glm::mat4>(ShaderUniform::ViewMat, v);
-	m_pbr->set<glm::mat4>(ShaderUniform::ProjMat, p);
-
-	m_pbr->set<glm::vec3>(ShaderUniform::ViewPos, m_cameraMan.getActiveCamera()->viewPos());
-	m_pbr->setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
-
-	// Debug display
-	m_pbr->setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
-
-	// Draw triangles
-	m_pPlaneModel->render();
 
 	// ------------------------------------------------------------------------
 	// Render the skybox

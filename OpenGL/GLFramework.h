@@ -113,6 +113,7 @@ private:
 
 	// Objects
 	std::unique_ptr<Object<VertexPTNT>> m_planeObject;
+	std::unique_ptr<Object<VertexPN>> m_pointLightObject;
 };
 
 #endif // GLFRAMEWORK_H

@@ -3,6 +3,9 @@
 
 #include <memory>
 
+#include <glm/glm.hpp>
+#include <glm/mat4x4.hpp>
+
 #include "Model.h"
 #include "Transform.h"
 #include "Shader.h"
@@ -48,7 +51,16 @@ void Object<T>::update(double dt)
 template<class T>
 void Object<T>::render(const std::unique_ptr<Shader> &shader)
 {
+	// Set uniforms
+	glm::mat4 model = m_transform.modelMat();
+	shader->set<glm::mat4>(ShaderUniform::ModelMat, model);
+	shader->set<glm::mat4>(ShaderUniform::NormalMat, glm::transpose(glm::inverse(model)));
+	shader->set<glm::mat4>(ShaderUniform::ViewMat, CameraMan::Instance().getActiveCamera()->viewMatrix());
+	shader->set<glm::mat4>(ShaderUniform::ProjMat, CameraMan::Instance().getActiveCamera()->projMatrix());
+	shader->set<glm::vec3>(ShaderUniform::ViewPos, CameraMan::Instance().getActiveCamera()->viewPos());
 
+	// Render
+	m_model.render();
 }
 
 #endif // OBJECT_H

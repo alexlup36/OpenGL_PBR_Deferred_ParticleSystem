@@ -63,6 +63,9 @@ Shader::Shader(const std::string& vsFilePath, const std::string& psFilePath)
 	m_shaderUniforms[static_cast<int>(ShaderUniform::DisplacementTexture)] = glGetUniformLocation(m_program, "displacementTexture");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::DepthTexture)] = glGetUniformLocation(m_program, "depthTexture");
 
+	m_shaderUniforms[static_cast<int>(ShaderUniform::TextureOffset)] = glGetUniformLocation(m_program, "textureOffset");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::TextureTile)] = glGetUniformLocation(m_program, "textureTile");
+
 	// Initialize dir lights uniform locations
 	for (auto dirLightIndex = 0; dirLightIndex < MAX_DIR_LIGHTS; ++dirLightIndex)
 	{

@@ -49,6 +49,8 @@ public:
 	//glm::vec4 m_rotation = glm::vec4(0.5f, 0.5f, 0.5f, 0.0f);
 	glm::quat m_rotation = glm::quat();
 	glm::vec3 m_lightDirection = glm::vec3(0.5f, 0.5f, 0.5f);
+	glm::vec2 m_textureOffset = glm::vec2(0.0f, 0.0f);
+	glm::vec2 m_textureTile = glm::vec2(1.0f, 1.0f);
 	float m_shininess = 32.0f;
 	float m_specularStrength = 0.1f;
 	float m_dispMapScale = 0.0f;

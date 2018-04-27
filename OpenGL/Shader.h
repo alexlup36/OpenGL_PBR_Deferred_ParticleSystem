@@ -27,6 +27,9 @@ enum class ShaderUniform
 	RenderedTexture,
 	SpecularStrength,
 
+	TextureOffset,
+	TextureTile,
+
 	// Parallax mapping / normal mapping
 	DisplacementMapScale,
 	NormalMapScale,

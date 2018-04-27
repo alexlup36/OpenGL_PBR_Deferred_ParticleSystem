@@ -42,6 +42,11 @@ bool GUI::setup(GLFWwindow* window, int w, int h)
 
 	bar = TwNewBar("Phong Lighting");
 
+	TwAddVarRW(bar, "TextureOffset X", TW_TYPE_FLOAT, &m_textureOffset.x, "min=0 max=10 step=0.01 ");
+	TwAddVarRW(bar, "TextureOffset Y", TW_TYPE_FLOAT, &m_textureOffset.y, "min=0 max=10 step=0.01 ");
+	TwAddVarRW(bar, "TextureTile X", TW_TYPE_FLOAT, &m_textureTile.x, "min=0 max=10 step=0.01 ");
+	TwAddVarRW(bar, "TextureTile Y", TW_TYPE_FLOAT, &m_textureTile.y, "min=0 max=10 step=0.01 ");
+
 	TwAddVarRW(bar, "ObjectShininess", TW_TYPE_FLOAT, &m_shininess, "min=1 max=256 step=0.1 help='Power of 2'");
 	TwAddVarRW(bar, "ObjectSpecularStrength", TW_TYPE_FLOAT, &m_specularStrength, "min=0 max=1 step=0.01 ");
 	TwAddVarRW(bar, "ObjectDispMapScale", TW_TYPE_FLOAT, &m_dispMapScale, "min=0 max=5 step=0.001 ");

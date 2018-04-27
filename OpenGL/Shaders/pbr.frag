@@ -73,6 +73,10 @@ uniform sampler2D shadowMap;
 uniform float dispMapScale;
 uniform float normalMapScale;
 
+// Texture
+uniform vec2 textureOffset;
+uniform vec2 textureTile;
+
 // Debug
 uniform int displayMode;
 const int DIFFUSE = 0x00;
@@ -267,7 +271,7 @@ vec4 pbrShadingPoint(vec3 normal, vec3 viewDirection)
 	}
 
 	// Calculate ambient lighting
-	totalAmbient += vec3(0.03f) * material.color * material.ao;
+	totalAmbient += vec3(0.0f) * material.color * material.ao;
 
 	return vec4(totalAmbient + totalIrradiance, 1.0f);
 }
@@ -340,7 +344,7 @@ vec4 pbrShadingDir(vec3 normal, vec3 viewDirection)
 		totalIrradiance += (kd * lambert + brdf) * radiance;
 
 		// Calculate ambient lighting
-		totalAmbient += vec3(0.03f) * material.color * material.ao;
+		totalAmbient += vec3(0.0f) * material.color * material.ao;
 	}
 
 	//return vec4(totalAmbient, 1.0f);
@@ -446,17 +450,20 @@ void main()
 	// Parallax displacement mapping
 	vec3 viewDirectionTangent = normalize(fs_in.viewPosTangent - fs_in.fragmentPosTangent);
 	
+	// Texture tiling
+	vec2 texCoord = fs_in.texCoord * textureTile + textureOffset;
+
 	// Normal parallax mapping
-	//vec2 texCoordParallax = parallaxMapping(fs_in.texCoord, viewDirectionTangent);
+	//vec2 texCoordParallax = parallaxMapping(texCoord, viewDirectionTangent);
 	// Steep parallax mapping
-	//vec2 texCoordParallax = steepParallaxMapping(fs_in.texCoord, viewDirectionTangent);
+	//vec2 texCoordParallax = steepParallaxMapping(texCoord, viewDirectionTangent);
 	// Parallax occlusion mapping
-	//vec2 texCoordParallax = parallaxOcclusionMapping(fs_in.texCoord, viewDirectionTangent);
+	//vec2 texCoordParallax = parallaxOcclusionMapping(texCoord, viewDirectionTangent);
 	// No parallax mapping
-	vec2 texCoordParallax = fs_in.texCoord;
+	vec2 texCoordParallax = texCoord;
 	
-	if (texCoordParallax.x > 1.0f || texCoordParallax.y > 1.0f || texCoordParallax.x < 0.0f || texCoordParallax.y < 0.0f)
-		discard;
+	//if (texCoordParallax.x > 1.0f || texCoordParallax.y > 1.0f || texCoordParallax.x < 0.0f || texCoordParallax.y < 0.0f)
+	//	discard;
 
 	// --------------------------------------
 
