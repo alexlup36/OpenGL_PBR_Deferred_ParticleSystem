@@ -261,6 +261,7 @@ void GLFramework::setupScene()
 	MaterialData::getInstance().matRustedIron.roughness = m_rustedIronRoughness;
 	MaterialData::getInstance().matRustedIron.ao = m_rustedIronAmbientOcclusion;
 	MaterialData::getInstance().matRustedIron.normal = m_rustedIronNormal;
+	MaterialData::getInstance().matRustedIron.displacement = m_toyBoxDisplacement;
 
 	// Gold
 	MaterialData::getInstance().matGold.albedo = m_goldAlbedo;
@@ -340,7 +341,7 @@ void GLFramework::drawScene(double dt)
 	MaterialData::getInstance().matRustedIron.bindTextures(m_pbr->program());
 	m_pbr->set<glm::vec2>(ShaderUniform::TextureOffset, m_pGUI->m_textureOffset);
 	m_pbr->set<glm::vec2>(ShaderUniform::TextureTile, m_pGUI->m_textureTile);
-	m_pbr->setScalar<float>(ShaderUniform::DisplacementMapScale, -1.0f);
+	m_pbr->setScalar<float>(ShaderUniform::DisplacementMapScale, m_pGUI->m_dispMapScale);
 	m_pbr->setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
 	m_pbr->setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
 	m_pbr->setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));

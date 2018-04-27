@@ -452,19 +452,28 @@ void main()
 	
 	// Texture tiling
 	vec2 texCoord = fs_in.texCoord * textureTile + textureOffset;
+	vec2 texCoordParallax = vec2(0.0f);
 
-	// Normal parallax mapping
-	//vec2 texCoordParallax = parallaxMapping(texCoord, viewDirectionTangent);
-	// Steep parallax mapping
-	//vec2 texCoordParallax = steepParallaxMapping(texCoord, viewDirectionTangent);
-	// Parallax occlusion mapping
-	//vec2 texCoordParallax = parallaxOcclusionMapping(texCoord, viewDirectionTangent);
-	// No parallax mapping
-	vec2 texCoordParallax = texCoord;
+	if (dispMapScale != 0.0f)
+	{
+		// Apply parallax mapping
+
+		// Normal parallax mapping
+		//texCoordParallax = parallaxMapping(texCoord, viewDirectionTangent);
+		// Steep parallax mapping
+		//texCoordParallax = steepParallaxMapping(texCoord, viewDirectionTangent);
+		// Parallax occlusion mapping
+		texCoordParallax = parallaxOcclusionMapping(texCoord, viewDirectionTangent);
+
+		if (texCoordParallax.x > 1.0f || texCoordParallax.y > 1.0f || texCoordParallax.x < 0.0f || texCoordParallax.y < 0.0f)
+			discard;
+	}
+	else
+	{
+		// No parallax mapping
+		texCoordParallax = texCoord;
+	}
 	
-	//if (texCoordParallax.x > 1.0f || texCoordParallax.y > 1.0f || texCoordParallax.x < 0.0f || texCoordParallax.y < 0.0f)
-	//	discard;
-
 	// --------------------------------------
 
 	// Get PBR material
