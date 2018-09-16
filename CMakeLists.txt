@@ -2,12 +2,15 @@ cmake_minimum_required(VERSION 3.7)
 
 project(openglframework)
 
+set(OpenGL_GL_PREFERENCE GLVND)
+
 find_package(glm REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(assimp REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(SOIL REQUIRED)
+
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
