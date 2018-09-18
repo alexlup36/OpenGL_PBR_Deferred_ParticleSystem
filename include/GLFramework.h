@@ -44,16 +44,8 @@ private:
 	const CameraMan& m_cameraMan;
 
 	// Shaders
-	std::unique_ptr<Shader> m_basicShader = nullptr;
-	std::unique_ptr<Shader> m_quadShader = nullptr;
-	std::unique_ptr<Shader> m_phongColorShader = nullptr;
-	std::unique_ptr<Shader> m_phongTextureShader = nullptr;
-	std::unique_ptr<Shader> m_parallaxMapping = nullptr;
-	std::unique_ptr<Shader> m_normalMapping = nullptr;
-	std::unique_ptr<Shader> m_colorPBR = nullptr;
-	std::unique_ptr<Shader> m_pbr = nullptr;
-	std::unique_ptr<Shader> m_depth = nullptr;
-	std::unique_ptr<Shader> m_skyBox = nullptr;
+	Shader m_basicShader, m_quadShader, m_phongColorShader, m_phongTextureShader, m_parallaxMapping, m_normalMapping;
+	Shader m_colorPBR, m_pbr, m_depth, m_skyBox;
 
 	// Textures
 	std::unique_ptr<Texture2D> m_depthMap = nullptr;

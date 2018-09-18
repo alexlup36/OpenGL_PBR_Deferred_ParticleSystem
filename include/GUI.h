@@ -8,7 +8,7 @@
 class GUI 
 {
 public:
-	GUI();
+	GUI(GLFWwindow* window);
 	~GUI();
 	bool setup(GLFWwindow* window, int w, int h);
 	void draw();
@@ -61,6 +61,11 @@ public:
 	float m_exposure = 1.0f;
 	glm::vec3 m_lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec4 m_objectColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+	glm::vec3 m_clearColor = glm::vec3(0.2f, 0.2f, 0.2f);
+	GLFWwindow *m_window = nullptr;
+	bool m_enableVsync = true;
+
+	int m_framebufferWidth, m_framebufferHeight;
 
 	DisplayMode m_displayMode = DisplayMode::FINAL;
 	ToneMapper m_toneMapper = ToneMapper::NORMAL;

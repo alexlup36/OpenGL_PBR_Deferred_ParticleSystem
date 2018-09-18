@@ -11,8 +11,27 @@
 #include "LightData.h"
 #include "MaterialData.h"
 
-GUI::GUI()
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
+GUI::GUI(GLFWwindow* window)
+	: m_window(window)
 {
+	assert(window && "Invalid GLFW window.");
+
+	// Setup imgui binding
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO &io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+	// Setup imgui for GLFW and OpenGL3+
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
+
+	// Setup style
+	ImGui::StyleColorsDark();
 }
 
 GUI::~GUI()
@@ -178,5 +197,23 @@ bool GUI::setup(GLFWwindow* window, int w, int h)
 
 void GUI::draw() 
 {
-	//TwDraw();
+	// Start imgui new frame
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
+	// Setup
+	ImGui::Begin("MainWindow");
+	ImGui::Text("Properties");
+	ImGui::SliderFloat3("Light direction", &m_lightDirection.x, -1.0f, 1.0f);
+	ImGui::ColorEdit3("Clear color", (float*)&m_clearColor);
+	ImGui::Checkbox("VSync", &m_enableVsync);
+	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::End();
+
+	// Rendering
+	ImGui::Render();
+	glfwGetFramebufferSize(m_window, &m_framebufferWidth, &m_framebufferHeight);
+	glViewport(0, 0, m_framebufferWidth, m_framebufferHeight);
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

@@ -11,10 +11,12 @@ find_package(assimp REQUIRED)
 find_package(OpenGL REQUIRED)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+set(IMGUI_IMPL_OPENGL_LOADER_GLEW 1)
 
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE SOURCES "src/*.cpp" "3rdParty/imgui/*.cpp")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/imgui)
 
 add_executable(${PROJECT_NAME} ${SOURCES} "main.cpp")
 target_link_libraries(${PROJECT_NAME} glm GLEW glfw assimp SOIL ${OPENGL_LIBRARY})

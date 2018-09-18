@@ -1,10 +1,10 @@
 #version 330 core
 
-in layout(location = 0) vec3 vertexPosition;
-in layout(location = 1) vec3 vertexNormal;
-in layout(location = 2) vec2 vertexTexCoord;
-in layout(location = 3) vec3 vertexTangent;
-in layout(location = 4) vec3 vertexBitangent;
+layout(location = 0) in vec3 vertexPosition;
+layout(location = 1) in vec3 vertexNormal;
+layout(location = 2) in vec2 vertexTexCoord;
+layout(location = 3) in vec3 vertexTangent;
+layout(location = 4) in vec3 vertexBitangent;
 
 out VS_OUT
 {

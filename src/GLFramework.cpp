@@ -37,8 +37,13 @@ GLFramework::~GLFramework()
 
 void GLFramework::update(double dt)
 {
+	glCheckError();
+
 	// Call base class
 	OpenGLApp::update(dt);
+	glfwSwapInterval(static_cast<int>(m_pGUI->m_enableVsync));
+
+	glCheckError();
 
 	// ------------------------------------------------------------------------
 	// Update here
@@ -47,7 +52,12 @@ void GLFramework::update(double dt)
 	if (Input::fpsCameraEnabled())
 	{
 		m_cameraMan.getActiveCamera()->processInput(window(), dt);
+
+		glCheckError();
+
 		m_cameraMan.getActiveCamera()->updateView();
+
+		glCheckError();
 	}
 
 	// ------------------------------------------------------------------------
@@ -59,8 +69,13 @@ void GLFramework::draw(double dt)
 {
 	glCheckError();
 
+	auto clearColor = m_pGUI->m_clearColor;
+	glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
+
 	// Call base class
 	OpenGLApp::draw(dt);
+
+	glCheckError();
 
 	// ------------------------------------------------------------------------
 	// Do drawing here
@@ -68,29 +83,37 @@ void GLFramework::draw(double dt)
 	// Render to the depth map setup
 	m_pDT->renderToTexture();
 
+	glCheckError();
+
 	// Render scene to depth map
 	drawSceneToDepth();
+
+	glCheckError();
 
 	// Render to texture setup
 	m_pRT->renderToTexture();
 
+	glCheckError();
+
 	// Draw scene
 	drawScene(dt);
+
+	glCheckError();
 
 	// ------------------------------------------------------------------------
 
 	// Render color to screen
 	// Activate shader
 	glBindVertexArray(m_quadVAO);
-	m_quadShader->useShader();
+	m_quadShader.useShader();
 	GLuint textureUnit = 0;
 	m_pRT->renderColorToScreen(0, 0, windowWidth(), windowHeight(), textureUnit);
 	// Set tone mapper
-	m_quadShader->setScalar<int>(ShaderUniform::ToneMapper, static_cast<int>(m_pGUI->m_toneMapper));
-	m_quadShader->setScalar<float>(ShaderUniform::GammaHDR, m_pGUI->m_gammaHDR);
-	m_quadShader->setScalar<float>(ShaderUniform::Exposure, m_pGUI->m_exposure);
-	m_quadShader->setScalar<float>(ShaderUniform::ExposureBias, m_pGUI->m_exposureBias);
-	m_quadShader->setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
+	m_quadShader.setScalar<int>(ShaderUniform::ToneMapper, static_cast<int>(m_pGUI->m_toneMapper));
+	m_quadShader.setScalar<float>(ShaderUniform::GammaHDR, m_pGUI->m_gammaHDR);
+	m_quadShader.setScalar<float>(ShaderUniform::Exposure, m_pGUI->m_exposure);
+	m_quadShader.setScalar<float>(ShaderUniform::ExposureBias, m_pGUI->m_exposureBias);
+	m_quadShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
 	// Draw triangles
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -108,8 +131,12 @@ void GLFramework::draw(double dt)
 
 bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, bool enableSRGB)
 {
+	glCheckError();
+
 	// Base class initialize
 	OpenGLApp::initialize(windowTitle, enableMultisampling, enableSRGB);
+
+	glCheckError();
 
 	std::cout << "GLFramework initialize. \n";
 
@@ -117,7 +144,7 @@ bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, 
 	// Initialization
 
 	// Initialize GUI
-	m_pGUI = new GUI();
+	m_pGUI = new GUI(window());
 	m_pGUI->setup(window(), windowWidth(), windowHeight());
 
 	// Initialize input
@@ -129,6 +156,8 @@ bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, 
 
 	// Initalize camera
 	CameraMan::Instance().createCamera(windowData, "FPSCamera1", 60.0f, 0.001f, 1000.0f);
+
+	glCheckError();
 
 	// Initialize RT
 	m_pRT = std::make_unique<RenderTarget>(true,
@@ -162,6 +191,8 @@ bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, 
 		return false;
 	}
 
+	glCheckError();
+
 	// Create the Texture2D object using the depth texture handler
 	m_depthMap = std::make_unique<Texture2D>(m_pDT->depthTexture(), TextureType::Depth);
 	if (m_depthMap == nullptr)
@@ -170,9 +201,13 @@ bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, 
 		return false;
 	}
 
+	glCheckError();
+
 	// ------------------------------------------------------------------------
 	// Setup scene
 	setupScene();
+
+	glCheckError();
 
 	// Success
 	return true;
@@ -182,6 +217,8 @@ bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, 
 
 void GLFramework::setupScene()
 {
+	glCheckError();
+
 	std::cout << "Scene setup. \n";
 
 	// Initialize lights
@@ -189,61 +226,96 @@ void GLFramework::setupScene()
 	MaterialData::getInstance().initialize();
 
 	// Load shaders
-	m_basicShader = std::make_unique<Shader>(".\\Shaders\\basic.vert", ".\\Shaders\\basic.frag");
-	m_quadShader = std::make_unique<Shader>(".\\Shaders\\hdr.vert", ".\\Shaders\\hdr.frag");
-	m_phongColorShader = std::make_unique<Shader>(".\\Shaders\\phongColor.vert", ".\\Shaders\\phongColor.frag");
-	m_phongTextureShader = std::make_unique<Shader>(".\\Shaders\\phongTexture.vert", ".\\Shaders\\phongTexture.frag");
-	m_normalMapping = std::make_unique<Shader>(".\\Shaders\\normalMapping.vert", ".\\Shaders\\normalMapping.frag");
-	m_parallaxMapping = std::make_unique<Shader>(".\\Shaders\\parallaxMapping.vert", ".\\Shaders\\parallaxMapping.frag");
-	m_colorPBR = std::make_unique<Shader>(".\\Shaders\\simplePBR.vert", ".\\Shaders\\simplePBR.frag");
-	m_pbr = std::make_unique<Shader>(".\\Shaders\\pbr.vert", ".\\Shaders\\pbr.frag");
-	m_depth = std::make_unique<Shader>(".\\Shaders\\shadowMap.vert", ".\\Shaders\\shadowMap.frag");
-	m_skyBox = std::make_unique<Shader>(".\\Shaders\\cubemap.vert", ".\\Shaders\\cubemap.frag");
+	m_basicShader.addShader(Shader::ShaderType::VERTEX, "Shaders/basic.vert");
+	m_basicShader.addShader(Shader::ShaderType::FRAGMENT, "Shaders/basic.frag");
+	if (m_basicShader.initialize() == false) return;
+	
+	m_quadShader.addShader(Shader::ShaderType::VERTEX, "Shaders/hdr.vert");
+	m_quadShader.addShader(Shader::ShaderType::FRAGMENT, "Shaders/hdr.frag");
+	if (m_quadShader.initialize() == false) return;
+
+	m_phongColorShader.addShader(Shader::ShaderType::VERTEX, "Shaders/phongColor.vert");
+	m_phongColorShader.addShader(Shader::ShaderType::FRAGMENT, "Shaders/phongColor.frag");
+	if (m_phongColorShader.initialize() == false) return;
+
+	m_phongTextureShader.addShader(Shader::ShaderType::VERTEX, "Shaders/phongTexture.vert");
+	m_phongTextureShader.addShader(Shader::ShaderType::FRAGMENT, "Shaders/phongTexture.frag");
+	if (m_phongTextureShader.initialize() == false) return;
+
+	m_normalMapping.addShader(Shader::ShaderType::VERTEX, "Shaders/normalMapping.vert");
+	m_normalMapping.addShader(Shader::ShaderType::FRAGMENT, "Shaders/normalMapping.frag");
+	if (m_normalMapping.initialize() == false) return;
+
+	m_parallaxMapping.addShader(Shader::ShaderType::VERTEX, "Shaders/parallaxMapping.vert");
+	m_parallaxMapping.addShader(Shader::ShaderType::FRAGMENT, "Shaders/parallaxMapping.frag");
+	if (m_parallaxMapping.initialize() == false) return;
+
+	m_colorPBR.addShader(Shader::ShaderType::VERTEX, "Shaders/simplePBR.vert");
+	m_colorPBR.addShader(Shader::ShaderType::FRAGMENT, "Shaders/simplePBR.frag");
+	if (m_colorPBR.initialize() == false) return;
+
+	m_pbr.addShader(Shader::ShaderType::VERTEX, "Shaders/pbr.vert");
+	m_pbr.addShader(Shader::ShaderType::FRAGMENT, "Shaders/pbr.frag");
+	if (m_pbr.initialize() == false) return;
+
+	m_depth.addShader(Shader::ShaderType::VERTEX, "Shaders/shadowMap.vert");
+	m_depth.addShader(Shader::ShaderType::FRAGMENT, "Shaders/shadowMap.frag");
+	if (m_depth.initialize() == false) return;
+
+	m_skyBox.addShader(Shader::ShaderType::VERTEX, "Shaders/cubemap.vert");
+	m_skyBox.addShader(Shader::ShaderType::FRAGMENT, "Shaders/cubemap.frag");
+	if (m_skyBox.initialize() == false) return;
+
+	glCheckError();
 
 	// Load textures
-	m_brick1Diffuse = TextureMan::Instance().getTexture("..//Assets//Textures//brick1//brick_diffuse.jpg", TextureType::Diffuse1);
-	m_brick1Displacement = TextureMan::Instance().getTexture("..//Assets//Textures//brick1/brick_displacement.jpg", TextureType::Displacement);
-	m_brick1Normal = TextureMan::Instance().getTexture("..//Assets//Textures//brick1//brick_normal.jpg", TextureType::Normal1);
-	m_brick1Specular = TextureMan::Instance().getTexture("..//Assets//Textures//brick1//brick_specular.jpg", TextureType::Specular);
+	m_brick1Diffuse = TextureMan::Instance().getTexture("Assets/Textures/brick1/brick_diffuse.jpg", TextureType::Diffuse1);
+	m_brick1Displacement = TextureMan::Instance().getTexture("Assets/Textures/brick1/brick_displacement.jpg", TextureType::Displacement);
+	m_brick1Normal = TextureMan::Instance().getTexture("Assets/Textures/brick1/brick_normal.jpg", TextureType::Normal1);
+	m_brick1Specular = TextureMan::Instance().getTexture("Assets/Textures/brick1/brick_specular.jpg", TextureType::Specular);
 
-	m_toyBoxDiffuse = TextureMan::Instance().getTexture("..//Assets//Textures//toybox//toy_box_diffuse.png", TextureType::Diffuse1);
-	m_toyBoxDisplacement = TextureMan::Instance().getTexture("..//Assets//Textures//toybox//toy_box_disp.png", TextureType::Displacement);
-	m_toyBoxNormal = TextureMan::Instance().getTexture("..//Assets//Textures//toybox//toy_box_normal.png", TextureType::Normal1);
+	m_toyBoxDiffuse = TextureMan::Instance().getTexture("Assets/Textures/toybox/toy_box_diffuse.png", TextureType::Diffuse1);
+	m_toyBoxDisplacement = TextureMan::Instance().getTexture("Assets/Textures/toybox/toy_box_disp.png", TextureType::Displacement);
+	m_toyBoxNormal = TextureMan::Instance().getTexture("Assets/Textures/toybox/toy_box_normal.png", TextureType::Normal1);
 
-	m_brick1RoughnessPBR = TextureMan::Instance().getTexture("..//Assets//Textures//brick1//brick_specular.jpg", TextureType::Roughness);
-	m_brick1MetallnessPBR = TextureMan::Instance().getTexture("..//Assets//Textures//brick1/brick_specular.jpg", TextureType::Metalness);
-	m_brick1AmbientOcclusionPBR = TextureMan::Instance().getTexture("..//Assets//Textures//brick1//brick_displacement.jpg", TextureType::AmbientOcclusion);
+	m_brick1RoughnessPBR = TextureMan::Instance().getTexture("Assets/Textures/brick1/brick_specular.jpg", TextureType::Roughness);
+	m_brick1MetallnessPBR = TextureMan::Instance().getTexture("Assets/Textures/brick1/brick_specular.jpg", TextureType::Metalness);
+	m_brick1AmbientOcclusionPBR = TextureMan::Instance().getTexture("Assets/Textures/brick1/brick_displacement.jpg", TextureType::AmbientOcclusion);
 
-	m_rustedIronAlbedo = TextureMan::Instance().getTexture("..//Assets//Textures//pbr//rusted_iron//albedo.png", TextureType::Diffuse1);
-	m_rustedIronRoughness = TextureMan::Instance().getTexture("..//Assets//Textures//pbr//rusted_iron//metallic.png", TextureType::Metalness);
-	m_rustedIronMetallic = TextureMan::Instance().getTexture("..//Assets//Textures//pbr//rusted_iron//roughness.png", TextureType::Roughness);
-	m_rustedIronAmbientOcclusion = TextureMan::Instance().getTexture("..//Assets//Textures//pbr//rusted_iron//ao.png", TextureType::AmbientOcclusion);
-	m_rustedIronNormal = TextureMan::Instance().getTexture("..//Assets//Textures//pbr//rusted_iron//normal.png", TextureType::Normal1);
+	m_rustedIronAlbedo = TextureMan::Instance().getTexture("Assets/Textures/pbr/rusted_iron/albedo.png", TextureType::Diffuse1);
+	m_rustedIronRoughness = TextureMan::Instance().getTexture("Assets/Textures/pbr/rusted_iron/metallic.png", TextureType::Metalness);
+	m_rustedIronMetallic = TextureMan::Instance().getTexture("Assets/Textures/pbr/rusted_iron/roughness.png", TextureType::Roughness);
+	m_rustedIronAmbientOcclusion = TextureMan::Instance().getTexture("Assets/Textures/pbr/rusted_iron/ao.png", TextureType::AmbientOcclusion);
+	m_rustedIronNormal = TextureMan::Instance().getTexture("Assets/Textures/pbr/rusted_iron/normal.png", TextureType::Normal1);
 
-	m_goldAlbedo = TextureMan::Instance().getTexture("..//Assets//Textures//pbr//gold//albedo.png", TextureType::Diffuse1);
-	m_goldRoughness = TextureMan::Instance().getTexture("..//Assets//Textures//pbr//gold//metallic.png", TextureType::Metalness);
-	m_goldMetallic = TextureMan::Instance().getTexture("..//Assets//Textures//pbr//gold//roughness.png", TextureType::Roughness);
-	m_goldAmbientOcclusion = TextureMan::Instance().getTexture("..//Assets//Textures//pbr//gold//ao.png", TextureType::AmbientOcclusion);
-	m_goldNormal = TextureMan::Instance().getTexture("..//Assets//Textures//pbr//gold//normal.png", TextureType::Normal1);
+	m_goldAlbedo = TextureMan::Instance().getTexture("Assets/Textures/pbr/gold/albedo.png", TextureType::Diffuse1);
+	m_goldRoughness = TextureMan::Instance().getTexture("Assets/Textures/pbr/gold/metallic.png", TextureType::Metalness);
+	m_goldMetallic = TextureMan::Instance().getTexture("Assets/Textures/pbr/gold/roughness.png", TextureType::Roughness);
+	m_goldAmbientOcclusion = TextureMan::Instance().getTexture("Assets/Textures/pbr/gold/ao.png", TextureType::AmbientOcclusion);
+	m_goldNormal = TextureMan::Instance().getTexture("Assets/Textures/pbr/gold/normal.png", TextureType::Normal1);
+
+	glCheckError();
 
 	// Load cube maps
 	std::vector<std::string> facePaths = {
-		"..//Assets//Textures//skybox2//right.jpg", 
-		"..//Assets//Textures//skybox2//left.jpg",
-		"..//Assets//Textures//skybox2//top.jpg",
-		"..//Assets//Textures//skybox2//bottom.jpg",
-		"..//Assets//Textures//skybox2//back.jpg",
-		"..//Assets//Textures//skybox2//front.jpg" };
+		"Assets/Textures/skybox2/right.jpg", 
+		"Assets/Textures/skybox2/left.jpg",
+		"Assets/Textures/skybox2/top.jpg",
+		"Assets/Textures/skybox2/bottom.jpg",
+		"Assets/Textures/skybox2/back.jpg",
+		"Assets/Textures/skybox2/front.jpg" };
 	m_cubeMap1 = TextureMan::Instance().getTexture("skybox1", facePaths);
 
 	facePaths = {
-		"..//Assets//Textures//skybox1//right.bmp",
-		"..//Assets//Textures//skybox1//left.bmp",
-		"..//Assets//Textures//skybox1//top.bmp",
-		"..//Assets//Textures//skybox1//bottom.bmp",
-		"..//Assets//Textures//skybox1//front.bmp",
-		"..//Assets//Textures//skybox1//back.bmp" };
+		"Assets/Textures/skybox1/right.bmp",
+		"Assets/Textures/skybox1/left.bmp",
+		"Assets/Textures/skybox1/top.bmp",
+		"Assets/Textures/skybox1/bottom.bmp",
+		"Assets/Textures/skybox1/front.bmp",
+		"Assets/Textures/skybox1/back.bmp" };
 	m_cubeMap2 = TextureMan::Instance().getTexture("skybox2", facePaths);
+
+	glCheckError();
 
 	// Setup PBR material
 
@@ -270,23 +342,27 @@ void GLFramework::setupScene()
 	MaterialData::getInstance().matGold.ao = m_goldAmbientOcclusion;
 	MaterialData::getInstance().matGold.normal = m_goldNormal;
 
+	glCheckError();
+
 	// Load objects
-	m_planeObject = std::make_unique<Object<VertexPTNT>>("..//Assets//plane2.obj");
-	m_pointLightObject = std::make_unique<Object<VertexPN>>("..//Assets//sphere.obj");
+	m_planeObject = std::make_unique<Object<VertexPTNT>>("Assets/plane2.obj");
+	m_pointLightObject = std::make_unique<Object<VertexPN>>("Assets/sphere.obj");
 
 	// Load meshes
-	m_pTorusModel = std::make_unique<Model<VertexPN>>("..//Assets//torus.obj");
-	//m_pMonkeyModel = std::make_unique<Model<VertexPN>>("..//Assets//mymodel.obj");
-	m_pPlaneModel = std::make_unique<Model<VertexPTNT>>("..//Assets//plane2.obj");
-	m_pLightModel = std::make_unique<Model<VertexPN>>("..//Assets//sphere.obj");
-	m_pSphereModel = std::make_unique<Model<VertexPTNT>>("..//Assets//planet.obj");
-	m_bunny = std::make_unique<Model<VertexPTNT>>("..//Assets//models//bunny.obj");
-	//m_dragon = std::make_unique<Model<VertexPTNT>>("..//Assets//models//dragon.obj");
-	//m_buddha = std::make_unique<Model<VertexPTNT>>("..//Assets//models//buddha.obj");
-	//m_lucy = std::make_unique<Model<VertexPTNT>>("..//Assets//models//lucy.obj");
-	//m_armadillo = std::make_unique<Model<VertexPTNT>>("..//Assets//models//armadillo.obj");
-	//m_tyra = std::make_unique<Model<VertexPTNT>>("..//Assets//models//tyra.obj");
-	//m_chair = std::make_unique<Model<VertexPTNT>>("..//Assets//models//chair.obj");
+	m_pTorusModel = std::make_unique<Model<VertexPN>>("Assets/torus.obj");
+	//m_pMonkeyModel = std::make_unique<Model<VertexPN>>("Assets/mymodel.obj");
+	m_pPlaneModel = std::make_unique<Model<VertexPTNT>>("Assets/plane2.obj");
+	m_pLightModel = std::make_unique<Model<VertexPN>>("Assets/sphere.obj");
+	m_pSphereModel = std::make_unique<Model<VertexPTNT>>("Assets/planet.obj");
+	m_bunny = std::make_unique<Model<VertexPTNT>>("Assets/models/bunny.obj");
+	//m_dragon = std::make_unique<Model<VertexPTNT>>("Assets/models/dragon.obj");
+	//m_buddha = std::make_unique<Model<VertexPTNT>>("Assets/models/buddha.obj");
+	//m_lucy = std::make_unique<Model<VertexPTNT>>("Assets/models/lucy.obj");
+	//m_armadillo = std::make_unique<Model<VertexPTNT>>("Assets/models/armadillo.obj");
+	//m_tyra = std::make_unique<Model<VertexPTNT>>("Assets/models/tyra.obj");
+	//m_chair = std::make_unique<Model<VertexPTNT>>("Assets/models/chair.obj");
+
+	glCheckError();
 
 	// Generate VAO
 	m_cubeVAO = Mesh<int>::vaoCubeSetup();
@@ -297,6 +373,8 @@ void GLFramework::setupScene()
 	GLuint vertexArrayObject = 0;
 	glGenVertexArrays(1, &vertexArrayObject);
 	glBindVertexArray(vertexArrayObject);
+
+	glCheckError();
 }
 
 void GLFramework::drawScene(double dt)
@@ -312,14 +390,14 @@ void GLFramework::drawScene(double dt)
 
 	// ------------------------------------------------------------------------
 	// Render Phong
-	m_phongColorShader->useShader();
+	m_phongColorShader.useShader();
 	// Setup lighting
-	m_phongColorShader->set<glm::vec3>(ShaderUniform::LightColor, WHITE);
-	m_phongColorShader->set<glm::vec3>(ShaderUniform::LightDir, m_pGUI->m_lightDirection);
+	m_phongColorShader.set<glm::vec3>(ShaderUniform::LightColor, WHITE);
+	m_phongColorShader.set<glm::vec3>(ShaderUniform::LightDir, m_pGUI->m_lightDirection);
 	// Set uniforms
-	m_phongColorShader->set<glm::vec4>(ShaderUniform::ObjectColor, WHITE);
-	m_phongColorShader->setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
-	m_phongColorShader->setScalar<float>(ShaderUniform::SpecularStrength, m_pGUI->m_specularStrength);
+	m_phongColorShader.set<glm::vec4>(ShaderUniform::ObjectColor, WHITE);
+	m_phongColorShader.setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
+	m_phongColorShader.setScalar<float>(ShaderUniform::SpecularStrength, m_pGUI->m_specularStrength);
 	// Draw point light sphere
 	m_pointLightObject->transform().setPos(LightData::getInstance().pointLight1.direction);
 	m_pointLightObject->transform().setScale(glm::vec3(0.01f));
@@ -329,22 +407,22 @@ void GLFramework::drawScene(double dt)
 
 	// ------------------------------------------------------------------------
 	// Render PBR
-	m_pbr->useShader();
+	m_pbr.useShader();
 	// Setup lighting
-	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
-	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
-	m_pbr->setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
+	m_pbr.setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
+	m_pbr.setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
+	m_pbr.setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
 	//m_pbr->setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
 	//m_pbr->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
 	// Set uniforms
-	m_depthMap->bind(m_pbr->program());
-	MaterialData::getInstance().matRustedIron.bindTextures(m_pbr->program());
-	m_pbr->set<glm::vec2>(ShaderUniform::TextureOffset, m_pGUI->m_textureOffset);
-	m_pbr->set<glm::vec2>(ShaderUniform::TextureTile, m_pGUI->m_textureTile);
-	m_pbr->setScalar<float>(ShaderUniform::DisplacementMapScale, m_pGUI->m_dispMapScale);
-	m_pbr->setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
-	m_pbr->setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
-	m_pbr->setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
+	m_depthMap->bind(m_pbr.program());
+	MaterialData::getInstance().matRustedIron.bindTextures(m_pbr.program());
+	m_pbr.set<glm::vec2>(ShaderUniform::TextureOffset, m_pGUI->m_textureOffset);
+	m_pbr.set<glm::vec2>(ShaderUniform::TextureTile, m_pGUI->m_textureTile);
+	m_pbr.setScalar<float>(ShaderUniform::DisplacementMapScale, m_pGUI->m_dispMapScale);
+	m_pbr.setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
+	m_pbr.setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
+	m_pbr.setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
 	// Draw main plane
 	m_planeObject->transform().setPos(glm::vec3(0.0f, -1.0f, -2.0f));
 	m_planeObject->transform().setScale(glm::vec3(0.5f, 0.001f, 0.5f));
@@ -358,17 +436,17 @@ void GLFramework::drawScene(double dt)
 	// Set the depth function to less or equal
 	glDepthFunc(GL_LEQUAL);
 	// Activate the skybox shader
-	m_skyBox->useShader();
+	m_skyBox.useShader();
 	// Get rid of the translation component from the view matrix
 	// We don't want the skybox to move together with the player
 	v = glm::mat4x4(glm::mat3x3(m_cameraMan.getActiveCamera()->viewMatrix()));
 	p = m_cameraMan.getActiveCamera()->projMatrix();
-	m_skyBox->set<glm::mat4>(ShaderUniform::ViewMat, v);
-	m_skyBox->set<glm::mat4>(ShaderUniform::ProjMat, p);
+	m_skyBox.set<glm::mat4>(ShaderUniform::ViewMat, v);
+	m_skyBox.set<glm::mat4>(ShaderUniform::ProjMat, p);
 	// Bind the cube VAO
 	glBindVertexArray(m_skyboxVAO);
 	// Bind the environment texture
-	m_cubeMap2->bind(m_skyBox->program());
+	m_cubeMap2->bind(m_skyBox.program());
 	// Draw the cube
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	// Set the depth function to default
@@ -406,10 +484,10 @@ void GLFramework::drawSceneToDepth()
 	glm::mat4 rotMat = glm::toMat4(m_pGUI->m_rotation);
 	m = m * rotMat;
 	// Activate shader
-	m_depth->useShader();
+	m_depth.useShader();
 	// Set uniforms
-	m_depth->set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_depth->set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
+	m_depth.set<glm::mat4>(ShaderUniform::ModelMat, m);
+	m_depth.set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
 	// Draw triangles
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -427,10 +505,10 @@ void GLFramework::drawSceneToDepth()
 	rotMat = glm::toMat4(m_pGUI->m_rotation);
 	m = m * rotMat;
 	// Activate shader
-	m_depth->useShader();
+	m_depth.useShader();
 	// Matrices
-	m_depth->set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_depth->set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
+	m_depth.set<glm::mat4>(ShaderUniform::ModelMat, m);
+	m_depth.set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
 	// Draw triangles
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -446,10 +524,10 @@ void GLFramework::drawSceneToDepth()
 	rotMat = glm::toMat4(m_pGUI->m_rotation);
 	m = m * rotMat;
 	// Activate shader
-	m_depth->useShader();
+	m_depth.useShader();
 	// Matrices
-	m_depth->set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_depth->set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
+	m_depth.set<glm::mat4>(ShaderUniform::ModelMat, m);
+	m_depth.set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
 	// Draw triangles
 	m_pSphereModel->render();
 
@@ -465,10 +543,10 @@ void GLFramework::drawSceneToDepth()
 	rotMat = glm::toMat4(m_pGUI->m_rotation);
 	m = m * rotMat;
 	// Activate shader
-	m_depth->useShader();
+	m_depth.useShader();
 	// Matrices
-	m_depth->set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_depth->set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
+	m_depth.set<glm::mat4>(ShaderUniform::ModelMat, m);
+	m_depth.set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
 	// Draw triangles
 	m_pSphereModel->render();
 
@@ -484,10 +562,10 @@ void GLFramework::drawSceneToDepth()
 	rotMat = glm::toMat4(m_pGUI->m_rotation);
 	m = m * rotMat;
 	// Activate shader
-	m_depth->useShader();
+	m_depth.useShader();
 	// Matrices
-	m_depth->set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_depth->set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
+	m_depth.set<glm::mat4>(ShaderUniform::ModelMat, m);
+	m_depth.set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
 	// Draw triangles
 	m_pTorusModel->render();
 
@@ -501,10 +579,10 @@ void GLFramework::drawSceneToDepth()
 	m = glm::rotate(m, 0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 	m = glm::scale(m, glm::vec3(scaleFactor, 0.001f, scaleFactor));
 	// Activate shader
-	m_depth->useShader();
+	m_depth.useShader();
 	// Matrices
-	m_depth->set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_depth->set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
+	m_depth.set<glm::mat4>(ShaderUniform::ModelMat, m);
+	m_depth.set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
 	// Draw triangles
 	m_pPlaneModel->render();
 }

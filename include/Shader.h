@@ -9,6 +9,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
+#include <vector>
 
 enum class ShaderUniform
 {
@@ -130,11 +131,22 @@ enum class MaterialPBRUniform
 class Shader
 {
 public:
-	Shader(const std::string& vsFilePath, const std::string& psFilePath);
+
+	enum class ShaderType
+	{
+		VERTEX,
+		FRAGMENT,
+
+		COUNT,
+	};
+
+	Shader();
 	~Shader();
 
+	bool initialize();
 	const inline void useShader() { glUseProgram(m_program); }
 	const inline GLuint program() const { return m_program; }
+	bool addShader(ShaderType type, const std::string &path);
 
 	template<typename T>
 	void set(ShaderUniform uniform, const T& val);
@@ -161,6 +173,7 @@ public:
 
 private:
 	GLuint m_program;
+	std::vector<int> m_shaderObjects;
 
 	GLint m_shaderUniforms[static_cast<int>(ShaderUniform::Count)];
 	GLint m_pointLightsUniforms[MAX_POINT_LIGHTS][static_cast<int>(PointLightUniform::Count)];
@@ -170,9 +183,10 @@ private:
 	GLint m_materialPBRUniforms[static_cast<int>(MaterialPBRUniform::Count)];
 
 private:
-	void readShaderFromFile(const std::string& shaderFilePath, std::string& outShaderCode);
-	bool compileShader(const std::string& shaderFilePath, GLuint shaderObject, const std::string& shaderCode);
+	bool readShaderFromFile(const std::string& shaderFilePath, std::string& outShaderCode);
+	bool compileShader(GLuint shaderObject, const std::string& shaderCode);
 	bool linkProgram();
+	void initializeUniforms();
 
 };
 

@@ -74,7 +74,7 @@ bool OpenGLApp::initialize(const char* windowTitle,
 		glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
 
 	// Create a debug context for a debug build
-#ifdef _DEBUG
+#ifndef NDEBUG
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif // DEBUG
 
@@ -100,7 +100,7 @@ bool OpenGLApp::initialize(const char* windowTitle,
 		return false;
 	}
 
-	// Set swap interval
+	// Set swap interval - enable VSync by default
 	glfwSwapInterval(1);
 
 	// Set default opengl state
@@ -137,7 +137,7 @@ void OpenGLApp::setupScene()
 
 bool OpenGLApp::setOpenGLState() const
 {
-#ifdef _DEBUG
+#ifndef NDEBUG
 	GLint flags;
 	// Get context information
 	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);

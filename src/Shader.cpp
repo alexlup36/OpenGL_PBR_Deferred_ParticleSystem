@@ -7,29 +7,172 @@
 
 // ----------------------------------------------------------------------------
 
-Shader::Shader(const std::string& vsFilePath, const std::string& psFilePath)
+Shader::Shader()
 {
+}
+
+// ----------------------------------------------------------------------------
+
+Shader::~Shader()
+{
+}
+
+// ----------------------------------------------------------------------------
+
+bool Shader::initialize()
+{
+	assert(m_shaderObjects.size() != 0 && "Failed to initialize shader. Use add shader to set shader stages.");
+
 	// Create shader program
 	m_program = glCreateProgram();
 
-	// Read shader code
-	std::string vsShaderCode, psShaderCode;
-	readShaderFromFile(vsFilePath, vsShaderCode);
-	readShaderFromFile(psFilePath, psShaderCode);
-
-	// Create shader objects
-	GLuint vsObject = glCreateShader(GL_VERTEX_SHADER);
-	GLuint psObject = glCreateShader(GL_FRAGMENT_SHADER);
-
-	// Compile shaders
-	if (compileShader(vsFilePath, vsObject, vsShaderCode))
-		glAttachShader(m_program, vsObject);
-	if (compileShader(psFilePath, psObject, psShaderCode))
-		glAttachShader(m_program, psObject);
+	// Attach shader objects
+	for (auto shaderObject : m_shaderObjects)
+	{
+		// Attach shader to shader program
+		glAttachShader(m_program, shaderObject);
+	}
 
 	// Link program
-	linkProgram();
+	if (linkProgram() == false)
+		return false;
 
+	// Initialize uniforms
+	initializeUniforms();
+
+	// Delete shader objects
+	for (auto shaderObject : m_shaderObjects)
+		glDeleteShader(shaderObject);
+
+	// Sucess
+	return true;
+}
+
+// ----------------------------------------------------------------------------
+
+bool Shader::addShader(ShaderType type, const std::string &path)
+{
+	// Read shader code
+	std::string shaderCode;
+	bool res = readShaderFromFile(path, shaderCode);
+	if (res == false) return false;
+
+	// Create shader object
+	GLuint shaderObject;
+	switch (type)
+	{
+		case ShaderType::VERTEX:
+			shaderObject = glCreateShader(GL_VERTEX_SHADER);
+			break;
+		case ShaderType::FRAGMENT:
+			shaderObject = glCreateShader(GL_FRAGMENT_SHADER);
+			break;
+		default:
+			std::cout << "Invalid shader type.";
+			break;
+	}
+	m_shaderObjects.push_back(shaderObject);
+
+	// Compile shader
+	if (compileShader(shaderObject, shaderCode) == false)
+	{
+		std::cout << "Shader " << path << " failed to compile.\n";
+		return false;
+	}
+
+	// Success
+	return true;
+}
+
+// ----------------------------------------------------------------------------
+
+bool Shader::readShaderFromFile(const std::string& shaderFilePath, std::string& outShaderCode)
+{
+	assert(shaderFilePath.length() && "Error. Empty shader path.");
+
+	// Init shader code
+	outShaderCode = "";
+	// Open shader file and read content into outShaderCode
+	std::ifstream shaderStream;
+	shaderStream.exceptions(std::ifstream::badbit);
+  	try 
+	{
+    	shaderStream.open(shaderFilePath.c_str(), std::ifstream::in);
+
+		if (shaderStream.is_open())
+		{
+			std::string line = "";
+			while (getline(shaderStream, line))
+				outShaderCode += (line + "\n");
+			shaderStream.close();
+		}
+		else
+		{
+			std::cout << "Failed to open " << shaderFilePath;
+			return false;
+		}
+  	}
+  	catch (const std::ifstream::failure& e) 
+	{
+		std::cout << "Exception: " << e.what() << " while opening/reading file " << shaderFilePath << "\n";
+		return false;
+  	}
+
+	// Success
+	return true;
+}
+
+// ----------------------------------------------------------------------------
+
+bool Shader::compileShader(GLuint shaderObject, const std::string& shaderCode)
+{
+	// Set shader source and compile
+	const char* shaderSource = shaderCode.c_str();
+	glShaderSource(shaderObject, 1, &shaderSource, nullptr);
+	glCompileShader(shaderObject);
+
+	// Error check
+	GLint compileStatus;
+	glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &compileStatus);
+	if (compileStatus != GL_TRUE)
+	{
+		// Error
+		GLchar message[1024];
+		glGetShaderInfoLog(shaderObject, 1024, nullptr, message);
+		std::cout << "Shader compile failed: " << message;
+		return false;
+	}
+
+	// Success
+	return true;
+}
+
+// ----------------------------------------------------------------------------
+
+bool Shader::linkProgram()
+{
+	// Link program
+	glLinkProgram(m_program);
+
+	// Error check
+	GLint linkStatus;
+	glGetProgramiv(m_program, GL_LINK_STATUS, &linkStatus);
+	if (linkStatus != GL_TRUE)
+	{
+		// Error
+		GLchar message[1024];
+		glGetProgramInfoLog(m_program, 1024, nullptr, message);
+		std::cout << "Shader link failed: " << message << "\n";
+		return false;
+	}
+	// Success
+	return true;
+}
+
+// ----------------------------------------------------------------------------
+
+void Shader::initializeUniforms()
+{
 	// Default values for shader uniforms
 	unsigned int shaderUniformCount = static_cast<int>(ShaderUniform::Count);
 	for (unsigned int index = 0; index < shaderUniformCount; ++index)
@@ -149,87 +292,6 @@ Shader::Shader(const std::string& vsFilePath, const std::string& psFilePath)
 	m_materialPBRUniforms[static_cast<int>(MaterialPBRUniform::Metallic)] = glGetUniformLocation(m_program, "material.metallic");
 	m_materialPBRUniforms[static_cast<int>(MaterialPBRUniform::Roughness)] = glGetUniformLocation(m_program, "material.roughness");
 	m_materialPBRUniforms[static_cast<int>(MaterialPBRUniform::AmbientOcclusion)] = glGetUniformLocation(m_program, "material.ao");
-
-
-	// Delete shader objects
-	glDeleteShader(vsObject);
-	glDeleteShader(psObject);
-}
-
-// ----------------------------------------------------------------------------
-
-Shader::~Shader()
-{
-}
-
-// ----------------------------------------------------------------------------
-
-void Shader::readShaderFromFile(const std::string& shaderFilePath, std::string& outShaderCode)
-{
-	assert(shaderFilePath.length() && "Error. Empty shader path.");
-
-	// Init shader code
-	outShaderCode = "";
-	// Open shader file and read content into outShaderCode
-	std::ifstream shaderStream(shaderFilePath, std::ios::in);
-	if (shaderStream.is_open())
-	{
-		std::string line = "";
-		while (getline(shaderStream, line))
-			outShaderCode += (line + "\n");
-		shaderStream.close();
-	}
-	else
-		std::cout << "Failed to open shader file: " << shaderFilePath << "\n";
-}
-
-// ----------------------------------------------------------------------------
-
-bool Shader::compileShader(const std::string& shaderFilePath, GLuint shaderObject, const std::string& shaderCode)
-{
-	std::cout << "Compiling: " << shaderFilePath;
-
-	// Set shader source and compile
-	const char* shaderSource = shaderCode.c_str();
-	glShaderSource(shaderObject, 1, &shaderSource, nullptr);
-	glCompileShader(shaderObject);
-
-	// Error check
-	GLint compileStatus;
-	glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &compileStatus);
-	if (compileStatus != GL_TRUE)
-	{
-		// Error
-		GLchar message[1024];
-		glGetShaderInfoLog(shaderObject, 1024, nullptr, message);
-		std::cout << "Shader compile failed: " << message;
-		return false;
-	}
-	// Success
-	std::cout << " success. \n";
-	return true;
-}
-
-// ----------------------------------------------------------------------------
-
-bool Shader::linkProgram()
-{
-	// Link program
-	glLinkProgram(m_program);
-
-	// Error check
-	GLint linkStatus;
-	glGetProgramiv(m_program, GL_LINK_STATUS, &linkStatus);
-	if (linkStatus != GL_TRUE)
-	{
-		// Error
-		GLchar message[1024];
-		glGetProgramInfoLog(m_program, 1024, nullptr, message);
-		std::cout << "Shader link failed: " << message << "\n";
-		return false;
-	}
-	// Success
-	return true;
 }
 
 // ----------------------------------------------------------------------------
