@@ -81,7 +81,7 @@ void GLFramework::draw(double dt)
 	// Do drawing here
 
 	// Render to the depth map setup
-	m_pDT->renderToTexture();
+	m_shadowFramebuffer.renderToTexture(Framebuffer::RenderTargetType::DEPTH_TARGET);
 
 	glCheckError();
 
@@ -91,7 +91,7 @@ void GLFramework::draw(double dt)
 	glCheckError();
 
 	// Render to texture setup
-	m_pRT->renderToTexture();
+	m_displayFramebuffer.renderToTexture(Framebuffer::RenderTargetType::COLOR_TARGET);
 
 	glCheckError();
 
@@ -107,7 +107,7 @@ void GLFramework::draw(double dt)
 	glBindVertexArray(m_quadVAO);
 	m_quadShader.useShader();
 	GLuint textureUnit = 0;
-	m_pRT->renderColorToScreen(0, 0, windowWidth(), windowHeight(), textureUnit);
+	m_displayFramebuffer.renderColorTargetToScreen(0, 0, windowWidth(), windowHeight(), textureUnit);
 	// Set tone mapper
 	m_quadShader.setScalar<int>(ShaderUniform::ToneMapper, static_cast<int>(m_pGUI->m_toneMapper));
 	m_quadShader.setScalar<float>(ShaderUniform::GammaHDR, m_pGUI->m_gammaHDR);
@@ -160,41 +160,49 @@ bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, 
 	glCheckError();
 
 	// Initialize RT
-	m_pRT = std::make_unique<RenderTarget>(true,
-		GL_RGBA16F,
-		GL_RGBA,
-		GL_FLOAT,
-		windowWidth(),
-		windowHeight(),
-		true,
-		GL_DEPTH_COMPONENT24);
-	if (m_pRT->initialize() == false)
+	m_displayWidth = windowWidth();
+	m_displayHeight = windowHeight();
+	m_depthMapWidth = 1024;
+	m_depthMapHeight = 1024;
+
+	// Create display buffer
+	m_displayFramebuffer
+		.initialize(m_displayWidth, m_displayHeight)
+		.addColorTarget("DisplayColor", GL_RGBA16F, GL_RGBA, GL_FLOAT)
+		.addDepthTarget(GL_DEPTH_COMPONENT24);
+	if (m_displayFramebuffer.create() == false)
 	{
-		std::cout << "Failed to create RT. \n";
+		std::cout << "Failed to initialize display framebuffer.\n";
 		return false;
 	}
 
-	// Initialize depth map
-	m_depthMapWidth = 1024;
-	m_depthMapHeight = 1024;
-	m_pDT = std::make_unique<RenderTarget>(false,
-		GL_RGBA16F,
-		GL_RGBA,
-		GL_FLOAT,
-		m_depthMapWidth,
-		m_depthMapHeight,
-		true,
-		GL_DEPTH_COMPONENT);
-	if (m_pDT->initialize() == false)
+	// Create depth framebuffer
+	m_shadowFramebuffer.initialize(m_depthMapWidth, m_depthMapHeight)
+		.addDepthTarget(GL_DEPTH_COMPONENT24);
+	if (m_shadowFramebuffer.create() == false)
 	{
-		std::cout << "Failed to create the depth map. \n";
+		std::cout << "Failed to initialize shadow framebuffer.\n";
+		return false;
+	}
+
+	// Create g buffer
+	m_gbufferFramebuffer.initialize(m_displayWidth, m_displayHeight)
+		.addColorTarget("Position", GL_RGB16F, GL_RGB, GL_FLOAT)
+		.addColorTarget("Tangent", GL_RGB16F, GL_RGB, GL_FLOAT)
+		.addColorTarget("Normal", GL_RGB16F, GL_RGB, GL_FLOAT)
+		.addColorTarget("Albedo", GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE)
+		.addColorTarget("PBR", GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE)
+		.addDepthTarget(GL_DEPTH_COMPONENT32);
+	if (m_gbufferFramebuffer.create() == false)
+	{
+		std::cout << "Failed to initialize the g buffer.\n";
 		return false;
 	}
 
 	glCheckError();
 
 	// Create the Texture2D object using the depth texture handler
-	m_depthMap = std::make_unique<Texture2D>(m_pDT->depthTexture(), TextureType::Depth);
+	m_depthMap = std::make_unique<Texture2D>(m_displayFramebuffer.depthTexture(), TextureType::Depth);
 	if (m_depthMap == nullptr)
 	{
 		std::cout << "Failed to create the Texture2D object. \n";
@@ -265,6 +273,10 @@ void GLFramework::setupScene()
 	m_skyBox.addShader(Shader::ShaderType::VERTEX, "Shaders/cubemap.vert");
 	m_skyBox.addShader(Shader::ShaderType::FRAGMENT, "Shaders/cubemap.frag");
 	if (m_skyBox.initialize() == false) return;
+
+	m_gbuffer.addShader(Shader::ShaderType::VERTEX, "Shaders/gbuffer.vert");
+	m_gbuffer.addShader(Shader::ShaderType::FRAGMENT, "Shaders/gbuffer.frag");
+	if (m_gbuffer.initialize() == false) return;
 
 	glCheckError();
 

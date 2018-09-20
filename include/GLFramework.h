@@ -2,7 +2,7 @@
 #define GLFRAMEWORK_H
 
 #include "OpenGLApp.h"
-#include "RenderTarget.h"
+#include "Framebuffer.h"
 #include <memory>
 #include "Model.h"
 #include "TextureMan.h"
@@ -40,12 +40,20 @@ private:
 	GLsizei m_depthMapWidth = 1024;
 	GLsizei m_depthMapHeight = 1024;
 
+	// Diplay buffer size
+	GLsizei m_displayWidth;
+	GLsizei m_displayHeight;
+
+	Framebuffer m_displayFramebuffer;
+	Framebuffer m_shadowFramebuffer;
+	Framebuffer m_gbufferFramebuffer;
+
 	// CameraMan reference
 	const CameraMan& m_cameraMan;
 
 	// Shaders
 	Shader m_basicShader, m_quadShader, m_phongColorShader, m_phongTextureShader, m_parallaxMapping, m_normalMapping;
-	Shader m_colorPBR, m_pbr, m_depth, m_skyBox;
+	Shader m_colorPBR, m_pbr, m_depth, m_skyBox, m_gbuffer;
 
 	// Textures
 	std::unique_ptr<Texture2D> m_depthMap = nullptr;
@@ -85,10 +93,6 @@ private:
 	// Cube maps
 	Texture3D* m_cubeMap1 = nullptr;
 	Texture3D* m_cubeMap2 = nullptr;
-
-	// Render target
-	std::unique_ptr<RenderTarget> m_pRT;
-	std::unique_ptr<RenderTarget> m_pDT;
 
 	std::unique_ptr<Model<VertexPN>> m_pTorusModel;
 	std::unique_ptr<Model<VertexPN>> m_pMonkeyModel;
