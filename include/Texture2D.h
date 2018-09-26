@@ -34,6 +34,8 @@ public:
 	inline const std::string& getPath() const { return m_sTexturePath; }
 	inline const TextureType getTextureType() const { return m_textureType; }
 
+	static void bind(GLint location, GLuint textureHandle, GLuint textureUnit);
+
 protected:
 
 private:

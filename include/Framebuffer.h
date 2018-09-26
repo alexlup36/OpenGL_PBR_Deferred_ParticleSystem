@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <assert.h>
+#include <glm/vec4.hpp>
 
 class Framebuffer
 {
@@ -24,7 +25,7 @@ public:
 	Framebuffer &addColorTarget(const std::string &rtName, GLint internalFormat, GLenum elementFormat, GLenum elementType);
 	Framebuffer &addDepthTarget(GLint internalFormat, GLsizei width = 0, GLsizei height = 0, bool readDepth = true);
 
-	void renderToTexture(RenderTargetType targetType);
+	void renderToTexture(RenderTargetType targetType = RenderTargetType::COLOR_TARGET);
 	void renderColorTargetToScreen(int x, int y, int width, int height, GLuint textureUnit);
 	void renderDepthTargetToScreen(int x, int y, int width, int height, GLuint textureUnit);
 	inline void set() const { glBindFramebuffer(GL_FRAMEBUFFER, m_framebufferHandle); }
@@ -35,14 +36,15 @@ public:
 	inline const GLsizei height() const { return m_height; }
 
 	// Get handles to color and depth buffer
-	inline const GLuint colorTexture(int index) const { assert(index < m_colorTextures.size() && "Invalid color texture index specified."); return m_colorTextures[index]; }
-	inline const GLuint colorTexture(const std::string &rtName) const 
+	inline const int colorTexture(int index) const { assert(index < m_colorTextures.size() && "Invalid color texture index specified."); return m_colorTextures[index]; }
+	inline const int colorTexture(const std::string &rtName) const 
 	{
 		auto element = m_colorTextureNames.find(rtName);
 		if (element != m_colorTextureNames.end())
-		{
-			return m_colorTextures[element->second];
-		}
+			return element->second;
+
+		// Failed to find the requested attachment
+		return -1;
 	}
 	inline const GLuint depthTexture() const { return m_depthTexture; }
 
@@ -62,6 +64,7 @@ private:
 
 	std::map<std::string, GLuint> m_colorTextureNames;
 	std::vector<GLuint> m_colorTextures;
+	glm::vec4 m_clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	static GLuint m_uiScreenQuadVAO;
 	static GLuint renderTextureToScreenSetup();

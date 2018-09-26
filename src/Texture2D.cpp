@@ -238,6 +238,17 @@ void Texture2D::bind(GLuint program)
 
 // ----------------------------------------------------------------------------
 
+void Texture2D::bind(GLint location, GLuint textureHandle, GLuint textureUnit)
+{
+	assert(location != -1 && "Invalid uniform location.");
+
+	glActiveTexture(GLenum(GL_TEXTURE0 + textureUnit));
+	glBindTexture(GL_TEXTURE_2D, textureHandle);
+	glUniform1i(location, textureUnit);
+}
+
+// ----------------------------------------------------------------------------
+
 GLuint Texture2D::getHandler()
 {
 	return m_uiTexture;

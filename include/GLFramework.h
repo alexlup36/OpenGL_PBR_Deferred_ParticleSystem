@@ -24,8 +24,11 @@ public:
 	virtual bool initialize(const char* windowTitle, bool enableMultisampling, bool enableSRGB);
 
 private:
-	virtual void setupScene();
+	virtual bool setupScene();
 	virtual void drawScene(double dt);
+	void drawToGBuffer(double dt);
+	void drawDeferredLighting(double dt);
+	void drawGbufferToScreen();
 	virtual void drawSceneToDepth();
 
 	// User interface manager
@@ -52,8 +55,8 @@ private:
 	const CameraMan& m_cameraMan;
 
 	// Shaders
-	Shader m_basicShader, m_quadShader, m_phongColorShader, m_phongTextureShader, m_parallaxMapping, m_normalMapping;
-	Shader m_colorPBR, m_pbr, m_depth, m_skyBox, m_gbuffer;
+	Shader m_basicShader, m_finalShader, m_phongColorShader, m_phongTextureShader, m_parallaxMapping, m_normalMapping;
+	Shader m_colorPBR, m_pbr, m_depth, m_skyBox, m_gbuffer, m_quadShader, m_deferredLighting;
 
 	// Textures
 	std::unique_ptr<Texture2D> m_depthMap = nullptr;
@@ -110,6 +113,8 @@ private:
 	// Objects
 	std::unique_ptr<Object<VertexPTNT>> m_planeObject;
 	std::unique_ptr<Object<VertexPN>> m_pointLightObject;
+
+	std::unique_ptr<Object<VertexPTT>> m_planeObjectDeferred;
 };
 
 #endif // GLFRAMEWORK_H

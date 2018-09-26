@@ -129,8 +129,10 @@ void OpenGLApp::draw(double dt)
 
 // ----------------------------------------------------------------------------
 
-void OpenGLApp::setupScene()
+bool OpenGLApp::setupScene()
 {
+	// Success
+	return true;
 }
 
 // ----------------------------------------------------------------------------

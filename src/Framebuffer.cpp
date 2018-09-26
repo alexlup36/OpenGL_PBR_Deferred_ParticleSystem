@@ -182,6 +182,7 @@ GLuint Framebuffer::renderTextureToScreenSetup()
 void Framebuffer::renderToTexture(RenderTargetType targetType)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_framebufferHandle);
+	glClearColor(m_clearColor.x, m_clearColor.y, m_clearColor.z, m_clearColor.w);
 
 	if (targetType == RenderTargetType::DEPTH_TARGET)
 	{
@@ -205,8 +206,6 @@ void Framebuffer::renderColorTargetToScreen(int x, int y, int width, int height,
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// Set the viewport and clear the color and depth buffers
 	glViewport(x, y, width, height);
-	// Clear
-	glClear(m_clearMask);
 	// Bind the rendered texture to texture unit
 	// Activate texture unit 0
 	glActiveTexture(GL_TEXTURE0 + index);
@@ -220,8 +219,6 @@ void Framebuffer::renderDepthTargetToScreen(int x, int y, int width, int height,
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// Set the viewport and clear the color and depth buffers
 	glViewport(x, y, width, height);
-	// Clear
-	glClear(m_clearMask);
 	// Bind the rendered texture to texture unit
 	// Activate texture unit 0
 	glActiveTexture(GL_TEXTURE0 + textureUnit);

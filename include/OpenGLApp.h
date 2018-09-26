@@ -23,7 +23,7 @@ protected:
 	virtual void draw(double dt);
 
 	virtual bool initialize(const char* windowTitle, bool enableMultisampling, bool enableSRGB);
-	virtual void setupScene();
+	virtual bool setupScene();
 
 private:
 	GLFWwindow* m_pWindow;
