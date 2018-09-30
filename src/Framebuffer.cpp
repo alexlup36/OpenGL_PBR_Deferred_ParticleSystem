@@ -189,6 +189,10 @@ void Framebuffer::renderToTexture(RenderTargetType targetType)
 		glDrawBuffer(GL_NONE);
 		glReadBuffer(GL_NONE);
 	}
+	else
+	{
+		glReadBuffer(GL_NONE);
+	}
 
 	// Set viewport and clear color and depth
 	glViewport(0, 0, m_width, m_height);

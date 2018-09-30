@@ -288,5 +288,68 @@ Mesh<VertexPTT> Model<VertexPTT>::processMesh(aiMesh* pModel)
 
 // ----------------------------------------------------------------------------
 
+template <>
+Mesh<VertexPNTT> Model<VertexPNTT>::processMesh(aiMesh* pModel)
+{
+	std::vector<VertexPNTT> vertexList;
+
+	const aiVector3D aiZeroVector(0.0f, 0.0f, 0.0f);
+	for (unsigned int i = 0; i < pModel->mNumVertices; i++)
+	{
+		// Vertex structure to be filled -------------------------------------------
+		VertexPNTT vertex;
+
+		// Position ----------------------------------------------------------------
+		glm::vec3 position, normal, tangent;
+		glm::vec2 textureCoodinate;
+
+		position.x = pModel->mVertices[i].x;
+		position.y = pModel->mVertices[i].y;
+		position.z = pModel->mVertices[i].z;
+
+		// Normal ------------------------------------------------------------------
+		if (pModel->HasNormals())
+		{
+			normal.x = pModel->mNormals[i].x;
+			normal.y = pModel->mNormals[i].y;
+			normal.z = pModel->mNormals[i].z;
+		}
+		else
+			normal = glm::vec3();
+
+		// Texture coordinates -----------------------------------------------------
+		if (pModel->HasTextureCoords(0))
+		{
+			textureCoodinate.x = pModel->mTextureCoords[0][i].x;
+			textureCoodinate.y = pModel->mTextureCoords[0][i].y;
+		}
+		else
+			textureCoodinate = glm::vec2();
+
+		// Tangent and bitangent ---------------------------------------------------
+		if (pModel->HasTangentsAndBitangents())
+		{
+			tangent.x = pModel->mTangents[i].x;
+			tangent.y = pModel->mTangents[i].y;
+			tangent.z = pModel->mTangents[i].z;
+		}
+		else
+		{
+			tangent = glm::vec3();
+		}
+
+		// Init vertex data
+		vertex.position = position;
+		vertex.normal = normal;
+		vertex.textureCoord = textureCoodinate;
+		vertex.tangent = tangent;
+
+		// Add vertex to vertex list
+		vertexList.push_back(vertex);
+	}
+
+	return Mesh<VertexPNTT>(vertexList, processIndices(pModel));
+}
+
 
 // ----------------------------------------------------------------------------

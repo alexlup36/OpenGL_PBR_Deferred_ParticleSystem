@@ -13,7 +13,6 @@ in VS_OUT
 } fs_in;
 
 uniform float dispMapScale;
-uniform float normalMapScale;
 uniform vec2 textureOffset;
 uniform vec2 textureTile;
 uniform vec3 viewPos;
@@ -144,6 +143,8 @@ void main()
 		// No parallax mapping
 		texCoordParallax = texCoord;
 	}
+
+	texCoordParallax = fs_in.uv;
 
 	// Fragment position
 	gPosition = fs_in.wsPosition;

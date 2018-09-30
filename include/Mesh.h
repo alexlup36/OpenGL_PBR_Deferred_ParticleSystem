@@ -75,6 +75,25 @@ struct VertexPTNT : public VertexPN
 
 // ----------------------------------------------------------------------------
 
+// Vertex containing position, normal texture coordinate and tangent
+struct VertexPNTT
+{
+	VertexPNTT()
+		: position(glm::vec3()), normal(glm::vec3()), textureCoord(glm::vec2()), tangent(glm::vec3()) {}
+	VertexPNTT(const glm::vec3& pos,
+		const glm::vec3& norm,
+		const glm::vec2& tex,
+		const glm::vec3& tan)
+		:  position(pos), normal(norm), textureCoord(tex), tangent(tan) {}
+
+	glm::vec3 position;
+	glm::vec3 normal;
+	glm::vec2 textureCoord;
+	glm::vec3 tangent;
+};
+
+// ----------------------------------------------------------------------------
+
 // Vertex containing position, texture coordinate, normal and tangent
 struct VertexPTT : public VertexP
 {

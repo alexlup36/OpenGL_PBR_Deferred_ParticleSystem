@@ -114,7 +114,7 @@ private:
 	std::unique_ptr<Object<VertexPTNT>> m_planeObject;
 	std::unique_ptr<Object<VertexPN>> m_pointLightObject;
 
-	std::unique_ptr<Object<VertexPTT>> m_planeObjectDeferred;
+	std::unique_ptr<Object<VertexPNTT>> m_planeObjectDeferred;
 };
 
 #endif // GLFRAMEWORK_H

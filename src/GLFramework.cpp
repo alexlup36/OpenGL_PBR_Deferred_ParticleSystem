@@ -81,22 +81,22 @@ void GLFramework::draw(double dt)
 	// Do drawing here
 
 	// Render to the depth map setup
-	m_shadowFramebuffer.renderToTexture(Framebuffer::RenderTargetType::DEPTH_TARGET);
+	//m_shadowFramebuffer.renderToTexture(Framebuffer::RenderTargetType::DEPTH_TARGET);
 
-	glCheckError();
+	//glCheckError();
 
 	// Render scene to depth map
-	drawSceneToDepth();
+	//drawSceneToDepth();
 
-	glCheckError();
+	//glCheckError();
 
 	// Render to texture setup
-	m_displayFramebuffer.renderToTexture(Framebuffer::RenderTargetType::COLOR_TARGET);
+	//m_displayFramebuffer.renderToTexture(Framebuffer::RenderTargetType::COLOR_TARGET);
 
-	glCheckError();
+	//glCheckError();
 
 	// Draw scene
-	drawScene(dt);
+	//drawScene(dt);
 
 	//glCheckError();
 
@@ -104,28 +104,28 @@ void GLFramework::draw(double dt)
 
 	drawToGBuffer(dt);
 	drawGbufferToScreen();
-	drawDeferredLighting(dt);
+	//drawDeferredLighting(dt);
 
 	// ------------------------------------------------------------------------
 
 	// Render color to screen
 	// Activate shader
-	glBindVertexArray(m_quadVAO);
-	m_finalShader.useShader();
-	GLuint textureUnit = 0;
-	m_displayFramebuffer.renderColorTargetToScreen(0, 0, windowWidth(), windowHeight(), textureUnit);
-	// Set tone mapper
-	m_finalShader.setScalar<int>(ShaderUniform::ToneMapper, static_cast<int>(m_pGUI->m_toneMapper));
-	m_finalShader.setScalar<float>(ShaderUniform::GammaHDR, m_pGUI->m_gammaHDR);
-	m_finalShader.setScalar<float>(ShaderUniform::Exposure, m_pGUI->m_exposure);
-	m_finalShader.setScalar<float>(ShaderUniform::ExposureBias, m_pGUI->m_exposureBias);
-	m_finalShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
-	// Draw triangles
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	// glBindVertexArray(m_quadVAO);
+	// m_finalShader.useShader();
+	// GLuint textureUnit = 0;
+	// m_displayFramebuffer.renderColorTargetToScreen(0, 0, windowWidth(), windowHeight(), textureUnit);
+	// // Set tone mapper
+	// m_finalShader.setScalar<int>(ShaderUniform::ToneMapper, static_cast<int>(m_pGUI->m_toneMapper));
+	// m_finalShader.setScalar<float>(ShaderUniform::GammaHDR, m_pGUI->m_gammaHDR);
+	// m_finalShader.setScalar<float>(ShaderUniform::Exposure, m_pGUI->m_exposure);
+	// m_finalShader.setScalar<float>(ShaderUniform::ExposureBias, m_pGUI->m_exposureBias);
+	// m_finalShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
+	// // Draw triangles
+	// glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	// ------------------------------------------------------------------------
 	// Draw GUI
-	m_pGUI->draw();
+	//m_pGUI->draw();
 
 	// Swap buffers
 	glfwSwapBuffers(window());
@@ -410,7 +410,7 @@ bool GLFramework::setupScene()
 	m_planeObject = std::make_unique<Object<VertexPTNT>>("Assets/plane2.obj");
 	m_pointLightObject = std::make_unique<Object<VertexPN>>("Assets/sphere.obj");
 
-	m_planeObjectDeferred = std::make_unique<Object<VertexPTT>>("Assets/plane2.obj");
+	m_planeObjectDeferred = std::make_unique<Object<VertexPNTT>>("Assets/plane2.obj");
 
 	// Load meshes
 	m_pTorusModel = std::make_unique<Model<VertexPN>>("Assets/torus.obj");
@@ -532,6 +532,9 @@ void GLFramework::drawToGBuffer(double dt)
 	m_gbuffer.useShader();
 	// Set uniforms
 	MaterialData::getInstance().matRustedIron.bindTextures(m_gbuffer.program());
+	m_gbuffer.set<glm::vec2>(ShaderUniform::TextureOffset, m_pGUI->m_textureOffset);
+	m_gbuffer.set<glm::vec2>(ShaderUniform::TextureTile, m_pGUI->m_textureTile);
+	m_gbuffer.setScalar<float>(ShaderUniform::DisplacementMapScale, m_pGUI->m_dispMapScale);
 	// Draw main plane
 	m_planeObjectDeferred->transform().setPos(glm::vec3(0.0f, -1.0f, -2.0f));
 	m_planeObjectDeferred->transform().setScale(glm::vec3(0.5f, 0.001f, 0.5f));
@@ -573,9 +576,6 @@ void GLFramework::drawDeferredLighting(double dt)
 
 	glCheckError();
 
-	m_deferredLighting.set<glm::vec2>(ShaderUniform::TextureOffset, m_pGUI->m_textureOffset);
-	m_deferredLighting.set<glm::vec2>(ShaderUniform::TextureTile, m_pGUI->m_textureTile);
-	m_deferredLighting.setScalar<float>(ShaderUniform::DisplacementMapScale, m_pGUI->m_dispMapScale);
 	m_deferredLighting.setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
 	m_deferredLighting.setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
 	m_deferredLighting.setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));

@@ -144,6 +144,46 @@ void Mesh<VertexPTNT>::setupVertexInput()
 // ----------------------------------------------------------------------------
 
 template <>
+void Mesh<VertexPNTT>::setupVertexInput()
+{
+	// Generate the vertex array
+
+	GLuint vertexBuffer, indexBuffer;
+	glGenVertexArrays(1, &m_vertexArrayObject);
+	glGenBuffers(1, &vertexBuffer);
+	glGenBuffers(1, &indexBuffer);
+
+	glBindVertexArray(m_vertexArrayObject);
+
+	// Vertex buffer
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(VertexPNTT) * m_vertexList.size(), (const void*)m_vertexList.data(), GL_STATIC_DRAW);
+
+	// Index buffer
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * m_indexList.size(), (const void*)m_indexList.data(), GL_STATIC_DRAW);
+
+	// Setup the attributes --------------------------------------------------------------------------
+	glEnableVertexAttribArray(0); // Enable vertex position
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPNTT), 0); // Position
+
+	glEnableVertexAttribArray(1); // Enable vertex normal
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPNTT), (GLvoid*)(sizeof(float) * 3)); // Normal
+
+	glEnableVertexAttribArray(2); // Enable vertex texture
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexPNTT), (GLvoid*)(sizeof(float) * 6)); // Texture
+
+	glEnableVertexAttribArray(3); // Enable vertex tangent
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPNTT), (GLvoid*)(sizeof(float) * 8)); // Tangent
+	
+	// -----------------------------------------------------------------------------------------------
+	glBindVertexArray(0);
+}
+
+
+// ----------------------------------------------------------------------------
+
+template <>
 void Mesh<VertexPTT>::setupVertexInput()
 {
 	// Generate the vertex array

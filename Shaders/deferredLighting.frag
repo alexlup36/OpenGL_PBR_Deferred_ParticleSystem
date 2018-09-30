@@ -64,10 +64,7 @@ uniform sampler2D gNormal;
 uniform sampler2D gAlbedo;
 uniform sampler2D gPBR;
 
-uniform float dispMapScale;
 uniform float normalMapScale;
-uniform vec2 textureOffset;
-uniform vec2 textureTile;
 uniform vec3 viewPos;
 uniform float gamma;
 
