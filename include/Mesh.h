@@ -244,12 +244,12 @@ inline GLuint Mesh<T>::vaoQuadSetup()
 
 	// Quad vertex data
 	static const GLfloat quadVertexData[] = {
-		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-		1.0f, -1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-		-1.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-		-1.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-		1.0f, -1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-		1.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
 	};
 	// Create quad vertex buffer
 	GLuint quadVertexBuffer;
@@ -263,10 +263,10 @@ inline GLuint Mesh<T>::vaoQuadSetup()
 
 	// Vertex attribute
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)0);
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(3 * sizeof(float)));
 
 	// Unbind vertex array object
 	glBindVertexArray(0);

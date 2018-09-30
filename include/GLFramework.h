@@ -115,6 +115,7 @@ private:
 	std::unique_ptr<Object<VertexPN>> m_pointLightObject;
 
 	std::unique_ptr<Object<VertexPNTT>> m_planeObjectDeferred;
+	std::unique_ptr<Object<VertexPNTT>> m_torusModelDeferred;
 };
 
 #endif // GLFRAMEWORK_H

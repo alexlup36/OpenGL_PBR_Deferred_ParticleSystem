@@ -6,6 +6,13 @@ GLuint Framebuffer::m_uiScreenQuadVAO = -1;
 
 // ----------------------------------------------------------------------------
 
+Framebuffer::~Framebuffer()
+{
+	glDeleteFramebuffers(1, &m_framebufferHandle);
+}
+
+// ----------------------------------------------------------------------------
+
 Framebuffer &Framebuffer::initialize(GLsizei width, GLsizei height)
 {
 	assert(width > 0 && "Invalid width size. Specified value needs to be > 0");
@@ -39,7 +46,7 @@ bool Framebuffer::create()
 		{
 			// Attach the color textures to the render target
 			unsigned int colorAttachment = GL_COLOR_ATTACHMENT0 + colorAttachmentIndex;
-			glFramebufferTexture(GL_FRAMEBUFFER, colorAttachment, m_colorTextures[colorAttachmentIndex], 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachment, GL_TEXTURE_2D, m_colorTextures[colorAttachmentIndex], 0);
 			drawBuffers.push_back(colorAttachment);
 		}
 
@@ -61,7 +68,7 @@ bool Framebuffer::create()
 		m_clearMask |= GL_DEPTH_BUFFER_BIT;
 
 		if (m_readDepth)
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depthTexture, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture, 0);
 		else
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depthTexture);
 	}
@@ -97,8 +104,8 @@ Framebuffer &Framebuffer::addColorTarget(const std::string &rtName, GLint intern
 		elementType,
 		nullptr);
 	// Filtering
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	// Add the newly created color texture to our array of color targets
 	m_colorTextures.push_back(colorTexture);
 	m_colorTextureNames[rtName] = colorTexture;

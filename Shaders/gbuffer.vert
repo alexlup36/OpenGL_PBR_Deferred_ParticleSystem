@@ -13,6 +13,8 @@ out VS_OUT
 } vs_out;
 
 uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 uniform mat4 normalMat;
 
 void calculateTNBMatrix()
@@ -32,7 +34,9 @@ void calculateTNBMatrix()
 
 void main()
 {
-    vs_out.wsPosition = (model * vec4(vertexPosition, 1.0f)).xyz;
-    vs_out.uv = vertexTexCoord;
+	vec4 wsPosition = model * vec4(vertexPosition, 1.0f);
+	vs_out.wsPosition = wsPosition.xyz;
+	vs_out.uv = vertexTexCoord;
+	gl_Position = projection * view * wsPosition;
     calculateTNBMatrix();
 }

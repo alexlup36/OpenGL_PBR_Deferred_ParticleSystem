@@ -104,28 +104,28 @@ void GLFramework::draw(double dt)
 
 	drawToGBuffer(dt);
 	drawGbufferToScreen();
-	//drawDeferredLighting(dt);
+	drawDeferredLighting(dt);
 
 	// ------------------------------------------------------------------------
 
 	// Render color to screen
 	// Activate shader
-	// glBindVertexArray(m_quadVAO);
-	// m_finalShader.useShader();
-	// GLuint textureUnit = 0;
-	// m_displayFramebuffer.renderColorTargetToScreen(0, 0, windowWidth(), windowHeight(), textureUnit);
-	// // Set tone mapper
-	// m_finalShader.setScalar<int>(ShaderUniform::ToneMapper, static_cast<int>(m_pGUI->m_toneMapper));
-	// m_finalShader.setScalar<float>(ShaderUniform::GammaHDR, m_pGUI->m_gammaHDR);
-	// m_finalShader.setScalar<float>(ShaderUniform::Exposure, m_pGUI->m_exposure);
-	// m_finalShader.setScalar<float>(ShaderUniform::ExposureBias, m_pGUI->m_exposureBias);
-	// m_finalShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
-	// // Draw triangles
-	// glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(m_quadVAO);
+	m_finalShader.useShader();
+	GLuint textureUnit = 0;
+	m_displayFramebuffer.renderColorTargetToScreen(0, 0, windowWidth(), windowHeight(), textureUnit);
+	// Set tone mapper
+	m_finalShader.setScalar<int>(ShaderUniform::ToneMapper, static_cast<int>(m_pGUI->m_toneMapper));
+	m_finalShader.setScalar<float>(ShaderUniform::GammaHDR, m_pGUI->m_gammaHDR);
+	m_finalShader.setScalar<float>(ShaderUniform::Exposure, m_pGUI->m_exposure);
+	m_finalShader.setScalar<float>(ShaderUniform::ExposureBias, m_pGUI->m_exposureBias);
+	m_finalShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
+	// Draw triangles
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	// ------------------------------------------------------------------------
 	// Draw GUI
-	//m_pGUI->draw();
+	m_pGUI->draw();
 
 	// Swap buffers
 	glfwSwapBuffers(window());
@@ -232,7 +232,7 @@ bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, 
 		.addColorTarget("Position", GL_RGB16F, GL_RGB, GL_FLOAT)
 		.addColorTarget("Normal", GL_RGB16F, GL_RGB, GL_FLOAT)
 		.addColorTarget("Albedo", GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE)
-		.addColorTarget("PBR", GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE)
+		.addColorTarget("PBR", GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE)
 		.addDepthTarget(GL_DEPTH_COMPONENT32);
 	if (m_gbufferFramebuffer.create() == false)
 	{
@@ -411,6 +411,7 @@ bool GLFramework::setupScene()
 	m_pointLightObject = std::make_unique<Object<VertexPN>>("Assets/sphere.obj");
 
 	m_planeObjectDeferred = std::make_unique<Object<VertexPNTT>>("Assets/plane2.obj");
+	m_torusModelDeferred = std::make_unique<Object<VertexPNTT>>("Assets/torus.obj");
 
 	// Load meshes
 	m_pTorusModel = std::make_unique<Model<VertexPN>>("Assets/torus.obj");
@@ -418,13 +419,13 @@ bool GLFramework::setupScene()
 	m_pPlaneModel = std::make_unique<Model<VertexPTNT>>("Assets/plane2.obj");
 	m_pLightModel = std::make_unique<Model<VertexPN>>("Assets/sphere.obj");
 	m_pSphereModel = std::make_unique<Model<VertexPTNT>>("Assets/planet.obj");
-	m_bunny = std::make_unique<Model<VertexPTNT>>("Assets/models/bunny.obj");
-	//m_dragon = std::make_unique<Model<VertexPTNT>>("Assets/models/dragon.obj");
-	//m_buddha = std::make_unique<Model<VertexPTNT>>("Assets/models/buddha.obj");
-	//m_lucy = std::make_unique<Model<VertexPTNT>>("Assets/models/lucy.obj");
-	//m_armadillo = std::make_unique<Model<VertexPTNT>>("Assets/models/armadillo.obj");
-	//m_tyra = std::make_unique<Model<VertexPTNT>>("Assets/models/tyra.obj");
-	//m_chair = std::make_unique<Model<VertexPTNT>>("Assets/models/chair.obj");
+	m_bunny = std::make_unique<Model<VertexPTNT>>("Assets/bunny.obj");
+	//m_dragon = std::make_unique<Model<VertexPTNT>>("Assets/dragon.obj");
+	//m_buddha = std::make_unique<Model<VertexPTNT>>("Assets/buddha.obj");
+	//m_lucy = std::make_unique<Model<VertexPTNT>>("Assets/lucy.obj");
+	//m_armadillo = std::make_unique<Model<VertexPTNT>>("Assets/armadillo.obj");
+	//m_tyra = std::make_unique<Model<VertexPTNT>>("Assets/tyra.obj");
+	//m_chair = std::make_unique<Model<VertexPTNT>>("Assets/chair.obj");
 
 	glCheckError();
 
@@ -526,10 +527,11 @@ void GLFramework::drawToGBuffer(double dt)
 {
 	glCheckError();
 
+	m_gbuffer.useShader();
+
 	// Set the gbuffer as the active framebuffer
 	m_gbufferFramebuffer.renderToTexture();
 
-	m_gbuffer.useShader();
 	// Set uniforms
 	MaterialData::getInstance().matRustedIron.bindTextures(m_gbuffer.program());
 	m_gbuffer.set<glm::vec2>(ShaderUniform::TextureOffset, m_pGUI->m_textureOffset);
@@ -542,6 +544,12 @@ void GLFramework::drawToGBuffer(double dt)
 	m_planeObjectDeferred->update(dt);
 	m_planeObjectDeferred->render(m_gbuffer);
 
+	m_torusModelDeferred->transform().setPos(glm::vec3(0.0f, -1.0f, -2.0f));
+	m_torusModelDeferred->transform().setScale(glm::vec3(1.0f, 1.0f, 1.0f));
+	m_torusModelDeferred->transform().setRotation(m_pGUI->m_rotation);
+	m_torusModelDeferred->update(dt);
+	m_torusModelDeferred->render(m_gbuffer);
+	
 	glCheckError();
 }
 
@@ -579,12 +587,9 @@ void GLFramework::drawDeferredLighting(double dt)
 	m_deferredLighting.setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
 	m_deferredLighting.setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
 	m_deferredLighting.setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
-	// Draw main plane
-	m_planeObject->transform().setPos(glm::vec3(0.0f, -1.0f, -2.0f));
-	m_planeObject->transform().setScale(glm::vec3(0.5f, 0.001f, 0.5f));
-	m_planeObject->transform().setRotation(m_pGUI->m_rotation);
-	m_planeObject->update(dt);
-	m_planeObject->render(m_deferredLighting);
+
+	glBindVertexArray(m_quadVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glCheckError();
 }

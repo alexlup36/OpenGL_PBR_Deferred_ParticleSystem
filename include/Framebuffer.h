@@ -18,7 +18,7 @@ public:
 	};
 
 	Framebuffer() = default;
-	~Framebuffer() = default;
+	~Framebuffer();
 
 	Framebuffer &initialize(GLsizei width, GLsizei height);
 	bool create();
@@ -64,7 +64,7 @@ private:
 
 	std::map<std::string, GLuint> m_colorTextureNames;
 	std::vector<GLuint> m_colorTextures;
-	glm::vec4 m_clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	glm::vec4 m_clearColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
 	static GLuint m_uiScreenQuadVAO;
 	static GLuint renderTextureToScreenSetup();
