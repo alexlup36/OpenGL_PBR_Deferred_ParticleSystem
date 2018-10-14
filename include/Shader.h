@@ -3,6 +3,7 @@
 
 #include <string>
 #include "Common.h"
+#include "LightData.h"
 
 #include <glm/glm.hpp>
 #include <glm/vec2.hpp>

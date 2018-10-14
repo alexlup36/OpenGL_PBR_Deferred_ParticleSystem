@@ -6,6 +6,11 @@ unsigned int SpotLight::m_spotLightCounter = 0;
 
 void LightData::initialize()
 {
+	// Reserve space to store light source information
+	m_pointLights.reserve(MAX_POINT_LIGHTS);
+	m_directionalLights.reserve(MAX_DIR_LIGHTS);
+	m_spotLights.reserve(MAX_SPOT_LIGHTS);
+
 	// Test point light source
 	PointLight pointLight1 = {};
 	pointLight1.ambientComp = glm::vec3(1.0f, 1.0f, 1.0f);

@@ -289,7 +289,7 @@ void GUI::updateLightSourcesList()
 	// }
 
 	m_lightSources = LightData::getInstance().getIds();
-	for (auto &lightSource : m_lightSources) 
+	for (std::string &lightSource : m_lightSources)
 	{
 		//char* lightSourceName = new char[lightSource.size() + 1];
 		//const char* nameString = lightSource.c_str();

@@ -11,6 +11,10 @@
 #define WHITE glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
 #define BLACK glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
 
+const unsigned int MAX_POINT_LIGHTS = 20;
+const unsigned int MAX_DIR_LIGHTS = 20;
+const unsigned int MAX_SPOT_LIGHTS = 20;
+
 class LightData
 {
 
@@ -25,16 +29,19 @@ public:
 	// Add light sources
 	inline void addPointLight(const PointLight &pointLight) 
 	{
+		assert(m_pointLights.size() < MAX_POINT_LIGHTS);
 		m_pointLights.push_back(pointLight);
 		m_globalLights[m_globalIndex++] = &m_pointLights.back();
 	}
 	inline void addDirectionalLight(const DirectionalLight &directionalLight) 
 	{
+		assert(m_directionalLights.size() < MAX_DIR_LIGHTS);
 		m_directionalLights.push_back(directionalLight);
 		m_globalLights[m_globalIndex++] = &m_directionalLights.back();
 	}
 	inline void addSpotLight(const SpotLight &spotLight) 
 	{
+		assert(m_spotLights.size() < MAX_SPOT_LIGHTS);
 		m_spotLights.push_back(spotLight);
 		m_globalLights[m_globalIndex++] = &m_spotLights.back();
 	}
@@ -64,7 +71,7 @@ public:
 	std::vector<std::string> getIds()
 	{
 		std::vector<std::string> ids;
-		for (auto lightSource : m_globalLights)
+		for (auto &lightSource : m_globalLights)
 			ids.push_back(lightSource.second->getId());
 		return ids;
 	}
