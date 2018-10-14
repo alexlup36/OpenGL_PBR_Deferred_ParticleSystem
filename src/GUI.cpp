@@ -1,6 +1,8 @@
 #include <assert.h>
 #include <iostream>
 #include <string>
+#include <algorithm>
+#include <vector>
 
 #include "Input.h"
 #include <GLFW/glfw3.h>
@@ -205,10 +207,15 @@ void GUI::draw()
 	// Setup
 	ImGui::Begin("MainWindow");
 	ImGui::Text("Properties");
-	ImGui::SliderFloat3("Light direction", &m_lightDirection.x, -1.0f, 1.0f);
+	ImGui::SliderFloat3("Point light position", &m_lightDirection.x, -20.0f, 20.0f);
+	ImGui::SliderFloat("Normal map scale", &m_normalMapScale, 1.0f, 5.0f);
+	ImGui::SliderFloat2("Texture offset", &m_textureOffset.x, 0.0f, 1.0f);
+	ImGui::SliderFloat2("Texture tile", &m_textureTile.x, 0.0f, 5.0f);
 	ImGui::ColorEdit3("Clear color", (float*)&m_clearColor);
 	ImGui::Checkbox("VSync", &m_enableVsync);
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	drawGbufferSettings();
+	drawLightPanel();
     ImGui::End();
 
 	// Rendering
@@ -216,4 +223,92 @@ void GUI::draw()
 	glfwGetFramebufferSize(m_window, &m_framebufferWidth, &m_framebufferHeight);
 	glViewport(0, 0, m_framebufferWidth, m_framebufferHeight);
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void GUI::drawGbufferSettings()
+{
+	ImGui::Text("Gbuffer Visualisation");
+
+	ImGui::Checkbox("Enable position buffer", &m_gBufferSettings.m_enablePosition);
+	ImGui::Checkbox("Enable albedo buffer", &m_gBufferSettings.m_enableAlbedo);
+	ImGui::Checkbox("Enable PBR buffer", &m_gBufferSettings.m_enablePBR);
+	ImGui::Checkbox("Enable normal buffer", &m_gBufferSettings.m_enableNormal);
+}
+
+void GUI::drawLightPanel()
+{
+	ImGui::Text("Light properties");
+
+	// Display list of light source type
+	ImGui::ListBox("Light types", &m_lightTypeSelection, LightTypes.data(), LightTypes.size());
+	ImGui::ListBox("Light sources", &m_lightSourceSelection, m_lightSourceNames.data(), m_lightSourceNames.size());
+
+	// Add light source button
+	bool addLightSourcePressed = ImGui::Button("Add light source");
+	if (addLightSourcePressed)
+	{
+		m_lightPanelRequiresUpdate = true;
+
+		// Add new light source
+		switch (m_lightTypeSelection)
+		{
+			case 0:
+			{
+				DirectionalLight newDirLight;
+				LightData::getInstance().addDirectionalLight(newDirLight);
+				break;
+			}
+			case 1:
+			{
+				PointLight newPointLight;
+				LightData::getInstance().addPointLight(newPointLight);
+				break;
+			}
+			case 2:
+			{
+				SpotLight newSpotLight;
+				LightData::getInstance().addSpotLight(newSpotLight);
+				break;
+			}
+			default:
+				std::cout << "Invalid light selection.\n";
+				break;
+		}
+	}
+
+	if (m_lightPanelRequiresUpdate) updateLightSourcesList();
+}
+
+void GUI::updateLightSourcesList()
+{
+	m_lightSourceNames.clear();
+	// for (auto lightName : m_lightSourceNames)
+	// {
+	// 	if (lightName)
+	// 		delete[] lightName;	
+	// }
+
+	m_lightSources = LightData::getInstance().getIds();
+	for (auto &lightSource : m_lightSources) 
+	{
+		//char* lightSourceName = new char[lightSource.size() + 1];
+		//const char* nameString = lightSource.c_str();
+		//std::strcpy(lightSourceName, nameString);
+		m_lightSourceNames.push_back(lightSource.c_str());
+	}
+	m_lightPanelRequiresUpdate = false;
+}
+
+void GUI::drawDirLightSettings()
+{
+}
+
+void GUI::drawPointLightSettings()
+{
+
+}
+
+void GUI::drawSpotLightSettings()
+{
+
 }

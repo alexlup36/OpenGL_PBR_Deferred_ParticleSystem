@@ -28,6 +28,7 @@ private:
 	virtual void drawScene(double dt);
 	void drawToGBuffer(double dt);
 	void drawDeferredLighting(double dt);
+	void drawForwardLighting(double dt);
 	void drawGbufferToScreen();
 	virtual void drawSceneToDepth();
 

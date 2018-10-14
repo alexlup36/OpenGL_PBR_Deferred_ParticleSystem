@@ -4,6 +4,7 @@
 #include <stdio.h>
 //#include <AntTweakBar.h>
 #include <glm/gtc/quaternion.hpp>
+#include <array>
 
 class GUI 
 {
@@ -12,6 +13,18 @@ public:
 	~GUI();
 	bool setup(GLFWwindow* window, int w, int h);
 	void draw();
+
+private:
+	void drawGbufferSettings();
+	void drawLightPanel();
+	void updateLightSourcesList();
+	void drawDirLightSettings();
+	void drawPointLightSettings();
+	void drawSpotLightSettings();
+
+	std::vector<const char*> m_lightSourceNames;
+	std::vector<std::string> m_lightSources;
+
 public:
 
 	enum class DisplayMode
@@ -37,6 +50,24 @@ public:
 
 		COUNT,
 	};
+
+	struct GbufferVisualisation
+	{
+		bool m_enableAlbedo = false;
+		bool m_enablePBR = false;
+		bool m_enableNormal = false;
+		bool m_enablePosition = false;
+	};
+	GbufferVisualisation m_gBufferSettings;
+
+	std::array<const char*, 3> LightTypes = {
+		"DirectionalLight",
+		"PointLight",
+		"SpotLight"
+	};
+	int m_lightTypeSelection = -1;
+	int m_lightSourceSelection = -1;
+	bool m_lightPanelRequiresUpdate = true;
 
 	//TwBar* bar;
 	double test;

@@ -339,7 +339,8 @@ void main()
 	// --------------------------------------
 
 	// Get PBR material
-	vec3 normal = normalMapScale * normalize(2.0f * texture(gNormal, uv).rgb - 1.0f);
+	vec3 tempNormal = normalize(2.0f * texture(gNormal, uv).rgb - 1.0f);
+	vec3 normal = vec3(tempNormal.x, tempNormal.y, tempNormal.z * normalMapScale);
 	vec4 pbrTemp = texture(gPBR, uv);
 	material.roughness = pbrTemp.r;
 	material.metallic = pbrTemp.g;

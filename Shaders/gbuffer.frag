@@ -144,8 +144,6 @@ void main()
 		texCoordParallax = texCoord;
 	}
 
-	texCoordParallax = fs_in.uv;
-
 	// Fragment position
 	gPosition = fs_in.wsPosition;
 	// Normal

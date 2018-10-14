@@ -100,11 +100,11 @@ struct MaterialTexturePBR
 	void bindTextures(GLuint program)
 	{
 		if (albedo) albedo->bind(program);
-		//if (normal) normal->bind(program);
-		//if (displacement) displacement->bind(program);
-		//if (metallic) metallic->bind(program);
-		//if (roughness) roughness->bind(program);
-		//if (ao) ao->bind(program);
+		if (normal) normal->bind(program);
+		if (displacement) displacement->bind(program);
+		if (metallic) metallic->bind(program);
+		if (roughness) roughness->bind(program);
+		if (ao) ao->bind(program);
 	}
 };
 

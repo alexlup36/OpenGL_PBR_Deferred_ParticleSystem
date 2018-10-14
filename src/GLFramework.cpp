@@ -105,8 +105,7 @@ void GLFramework::draw(double dt)
 	drawToGBuffer(dt);
 	drawGbufferToScreen();
 	drawDeferredLighting(dt);
-
-	// ------------------------------------------------------------------------
+	//drawForwardLighting(dt);
 
 	// Render color to screen
 	// Activate shader
@@ -141,30 +140,54 @@ void GLFramework::drawGbufferToScreen()
 	m_quadShader.useShader();
 	glBindVertexArray(m_quadVAO);
 	GLuint textureUnit;
+	int leftOffset = 0;
+	int horizontalSpacing = 0;
+	int gbufferVisualisationWidth = 200;
+	int gbufferVisualisationHeight = 130;
 
-	// Position
-	textureUnit = 0;
-	m_gbufferFramebuffer.renderColorTargetToScreen(0, 0, 200, 130, textureUnit);
-	m_quadShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	if (m_pGUI->m_gBufferSettings.m_enablePosition)
+	{
+		// Position
+		textureUnit = 0;
+		int left = leftOffset;
+		m_gbufferFramebuffer.renderColorTargetToScreen(left, 0, gbufferVisualisationWidth, gbufferVisualisationHeight, textureUnit);
+		m_quadShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		leftOffset += (gbufferVisualisationWidth + horizontalSpacing);
+	}
 
-	// Normal
-	textureUnit = 1;
-	m_gbufferFramebuffer.renderColorTargetToScreen(200, 0, 200, 130, textureUnit);
-	m_quadShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	if (m_pGUI->m_gBufferSettings.m_enableNormal)
+	{
+		// Normal
+		textureUnit = 1;
+		int left = leftOffset;
+		m_gbufferFramebuffer.renderColorTargetToScreen(left, 0, gbufferVisualisationWidth, gbufferVisualisationHeight, textureUnit);
+		m_quadShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		leftOffset += (gbufferVisualisationWidth + horizontalSpacing);
+	}
 
-	// Albedo
-	textureUnit = 2;
-	m_gbufferFramebuffer.renderColorTargetToScreen(400, 0, 200, 130, textureUnit);
-	m_quadShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	if (m_pGUI->m_gBufferSettings.m_enableAlbedo)
+	{
+		// Albedo
+		textureUnit = 2;
+		int left = leftOffset;
+		m_gbufferFramebuffer.renderColorTargetToScreen(left, 0, gbufferVisualisationWidth, gbufferVisualisationHeight, textureUnit);
+		m_quadShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		leftOffset += (gbufferVisualisationWidth + horizontalSpacing);
+	}
 
-	// PBR
-	textureUnit = 3;
-	m_gbufferFramebuffer.renderColorTargetToScreen(600, 0, 200, 130, textureUnit);
-	m_quadShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	if (m_pGUI->m_gBufferSettings.m_enablePBR)
+	{
+		// PBR
+		textureUnit = 3;
+		int left = leftOffset;
+		m_gbufferFramebuffer.renderColorTargetToScreen(left, 0, gbufferVisualisationWidth, gbufferVisualisationHeight, textureUnit);
+		m_quadShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		leftOffset += (gbufferVisualisationWidth + horizontalSpacing);
+	}
 
 	glCheckError();
 }
@@ -232,7 +255,7 @@ bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, 
 		.addColorTarget("Position", GL_RGB16F, GL_RGB, GL_FLOAT)
 		.addColorTarget("Normal", GL_RGB16F, GL_RGB, GL_FLOAT)
 		.addColorTarget("Albedo", GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE)
-		.addColorTarget("PBR", GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE)
+		.addColorTarget("PBR", GL_RGB16F, GL_RGB, GL_FLOAT)
 		.addDepthTarget(GL_DEPTH_COMPONENT32);
 	if (m_gbufferFramebuffer.create() == false)
 	{
@@ -451,8 +474,8 @@ void GLFramework::drawScene(double dt)
 	glm::mat4 m, v, p, normalMat;
 
 	// Get lights
-	auto& pointLight1 = LightData::getInstance().pointLight1;
-	auto& directionalLight1 = LightData::getInstance().directionalLight1;
+	auto& pointLight1 = LightData::getInstance().pointLight(0);
+	auto& directionalLight1 = LightData::getInstance().directionalLight(0);
 
 	// ------
 
@@ -467,7 +490,7 @@ void GLFramework::drawScene(double dt)
 	m_phongColorShader.setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
 	m_phongColorShader.setScalar<float>(ShaderUniform::SpecularStrength, m_pGUI->m_specularStrength);
 	// Draw point light sphere
-	m_pointLightObject->transform().setPos(LightData::getInstance().pointLight1.direction);
+	m_pointLightObject->transform().setPos(LightData::getInstance().pointLight(0).position);
 	m_pointLightObject->transform().setScale(glm::vec3(0.01f));
 	m_pointLightObject->transform().setRotation(m_pGUI->m_rotation);
 	m_pointLightObject->update(dt);
@@ -478,7 +501,7 @@ void GLFramework::drawScene(double dt)
 	m_pbr.useShader();
 	// Setup lighting
 	m_pbr.setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
-	m_pbr.setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
+	m_pbr.setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.position);
 	m_pbr.setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
 	//m_pbr->setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
 	//m_pbr->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
@@ -558,8 +581,8 @@ void GLFramework::drawDeferredLighting(double dt)
 	glCheckError();
 
 	// Get lights
-	auto& pointLight1 = LightData::getInstance().pointLight1;
-	auto& directionalLight1 = LightData::getInstance().directionalLight1;
+	auto& pointLight1 = LightData::getInstance().pointLight(0);
+	auto& directionalLight1 = LightData::getInstance().directionalLight(0);
 
 	// Set the display framebuffer as the active framebuffer
 	m_displayFramebuffer.renderToTexture();
@@ -568,10 +591,10 @@ void GLFramework::drawDeferredLighting(double dt)
 	m_deferredLighting.useShader();
 	// Setup lighting
 	m_deferredLighting.setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
-	m_deferredLighting.setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
+	m_deferredLighting.setPointLight<glm::vec3>(PointLightUniform::Position, 0, m_pGUI->m_lightDirection);
 	m_deferredLighting.setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
-	//m_deferredLighting->setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
-	//m_deferredLighting->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
+	//m_deferredLighting.setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
+	//m_deferredLighting.setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
 	// Set uniforms
 	m_depthMap->bind(m_deferredLighting.program());
 	
@@ -587,11 +610,67 @@ void GLFramework::drawDeferredLighting(double dt)
 	m_deferredLighting.setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
 	m_deferredLighting.setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
 	m_deferredLighting.setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
+	m_deferredLighting.set<glm::vec3>(ShaderUniform::ViewPos, CameraMan::Instance().getActiveCamera()->viewPos());
 
 	glBindVertexArray(m_quadVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glCheckError();
+}
+
+void GLFramework::drawForwardLighting(double dt)
+{
+	glDepthFunc(GL_ALWAYS);
+
+	// Set the display framebuffer as the active framebuffer
+	m_displayFramebuffer.renderToTexture();
+
+	// Get lights
+	auto& pointLight1 = LightData::getInstance().pointLight(0);
+	auto& directionalLight1 = LightData::getInstance().directionalLight(0);
+
+	// ------------------------------------------------------------------------
+	// Render PBR
+	m_pbr.useShader();
+	// Setup lighting
+	//m_pbr.setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
+	//m_pbr.setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
+	//m_pbr.setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
+	m_pbr.setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
+	m_pbr.setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
+	// Set uniforms
+	m_depthMap->bind(m_pbr.program());
+	MaterialData::getInstance().matRustedIron.bindTextures(m_pbr.program());
+	m_pbr.set<glm::vec2>(ShaderUniform::TextureOffset, m_pGUI->m_textureOffset);
+	m_pbr.set<glm::vec2>(ShaderUniform::TextureTile, m_pGUI->m_textureTile);
+	m_pbr.setScalar<float>(ShaderUniform::DisplacementMapScale, m_pGUI->m_dispMapScale);
+	m_pbr.setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
+	m_pbr.setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
+	m_pbr.setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
+	// Draw main plane
+	m_planeObject->transform().setPos(glm::vec3(0.0f, -1.0f, -10.0f));
+	m_planeObject->transform().setScale(glm::vec3(0.5f, 0.001f, 0.5f));
+	m_planeObject->transform().setRotation(m_pGUI->m_rotation);
+	m_planeObject->update(dt);
+	m_planeObject->render(m_pbr);
+
+	// // Render Phong
+	// m_phongColorShader.useShader();
+	// // Setup lighting
+	// m_phongColorShader.set<glm::vec3>(ShaderUniform::LightColor, WHITE);
+	// m_phongColorShader.set<glm::vec3>(ShaderUniform::LightDir, m_pGUI->m_lightDirection);
+	// // Set uniforms
+	// m_phongColorShader.set<glm::vec4>(ShaderUniform::ObjectColor, WHITE);
+	// m_phongColorShader.setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
+	// m_phongColorShader.setScalar<float>(ShaderUniform::SpecularStrength, m_pGUI->m_specularStrength);
+	// // Draw point light sphere
+	// m_pointLightObject->transform().setPos(LightData::getInstance().pointLight1.direction);
+	// m_pointLightObject->transform().setScale(glm::vec3(0.01f));
+	// m_pointLightObject->transform().setRotation(m_pGUI->m_rotation);
+	// m_pointLightObject->update(dt);
+	// m_pointLightObject->render(m_phongColorShader);
+
+	// ------------------------------------------------------------------------
 }
 
 void GLFramework::drawSceneToDepth()
@@ -602,7 +681,7 @@ void GLFramework::drawSceneToDepth()
 		-10.0f, 10.0f,
 		nearPlane, farPlane);
 	glm::mat4 lightView = glm::lookAt(
-		-LightData::getInstance().directionalLight1.direction,
+		-LightData::getInstance().directionalLight(0).direction,
 		glm::vec3(0.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f)); // Up vector ?????
 	glm::mat4 lightMatrix = lightProjection * lightView;
