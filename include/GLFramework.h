@@ -57,7 +57,7 @@ private:
 
 	// Shaders
 	Shader m_basicShader, m_finalShader, m_phongColorShader, m_phongTextureShader, m_parallaxMapping, m_normalMapping;
-	Shader m_colorPBR, m_pbr, m_depth, m_skyBox, m_gbuffer, m_quadShader, m_deferredLighting;
+	Shader m_colorPBR, m_pbr, m_depth, m_skyBox, m_gbuffer, m_quadShader, m_quadDepthShader, m_deferredLighting;
 
 	// Textures
 	std::unique_ptr<Texture2D> m_depthMap = nullptr;

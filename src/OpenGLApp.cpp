@@ -121,10 +121,6 @@ void OpenGLApp::update(double dt)
 
 void OpenGLApp::draw(double dt)
 {
-	// Draw
-	glClear(GL_COLOR_BUFFER_BIT);
-	glClear(GL_DEPTH_BUFFER_BIT);
-	glViewport(0, 0, m_iWindowWidth, m_iWindowHeight);
 }
 
 // ----------------------------------------------------------------------------
@@ -173,6 +169,7 @@ bool OpenGLApp::setOpenGLState() const
 	// Enable depth test and set depth function
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+	glDepthMask(GL_TRUE);
 
 	// Success
 	return true;

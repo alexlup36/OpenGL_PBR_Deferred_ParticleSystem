@@ -21,6 +21,7 @@ private:
 	void drawDirLightSettings(DirectionalLight &dirLight);
 	void drawPointLightSettings(PointLight &pointLight);
 	void drawSpotLightSettings(SpotLight &spotLight);
+	void drawObjectSettings();
 
 	std::vector<const char*> m_lightSourceNames;
 	std::vector<std::string> m_lightSources;
@@ -57,6 +58,7 @@ public:
 		bool m_enablePBR = false;
 		bool m_enableNormal = false;
 		bool m_enablePosition = false;
+		bool m_enableDepth = false;
 	};
 	GbufferVisualisation m_gBufferSettings;
 
@@ -68,6 +70,8 @@ public:
 	int m_lightTypeSelection = 0;
 	int m_lightSourceSelection = 0;
 	bool m_lightPanelRequiresUpdate = true;
+
+	bool m_fileSystemRequiresUpdate = true;
 
 	glm::quat m_rotation = glm::quat();
 	glm::vec2 m_textureOffset = glm::vec2(0.0f, 0.0f);

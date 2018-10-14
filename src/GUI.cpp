@@ -77,6 +77,11 @@ void GUI::draw()
 	{
 		drawLightPanel();
 	}
+
+	if (ImGui::CollapsingHeader("Object properties"))
+	{
+		drawObjectSettings();
+	}
 	
     ImGui::End();
 
@@ -93,6 +98,7 @@ void GUI::drawGbufferSettings()
 	ImGui::Checkbox("Enable albedo buffer", &m_gBufferSettings.m_enableAlbedo);
 	ImGui::Checkbox("Enable PBR buffer", &m_gBufferSettings.m_enablePBR);
 	ImGui::Checkbox("Enable normal buffer", &m_gBufferSettings.m_enableNormal);
+	ImGui::Checkbox("Enable depth buffer", &m_gBufferSettings.m_enableDepth);
 }
 
 void GUI::drawLightPanel()
@@ -220,4 +226,9 @@ void GUI::drawSpotLightSettings(SpotLight &spotLight)
 	ImGui::SliderFloat("Coscutoff", &spotLight.coscutoff, -10.0f, 10.0f);
 	ImGui::SliderFloat("Cutoff", &spotLight.cutoff, -10.0f, 10.0f);
 	ImGui::SliderFloat("Exponent", &spotLight.exponent, -10.0f, 10.0f);
+}
+
+void GUI::drawObjectSettings()
+{
+
 }

@@ -5,7 +5,7 @@
         "commandLine": "",
         "environment": [
         ],
-        "executable": "/home/bishopp/projects/openglframework_linux/build/openglframework",
+        "executable": "/home/bishopp/Projects/openglframework_linux/build/openglframework",
         "inject": false,
         "options": {
             "allowFullscreen": true,
@@ -20,6 +20,6 @@
             "refAllResources": false,
             "verifyMapWrites": false
         },
-        "workingDir": "/home/bishopp/projects/openglframework_linux"
+        "workingDir": "/home/bishopp/Projects/openglframework_linux"
     }
 }

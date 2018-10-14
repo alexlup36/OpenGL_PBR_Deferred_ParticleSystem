@@ -186,10 +186,13 @@ GLuint Framebuffer::renderTextureToScreenSetup()
 
 // ----------------------------------------------------------------------------
 
-void Framebuffer::renderToTexture(RenderTargetType targetType)
+void Framebuffer::renderToTexture(RenderTargetType targetType, bool clear)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_framebufferHandle);
 	glClearColor(m_clearColor.x, m_clearColor.y, m_clearColor.z, m_clearColor.w);
+	
+	// Clear
+	if (clear) glClear(m_clearMask);
 
 	if (targetType == RenderTargetType::DEPTH_TARGET)
 	{
@@ -203,8 +206,6 @@ void Framebuffer::renderToTexture(RenderTargetType targetType)
 
 	// Set viewport and clear color and depth
 	glViewport(0, 0, m_width, m_height);
-	// Clear
-	glClear(m_clearMask);
 }
 
 // ----------------------------------------------------------------------------

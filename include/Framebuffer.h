@@ -25,7 +25,7 @@ public:
 	Framebuffer &addColorTarget(const std::string &rtName, GLint internalFormat, GLenum elementFormat, GLenum elementType);
 	Framebuffer &addDepthTarget(GLint internalFormat, GLsizei width = 0, GLsizei height = 0, bool readDepth = true);
 
-	void renderToTexture(RenderTargetType targetType = RenderTargetType::COLOR_TARGET);
+	void renderToTexture(RenderTargetType targetType = RenderTargetType::COLOR_TARGET, bool clear = true);
 	void renderColorTargetToScreen(int x, int y, int width, int height, GLuint textureUnit);
 	void renderDepthTargetToScreen(int x, int y, int width, int height, GLuint textureUnit);
 	inline void set() const { glBindFramebuffer(GL_FRAMEBUFFER, m_framebufferHandle); }
