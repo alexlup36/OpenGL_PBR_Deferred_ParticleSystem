@@ -2,9 +2,9 @@
 
 // ----------------------------------------------------------------------------
 
-#define MAX_DIR_LIGHTS 1
-#define MAX_POINT_LIGHTS 1
-#define MAX_SPOT_LIGHTS 1
+#define MAX_DIR_LIGHTS 20
+#define MAX_POINT_LIGHTS 20
+#define MAX_SPOT_LIGHTS 20
 
 // ----------------------------------------------------------------------------
 
@@ -14,6 +14,7 @@ struct DirectionalLight
 	vec3 ambientComp;
 	vec3 diffuseComp;
 	vec3 specularComp;
+	bool enabled;
 };
 
 struct PointLight
@@ -23,12 +24,12 @@ struct PointLight
 	vec3 ambientComp;
 	vec3 diffuseComp;
 	vec3 specularComp;
+	bool enabled;
 };
 
 struct SpotLight
 {
 	vec3 position;
-	vec3 attenuation;
 	vec3 ambientComp;
 	vec3 diffuseComp;
 	vec3 specularComp;
@@ -36,6 +37,7 @@ struct SpotLight
 	float exponent;
 	float cutoff;
 	float coscutoff;
+	bool enabled;
 };
 
 struct Material
@@ -103,6 +105,8 @@ vec4 phongShading(vec3 normal, vec4 color, vec3 viewDirection)
 
 	for (int i = 0; i < MAX_DIR_LIGHTS; i++)
 	{
+		if (dirLight[i].enabled == false) continue;
+
 		// Calculate ambient component
 		totalAmbient += dirLight[i].ambientComp * material.ambientComp;
 
@@ -130,6 +134,8 @@ vec4 blinnPhongShadingPoint(vec3 normal, vec4 color, vec3 viewDirection)
 
 	for (int i = 0; i < MAX_POINT_LIGHTS; i++)
 	{
+		if (pointLight[i].enabled == false) continue;
+
 		// Calculate ambient component ---------------------------------------------------------------
 		vec3 ambientComponent = pointLight[i].ambientComp * material.ambientComp;
 		
@@ -170,6 +176,8 @@ vec4 blinnPhongShading(vec3 normal, vec4 color, vec3 viewDirection)
 
 	for (int i = 0; i < MAX_DIR_LIGHTS; i++)
 	{
+		if (dirLight[i].enabled == false) continue;
+
 		// Calculate ambient component ---------------------------------------------------------------
 		totalAmbient += dirLight[i].ambientComp * material.ambientComp;
 	

@@ -7,9 +7,9 @@
 #define PI_2 1.57079632679489661923
 #define PI_4 0.785398163397448309616
 
-#define MAX_POINT_LIGHTS 1
-#define MAX_DIR_LIGHTS 1
-#define MAX_SPOT_LIGHTS 1
+#define MAX_POINT_LIGHTS 20
+#define MAX_DIR_LIGHTS 20
+#define MAX_SPOT_LIGHTS 20
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -20,6 +20,7 @@ struct DirectionalLight
 {
     vec3 direction;
 	vec3 color;
+	bool enabled;
 };
 
 struct PointLight
@@ -27,17 +28,18 @@ struct PointLight
     vec3 position;
 	vec3 attenuation;
 	vec3 color;
+	bool enabled;
 };
 
 struct SpotLight
 {
 	vec3 position;
-	vec3 attenuation;
 	vec3 color;
 	vec3 direction;
 	float exponent;
 	float cutoff;
 	float coscutoff;
+	bool enabled;
 };
 
 struct PBRMaterial
@@ -234,6 +236,8 @@ vec4 pbrShadingPoint(vec3 normal, vec3 viewDirection)
 
 	for (int i = 0; i < MAX_POINT_LIGHTS; ++i)
 	{
+		if (pointLight[i].enabled == false) continue;
+
 		// Calculate light position in tangent space
 		vec3 lightPosTangent = fs_in.TBNMatrix * pointLight[i].position;
 
@@ -297,6 +301,8 @@ vec4 pbrShadingDir(vec3 normal, vec3 viewDirection)
 
 	for (int i = 0; i < MAX_DIR_LIGHTS; ++i)
 	{
+		if (dirLight[i].enabled == false) continue;
+
 		// Directional light direction in tangent space
 		vec3 l = -normalize(fs_in.TBNMatrix * normalize(dirLight[i].direction));
 		//return vec4(l, 1.0f);

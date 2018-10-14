@@ -71,6 +71,8 @@ enum class PointLightUniform
 	ColorDiffuseComp,
 	ColorSpecularComp,
 
+	Enabled,
+
 	Count,
 };
 
@@ -86,13 +88,14 @@ enum class DirLightUniform
 	ColorDiffuseComp,
 	ColorSpecularComp,
 
+	Enabled,
+
 	Count,
 };
 
 enum class SpotLightUniform
 {
 	Position,
-	Attenuation,
 	Direction,
 	Exponent,
 	Cutoff,
@@ -106,6 +109,8 @@ enum class SpotLightUniform
 	ColorDiffuseComp,
 	ColorSpecularComp,
 
+	Enabled,
+
 	Count,
 };
 
@@ -115,6 +120,8 @@ enum class MaterialUniform
 	DiffuseComp,
 	SpecularComp,
 	Shineness,
+
+	Enabled,
 
 	Count,
 };
@@ -166,11 +173,20 @@ public:
 	template<typename T>
 	void setDirLight(DirLightUniform uniform, int index, const T& val);
 	template<typename T>
+	void setDirLightScalar(DirLightUniform uniform, int index, float val);
+	template<typename T>
 	void setPointLight(PointLightUniform uniform, int index, const T& val);
+	template<typename T>
+	void setPointLightScalar(PointLightUniform uniform, int index, float val);
 	template<typename T>
 	void setSpotLight(SpotLightUniform uniform, int index, const T& val);
 	template<typename T>
 	void setSpotLightScalar(SpotLightUniform uniform, int index, T val);
+
+	// Set lighting
+	void updatePointLights();
+	void updateDirectionalLights();
+	void updateSpotLights();
 
 private:
 	GLuint m_program;
@@ -228,12 +244,24 @@ inline void Shader::setMaterialScalar<float>(MaterialPBRUniform uniform, float v
 
 // Directional light
 template<>
+inline void Shader::setDirLightScalar<float>(DirLightUniform uniform, int index, float val)
+{
+	assert(index < MAX_DIR_LIGHTS && "Invalid dir light index specified.");
+	glUniform1f(m_dirLightsUniforms[index][static_cast<int>(uniform)], val);
+}
+template<>
 inline void Shader::setDirLight<glm::vec3>(DirLightUniform uniform, int index, const glm::vec3& val)
 {
 	assert(index < MAX_DIR_LIGHTS && "Invalid dir light index specified.");
 	glUniform3f(m_dirLightsUniforms[index][static_cast<int>(uniform)], val.x, val.y, val.z);
 }
 // Point light
+template<>
+inline void Shader::setPointLightScalar<float>(PointLightUniform uniform, int index, float val)
+{
+	assert(index < MAX_POINT_LIGHTS && "Invalid point light index specified.");
+	glUniform1f(m_pointLightsUniforms[index][static_cast<int>(uniform)], val);
+}
 template<>
 inline void Shader::setPointLight<glm::vec3>(PointLightUniform uniform, int index, const glm::vec3& val)
 {

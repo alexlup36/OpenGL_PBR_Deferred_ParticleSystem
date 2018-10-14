@@ -210,7 +210,6 @@ bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, 
 
 	// Initialize GUI
 	m_pGUI = new GUI(window());
-	m_pGUI->setup(window(), windowWidth(), windowHeight());
 
 	// Initialize input
 	Input::getInstance().initialize(window());
@@ -474,8 +473,9 @@ void GLFramework::drawScene(double dt)
 	glm::mat4 m, v, p, normalMat;
 
 	// Get lights
-	auto& pointLight1 = LightData::getInstance().pointLight(0);
-	auto& directionalLight1 = LightData::getInstance().directionalLight(0);
+	auto& pointLight0 = LightData::getInstance().pointLight(0);
+	auto& directionalLight0 = LightData::getInstance().directionalLight(0);
+	auto& directionalLight1 = LightData::getInstance().directionalLight(1);
 
 	// ------
 
@@ -484,13 +484,13 @@ void GLFramework::drawScene(double dt)
 	m_phongColorShader.useShader();
 	// Setup lighting
 	m_phongColorShader.set<glm::vec3>(ShaderUniform::LightColor, WHITE);
-	m_phongColorShader.set<glm::vec3>(ShaderUniform::LightDir, m_pGUI->m_lightDirection);
+	m_phongColorShader.set<glm::vec3>(ShaderUniform::LightDir, directionalLight1.direction);
 	// Set uniforms
 	m_phongColorShader.set<glm::vec4>(ShaderUniform::ObjectColor, WHITE);
 	m_phongColorShader.setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
 	m_phongColorShader.setScalar<float>(ShaderUniform::SpecularStrength, m_pGUI->m_specularStrength);
 	// Draw point light sphere
-	m_pointLightObject->transform().setPos(LightData::getInstance().pointLight(0).position);
+	m_pointLightObject->transform().setPos(pointLight0.position);
 	m_pointLightObject->transform().setScale(glm::vec3(0.01f));
 	m_pointLightObject->transform().setRotation(m_pGUI->m_rotation);
 	m_pointLightObject->update(dt);
@@ -500,11 +500,9 @@ void GLFramework::drawScene(double dt)
 	// Render PBR
 	m_pbr.useShader();
 	// Setup lighting
-	m_pbr.setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
-	m_pbr.setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.position);
-	m_pbr.setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
-	//m_pbr->setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
-	//m_pbr->setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
+	m_pbr.updatePointLights();
+	m_pbr.updateDirectionalLights();
+	m_pbr.updateSpotLights();
 	// Set uniforms
 	m_depthMap->bind(m_pbr.program());
 	MaterialData::getInstance().matRustedIron.bindTextures(m_pbr.program());
@@ -581,8 +579,7 @@ void GLFramework::drawDeferredLighting(double dt)
 	glCheckError();
 
 	// Get lights
-	auto& pointLight1 = LightData::getInstance().pointLight(0);
-	auto& directionalLight1 = LightData::getInstance().directionalLight(0);
+	auto& lightData = LightData::getInstance();
 
 	// Set the display framebuffer as the active framebuffer
 	m_displayFramebuffer.renderToTexture();
@@ -590,11 +587,9 @@ void GLFramework::drawDeferredLighting(double dt)
 	// Set uniforms
 	m_deferredLighting.useShader();
 	// Setup lighting
-	m_deferredLighting.setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
-	m_deferredLighting.setPointLight<glm::vec3>(PointLightUniform::Position, 0, m_pGUI->m_lightDirection);
-	m_deferredLighting.setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
-	//m_deferredLighting.setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
-	//m_deferredLighting.setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
+	m_deferredLighting.updatePointLights();
+	m_deferredLighting.updateDirectionalLights();
+	m_deferredLighting.updateSpotLights();
 	// Set uniforms
 	m_depthMap->bind(m_deferredLighting.program());
 	
@@ -625,19 +620,13 @@ void GLFramework::drawForwardLighting(double dt)
 	// Set the display framebuffer as the active framebuffer
 	m_displayFramebuffer.renderToTexture();
 
-	// Get lights
-	auto& pointLight1 = LightData::getInstance().pointLight(0);
-	auto& directionalLight1 = LightData::getInstance().directionalLight(0);
-
 	// ------------------------------------------------------------------------
 	// Render PBR
 	m_pbr.useShader();
 	// Setup lighting
-	//m_pbr.setPointLight<glm::vec3>(PointLightUniform::Color, 0, pointLight1.color);
-	//m_pbr.setPointLight<glm::vec3>(PointLightUniform::Position, 0, pointLight1.direction);
-	//m_pbr.setPointLight<glm::vec3>(PointLightUniform::Attenuation, 0, pointLight1.attenuation);
-	m_pbr.setDirLight<glm::vec3>(DirLightUniform::Color, 0, directionalLight1.color);
-	m_pbr.setDirLight<glm::vec3>(DirLightUniform::Direction, 0, directionalLight1.direction);
+	m_pbr.updatePointLights();
+	m_pbr.updateDirectionalLights();
+	m_pbr.updateSpotLights();
 	// Set uniforms
 	m_depthMap->bind(m_pbr.program());
 	MaterialData::getInstance().matRustedIron.bindTextures(m_pbr.program());

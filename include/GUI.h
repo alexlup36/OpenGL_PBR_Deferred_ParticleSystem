@@ -2,25 +2,25 @@
 #define GUI_H
 
 #include <stdio.h>
-//#include <AntTweakBar.h>
 #include <glm/gtc/quaternion.hpp>
 #include <array>
+
+#include "Light.h"
 
 class GUI 
 {
 public:
 	GUI(GLFWwindow* window);
 	~GUI();
-	bool setup(GLFWwindow* window, int w, int h);
 	void draw();
 
 private:
 	void drawGbufferSettings();
 	void drawLightPanel();
 	void updateLightSourcesList();
-	void drawDirLightSettings();
-	void drawPointLightSettings();
-	void drawSpotLightSettings();
+	void drawDirLightSettings(DirectionalLight &dirLight);
+	void drawPointLightSettings(PointLight &pointLight);
+	void drawSpotLightSettings(SpotLight &spotLight);
 
 	std::vector<const char*> m_lightSourceNames;
 	std::vector<std::string> m_lightSources;
@@ -65,21 +65,11 @@ public:
 		"PointLight",
 		"SpotLight"
 	};
-	int m_lightTypeSelection = -1;
-	int m_lightSourceSelection = -1;
+	int m_lightTypeSelection = 0;
+	int m_lightSourceSelection = 0;
 	bool m_lightPanelRequiresUpdate = true;
 
-	//TwBar* bar;
-	double test;
-	/*float m_rotation[4] = { 0.5f, 0.5f, 0.5f };
-	float m_lightDirection[3] = { 0.5f, 0.5f, 0.5f };
-	float m_shininess = 32.0f;
-	float m_lightColor[3] = { 1.0f, 1.0f, 1.0f };
-	float m_objectColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };*/
-
-	//glm::vec4 m_rotation = glm::vec4(0.5f, 0.5f, 0.5f, 0.0f);
 	glm::quat m_rotation = glm::quat();
-	glm::vec3 m_lightDirection = glm::vec3(0.5f, 0.5f, 0.5f);
 	glm::vec2 m_textureOffset = glm::vec2(0.0f, 0.0f);
 	glm::vec2 m_textureTile = glm::vec2(1.0f, 1.0f);
 	float m_shininess = 32.0f;
@@ -100,8 +90,6 @@ public:
 
 	DisplayMode m_displayMode = DisplayMode::FINAL;
 	ToneMapper m_toneMapper = ToneMapper::NORMAL;
-
-	//PointLight* m_pCurrentPointLight = LightData::getInstance().pointLight1;
 };
 
 #endif // GUI_H

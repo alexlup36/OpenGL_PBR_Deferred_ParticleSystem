@@ -62,7 +62,7 @@ public:
 		assert(index < m_spotLights.size());
 		return m_spotLights[index];
 	}
-	inline const BaseLight* getLight(int index)
+	inline BaseLight* getLight(int index)
 	{
 		assert(index < m_globalLights.size());
 		return m_globalLights[index];
@@ -77,11 +77,14 @@ public:
 	}
 
 	inline int lightCount() const { return m_pointLights.size() + m_directionalLights.size() + m_spotLights.size(); }
+	inline int pointLightCount() const { return m_pointLights.size(); }
+	inline int directionalLightCount() const { return m_directionalLights.size(); }
+	inline int spotLightCount() const { return m_spotLights.size(); }
 
 private:
 	LightData() {}
 
-	std::map<int, const BaseLight*> m_globalLights;
+	std::map<int, BaseLight*> m_globalLights;
 	int m_globalIndex = 0;
 
 	std::vector<PointLight> m_pointLights;

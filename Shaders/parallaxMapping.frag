@@ -1,6 +1,6 @@
 #version 330 core
 
-#define MAX_POINT_LIGHTS 2
+#define MAX_POINT_LIGHTS 20
 
 struct DirectionalLight
 {
@@ -9,6 +9,7 @@ struct DirectionalLight
 	vec3 diffuseLight;
 	vec3 specularLight;
 	float specularIntensity;
+	bool enabled;
 };
 
 struct PointLight
@@ -18,6 +19,7 @@ struct PointLight
 	vec3 diffuseLight;
 	vec3 specularLight;
 	float specularIntensity;
+	bool enabled;
 };
 
 struct Material
@@ -81,6 +83,8 @@ vec4 blinnPhongShadingPoint(vec3 normal, vec4 color)
 
 	for (int i = 0; i < MAX_POINT_LIGHTS; i++)
 	{
+		if (pointLight[i].enabled == false) continue;
+
 		// Calculate ambient component ---------------------------------------------------------------
 		vec3 ambientComponent = pointLight[i].ambientLight * material.vMatAmbient;
 		

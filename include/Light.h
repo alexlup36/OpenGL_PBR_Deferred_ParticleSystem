@@ -9,6 +9,15 @@
 
 // ----------------------------------------------------------------------------
 
+enum class LightSourceType
+{
+	Point,
+	Directional,
+	Spot,
+};
+
+// ----------------------------------------------------------------------------
+
 struct BaseLight
 {
 	glm::vec3 color;
@@ -16,6 +25,9 @@ struct BaseLight
 	glm::vec3 diffuseComp;
 	glm::vec3 specularComp;
 	unsigned int id;
+	LightSourceType lightSourceType;
+	bool enabled = true;
+	bool pbrLight = true;
 
 	BaseLight()
 	{
@@ -51,6 +63,7 @@ struct DirectionalLight : public BaseLight
 		diffuseComp = glm::vec3(1.0f);
 		specularComp = glm::vec3(1.0f);
 		color = glm::vec3(1.0f);
+		lightSourceType = LightSourceType::Directional;
 		id = m_dirLightCounter++;
 	}
 
@@ -62,6 +75,7 @@ struct DirectionalLight : public BaseLight
 	{
 		direction = dir;
 		color = glm::vec3(0.0f);
+		lightSourceType = LightSourceType::Directional;
 		id = m_dirLightCounter++;
 	}
 
@@ -96,6 +110,7 @@ struct PointLight : public BaseLight
 	{
 		position = glm::vec3(0.0f);
 		attenuation = glm::vec3(1.0f, 1.0f, 1.0f);
+		lightSourceType = LightSourceType::Point;
 		id = m_pointLightCounter++;
 	}
 
@@ -118,6 +133,7 @@ struct PointLight : public BaseLight
 	{
 		position = pos;
 		attenuation = att;
+		lightSourceType = LightSourceType::Point;
 		id = m_pointLightCounter++;
 	}
 
@@ -150,6 +166,7 @@ struct SpotLight : public BaseLight
 		coscutoff = 0.0f;
 		position = glm::vec3(0.0f);
 		direction = glm::vec3(0.0f);
+		lightSourceType = LightSourceType::Spot;
 		id = m_spotLightCounter++;
 	}
 
@@ -184,6 +201,7 @@ struct SpotLight : public BaseLight
 		exponent = exponentVal;
 		cutoff = cutoffVal;
 		coscutoff = coscutoffVal;
+		lightSourceType = LightSourceType::Spot;
 		id = m_spotLightCounter++;
 	}
 

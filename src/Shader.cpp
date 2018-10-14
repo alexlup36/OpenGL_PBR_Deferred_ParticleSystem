@@ -227,6 +227,8 @@ void Shader::initializeUniforms()
 		m_dirLightsUniforms[dirLightIndex][static_cast<int>(DirLightUniform::ColorDiffuseComp)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
 		sShaderLocation = sTemp + "specularComp";
 		m_dirLightsUniforms[dirLightIndex][static_cast<int>(DirLightUniform::ColorSpecularComp)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "enabled";
+		m_dirLightsUniforms[dirLightIndex][static_cast<int>(DirLightUniform::Enabled)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
 	}
 
 	// Initialize point lights uniform locations
@@ -249,6 +251,8 @@ void Shader::initializeUniforms()
 		m_pointLightsUniforms[pointLightIndex][static_cast<int>(PointLightUniform::ColorDiffuseComp)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
 		sShaderLocation = sTemp + "specularComp";
 		m_pointLightsUniforms[pointLightIndex][static_cast<int>(PointLightUniform::ColorSpecularComp)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "enabled";
+		m_pointLightsUniforms[pointLightIndex][static_cast<int>(PointLightUniform::Enabled)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
 	}
 
 	// Initialize spot lights uniform locations
@@ -261,8 +265,6 @@ void Shader::initializeUniforms()
 
 		sShaderLocation = sTemp + "position";
 		m_spotLightsUniforms[spotLightIndex][static_cast<int>(SpotLightUniform::Position)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
-		sShaderLocation = sTemp + "attenuation";
-		m_spotLightsUniforms[spotLightIndex][static_cast<int>(SpotLightUniform::Attenuation)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
 		sShaderLocation = sTemp + "color";
 		m_spotLightsUniforms[spotLightIndex][static_cast<int>(SpotLightUniform::Color)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
 		sShaderLocation = sTemp + "ambientComp";
@@ -279,6 +281,8 @@ void Shader::initializeUniforms()
 		m_spotLightsUniforms[spotLightIndex][static_cast<int>(SpotLightUniform::Cutoff)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
 		sShaderLocation = sTemp + "cosCutoff";
 		m_spotLightsUniforms[spotLightIndex][static_cast<int>(SpotLightUniform::CosCutoff)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
+		sShaderLocation = sTemp + "enabled";
+		m_spotLightsUniforms[spotLightIndex][static_cast<int>(SpotLightUniform::Enabled)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
 	}
 
 	// Initialize material uniform locations
@@ -292,6 +296,107 @@ void Shader::initializeUniforms()
 	m_materialPBRUniforms[static_cast<int>(MaterialPBRUniform::Metallic)] = glGetUniformLocation(m_program, "material.metallic");
 	m_materialPBRUniforms[static_cast<int>(MaterialPBRUniform::Roughness)] = glGetUniformLocation(m_program, "material.roughness");
 	m_materialPBRUniforms[static_cast<int>(MaterialPBRUniform::AmbientOcclusion)] = glGetUniformLocation(m_program, "material.ao");
+}
+
+// ----------------------------------------------------------------------------
+
+// Update lights
+void Shader::updatePointLights()
+{
+	auto& lightData = LightData::getInstance();
+	unsigned int pointLightCount = lightData.pointLightCount();
+
+	for (unsigned int pointLightIndex = 0; pointLightIndex < pointLightCount; ++pointLightIndex)
+	{
+		auto &currentPointLight = lightData.pointLight(pointLightIndex);
+		setPointLightScalar<float>(PointLightUniform::Enabled, pointLightIndex, currentPointLight.enabled);
+
+		// Skip if not enabled
+		if (currentPointLight.enabled == false)
+			continue;
+			
+		// Set color
+		if (currentPointLight.pbrLight)
+		{
+			setPointLight<glm::vec3>(PointLightUniform::Color, pointLightIndex, currentPointLight.color);
+		}
+		else
+		{
+			setPointLight<glm::vec3>(PointLightUniform::ColorAmbientComp, pointLightIndex, currentPointLight.ambientComp);
+			setPointLight<glm::vec3>(PointLightUniform::ColorSpecularComp, pointLightIndex, currentPointLight.specularComp);
+			setPointLight<glm::vec3>(PointLightUniform::ColorDiffuseComp, pointLightIndex, currentPointLight.diffuseComp);
+		}
+
+		// Set properties
+		setPointLight<glm::vec3>(PointLightUniform::Position, pointLightIndex, currentPointLight.position);
+		setPointLight<glm::vec3>(PointLightUniform::Attenuation, pointLightIndex, currentPointLight.attenuation);
+	}
+}
+
+void Shader::updateDirectionalLights()
+{
+	auto& lightData = LightData::getInstance();
+	unsigned int dirLightCount = lightData.directionalLightCount();
+
+	for (unsigned int dirLightIndex = 0; dirLightIndex < dirLightCount; ++dirLightIndex)
+	{
+		auto &currentDirLight = lightData.directionalLight(dirLightIndex);
+		setDirLightScalar<float>(DirLightUniform::Enabled, dirLightIndex, currentDirLight.enabled);
+
+		// Skip if not enabled
+		if (currentDirLight.enabled == false)
+			continue;
+		
+		// Set color
+		if (currentDirLight.pbrLight)
+		{
+			setDirLight<glm::vec3>(DirLightUniform::Color, dirLightIndex, currentDirLight.color);
+		}
+		else
+		{
+			setDirLight<glm::vec3>(DirLightUniform::ColorAmbientComp, dirLightIndex, currentDirLight.ambientComp);
+			setDirLight<glm::vec3>(DirLightUniform::ColorSpecularComp, dirLightIndex, currentDirLight.specularComp);
+			setDirLight<glm::vec3>(DirLightUniform::ColorDiffuseComp, dirLightIndex, currentDirLight.diffuseComp);
+		}
+
+		// Set properties
+		setDirLight<glm::vec3>(DirLightUniform::Direction, dirLightIndex, currentDirLight.direction);
+	}
+}
+
+void Shader::updateSpotLights()
+{
+	auto& lightData = LightData::getInstance();
+	unsigned int spotLightCount = lightData.spotLightCount();
+
+	for (unsigned int spotLightIndex = 0; spotLightIndex < spotLightCount; ++spotLightIndex)
+	{
+		auto &currentSpotLight = lightData.spotLight(spotLightIndex);
+		setSpotLightScalar<float>(SpotLightUniform::Enabled, spotLightIndex, currentSpotLight.enabled);
+
+		// Skip if not enabled
+		if (currentSpotLight.enabled == false)
+			continue;
+
+		// Set color
+		if (currentSpotLight.pbrLight)
+		{
+			setSpotLight<glm::vec3>(SpotLightUniform::Color, spotLightIndex, currentSpotLight.color);
+		}
+		else
+		{
+			setSpotLight<glm::vec3>(SpotLightUniform::ColorAmbientComp, spotLightIndex, currentSpotLight.ambientComp);
+			setSpotLight<glm::vec3>(SpotLightUniform::ColorDiffuseComp, spotLightIndex, currentSpotLight.diffuseComp);
+			setSpotLight<glm::vec3>(SpotLightUniform::ColorSpecularComp, spotLightIndex, currentSpotLight.specularComp);
+		}
+		
+		// Set properties
+		setSpotLight<glm::vec3>(SpotLightUniform::Position, spotLightIndex, currentSpotLight.position);
+		setSpotLight<glm::vec3>(SpotLightUniform::Direction, spotLightIndex, currentSpotLight.direction);
+		setSpotLightScalar<float>(SpotLightUniform::CosCutoff, spotLightIndex, currentSpotLight.coscutoff);
+		setSpotLightScalar<float>(SpotLightUniform::Cutoff, spotLightIndex, currentSpotLight.cutoff);
+		setSpotLightScalar<float>(SpotLightUniform::Exponent, spotLightIndex, currentSpotLight.exponent);
+	}
 }
 
 // ----------------------------------------------------------------------------
