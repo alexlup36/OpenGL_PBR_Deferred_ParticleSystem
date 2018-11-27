@@ -466,19 +466,19 @@ bool GLFramework::setupScene()
 	glCheckError();
 
 	// Load objects
-	m_planeObject = std::make_unique<Object<VertexPTNT>>("Assets/plane2.obj");
-	m_pointLightObject = std::make_unique<Object<VertexPN>>("Assets/sphere.obj");
+	m_planeObject = std::make_unique<Object<VertexPTNT> >("Assets/plane2.obj");
+	m_pointLightObject = std::make_unique<Object<VertexPN> >("Assets/sphere.obj");
 
-	m_planeObjectDeferred = std::make_unique<Object<VertexPNTT>>("Assets/plane2.obj");
-	m_torusModelDeferred = std::make_unique<Object<VertexPNTT>>("Assets/torus.obj");
+	m_planeObjectDeferred = std::make_unique<Object<VertexPNTT> >("Assets/plane2.obj");
+	m_torusModelDeferred = std::make_unique<Object<VertexPNTT> >("Assets/torus.obj");
 
 	// Load meshes
-	m_pTorusModel = std::make_unique<Model<VertexPN>>("Assets/torus.obj");
+	m_pTorusModel = std::make_unique<Model<VertexPN> >("Assets/torus.obj");
 	//m_pMonkeyModel = std::make_unique<Model<VertexPN>>("Assets/mymodel.obj");
-	m_pPlaneModel = std::make_unique<Model<VertexPTNT>>("Assets/plane2.obj");
-	m_pLightModel = std::make_unique<Model<VertexPN>>("Assets/sphere.obj");
-	m_pSphereModel = std::make_unique<Model<VertexPTNT>>("Assets/planet.obj");
-	m_bunny = std::make_unique<Model<VertexPTNT>>("Assets/bunny.obj");
+	m_pPlaneModel = std::make_unique<Model<VertexPTNT> >("Assets/plane2.obj");
+	m_pLightModel = std::make_unique<Model<VertexPN> >("Assets/sphere.obj");
+	m_pSphereModel = std::make_unique<Model<VertexPTNT> >("Assets/planet.obj");
+	m_bunny = std::make_unique<Model<VertexPTNT> >("Assets/bunny.obj");
 	//m_dragon = std::make_unique<Model<VertexPTNT>>("Assets/dragon.obj");
 	//m_buddha = std::make_unique<Model<VertexPTNT>>("Assets/buddha.obj");
 	//m_lucy = std::make_unique<Model<VertexPTNT>>("Assets/lucy.obj");

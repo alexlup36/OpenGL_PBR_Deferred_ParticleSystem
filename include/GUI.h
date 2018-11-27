@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <glm/gtc/quaternion.hpp>
 #include <array>
+#include <filesystem>
 
 #include "Light.h"
 
@@ -18,12 +19,36 @@ private:
 	void drawGbufferSettings();
 	void drawLightPanel();
 	void updateLightSourcesList();
+	void updateAssetList();
 	void drawDirLightSettings(DirectionalLight &dirLight);
 	void drawPointLightSettings(PointLight &pointLight);
 	void drawSpotLightSettings(SpotLight &spotLight);
 	void drawObjectSettings();
+	void expandDirectory(const std::filesystem::directory_entry &dirEntry);
+
+	inline bool isTexture(const std::string &path)
+	{
+		for (const std::string &textureExtension : textureExtensions)
+		{
+			if (path.find(textureExtension) != std::string::npos)
+				return true;
+		}
+		return false;
+	};
+
+	inline bool isModel(const std::string &path)
+	{
+		for (const std::string &modelExtension : modelExtensions)
+		{
+			if (path.find(modelExtension) != std::string::npos)
+				return true;
+		}
+		return false;
+	};
 
 	std::vector<const char*> m_lightSourceNames;
+	std::vector<const char*> m_modelNames;
+	std::vector<const char*> m_textureNames;
 	std::vector<std::string> m_lightSources;
 
 public:
@@ -67,8 +92,19 @@ public:
 		"PointLight",
 		"SpotLight"
 	};
+
+	std::array<std::string, 2> modelExtensions = {
+		".obj", ".fbx"
+	};
+
+	std::array<std::string, 4> textureExtensions = {
+		".jpg", ".jpeg", ".png", ".tif"
+	};
+
 	int m_lightTypeSelection = 0;
 	int m_lightSourceSelection = 0;
+	int m_textureSelection = 0;
+	int m_modelSelection = 0;
 	bool m_lightPanelRequiresUpdate = true;
 
 	bool m_fileSystemRequiresUpdate = true;

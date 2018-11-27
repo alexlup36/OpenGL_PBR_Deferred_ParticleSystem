@@ -12,6 +12,10 @@ find_package(glfw3 REQUIRED)
 find_package(assimp REQUIRED)
 find_package(OpenGL REQUIRED)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(IMGUI_IMPL_OPENGL_LOADER_GLEW 1)
 
@@ -21,4 +25,4 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/imgui)
 
 add_executable(${PROJECT_NAME} ${SOURCES} "main.cpp")
-target_link_libraries(${PROJECT_NAME} glm GLEW glfw assimp SOIL ${OPENGL_LIBRARY})
+target_link_libraries(${PROJECT_NAME} glm GLEW glfw assimp SOIL ${OPENGL_LIBRARY} stdc++fs)
