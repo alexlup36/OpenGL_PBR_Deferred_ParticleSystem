@@ -36,7 +36,7 @@ public:
 	inline const GLsizei height() const { return m_height; }
 
 	// Get handles to color and depth buffer
-	inline const int colorTexture(int index) const { assert(index < m_colorTextures.size() && "Invalid color texture index specified."); return m_colorTextures[index]; }
+	inline const int colorTexture(int index) const { assert(index < (int)m_colorTextures.size() && "Invalid color texture index specified."); return m_colorTextures[index]; }
 	inline const int colorTexture(const std::string &rtName) const 
 	{
 		auto element = m_colorTextureNames.find(rtName);

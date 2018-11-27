@@ -210,7 +210,7 @@ void Shader::initializeUniforms()
 	m_shaderUniforms[static_cast<int>(ShaderUniform::TextureTile)] = glGetUniformLocation(m_program, "textureTile");
 
 	// Initialize dir lights uniform locations
-	for (auto dirLightIndex = 0; dirLightIndex < MAX_DIR_LIGHTS; ++dirLightIndex)
+	for (unsigned int dirLightIndex = 0; dirLightIndex < MAX_DIR_LIGHTS; ++dirLightIndex)
 	{
 		// Get the location for the current light uniform
 		std::string sLightIndex = std::to_string(dirLightIndex);
@@ -232,7 +232,7 @@ void Shader::initializeUniforms()
 	}
 
 	// Initialize point lights uniform locations
-	for (auto pointLightIndex = 0; pointLightIndex < MAX_POINT_LIGHTS; ++pointLightIndex)
+	for (unsigned int pointLightIndex = 0; pointLightIndex < MAX_POINT_LIGHTS; ++pointLightIndex)
 	{
 		// Get the location for the current light uniform
 		std::string sLightIndex = std::to_string(pointLightIndex);
@@ -254,9 +254,9 @@ void Shader::initializeUniforms()
 		sShaderLocation = sTemp + "enabled";
 		m_pointLightsUniforms[pointLightIndex][static_cast<int>(PointLightUniform::Enabled)] = glGetUniformLocation(m_program, sShaderLocation.c_str());
 	}
-
+// ---------------------------------------------------------------------------// ---------------------------------------------------------------------------
 	// Initialize spot lights uniform locations
-	for (auto spotLightIndex = 0; spotLightIndex < MAX_SPOT_LIGHTS; ++spotLightIndex)
+	for (unsigned spotLightIndex = 0; spotLightIndex < MAX_SPOT_LIGHTS; ++spotLightIndex)
 	{
 		// Get the location for the current light uniform
 		std::string sLightIndex = std::to_string(spotLightIndex);

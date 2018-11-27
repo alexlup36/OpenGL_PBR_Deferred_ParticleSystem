@@ -171,17 +171,17 @@ public:
 	void setMaterialScalar(MaterialPBRUniform uniform, T val);
 
 	template<typename T>
-	void setDirLight(DirLightUniform uniform, int index, const T& val);
+	void setDirLight(DirLightUniform uniform, unsigned int index, const T& val);
 	template<typename T>
-	void setDirLightScalar(DirLightUniform uniform, int index, float val);
+	void setDirLightScalar(DirLightUniform uniform, unsigned int index, float val);
 	template<typename T>
-	void setPointLight(PointLightUniform uniform, int index, const T& val);
+	void setPointLight(PointLightUniform uniform, unsigned int index, const T& val);
 	template<typename T>
-	void setPointLightScalar(PointLightUniform uniform, int index, float val);
+	void setPointLightScalar(PointLightUniform uniform, unsigned int index, float val);
 	template<typename T>
-	void setSpotLight(SpotLightUniform uniform, int index, const T& val);
+	void setSpotLight(SpotLightUniform uniform, unsigned int index, const T& val);
 	template<typename T>
-	void setSpotLightScalar(SpotLightUniform uniform, int index, T val);
+	void setSpotLightScalar(SpotLightUniform uniform, unsigned int index, T val);
 
 	// Set lighting
 	void updatePointLights();
@@ -217,7 +217,7 @@ template <> inline void Shader::set<glm::vec2>(ShaderUniform uniform, const glm:
 template <> inline void Shader::set<glm::vec3>(ShaderUniform uniform, const glm::vec3& val) { glUniform3f(m_shaderUniforms[static_cast<int>(uniform)], val.x, val.y, val.z); }
 template <> inline void Shader::set<glm::vec4>(ShaderUniform uniform, const glm::vec4& val) { glUniform4f(m_shaderUniforms[static_cast<int>(uniform)], val.x, val.y, val.z, val.w); }
 template <> inline void Shader::setScalar<float>(ShaderUniform uniform, float val) { glUniform1f(m_shaderUniforms[static_cast<int>(uniform)], val); }
-template <> inline void Shader::setScalar<int>(ShaderUniform uniform, int textureUnit) { glUniform1i(m_shaderUniforms[static_cast<int>(uniform)], textureUnit); }
+template <> inline void Shader::setScalar<unsigned int>(ShaderUniform uniform, unsigned int textureUnit) { glUniform1i(m_shaderUniforms[static_cast<int>(uniform)], textureUnit); }
 
 // Material
 template<>
@@ -244,26 +244,26 @@ inline void Shader::setMaterialScalar<float>(MaterialPBRUniform uniform, float v
 
 // Directional light
 template<>
-inline void Shader::setDirLightScalar<float>(DirLightUniform uniform, int index, float val)
+inline void Shader::setDirLightScalar<float>(DirLightUniform uniform, unsigned int index, float val)
 {
 	assert(index < MAX_DIR_LIGHTS && "Invalid dir light index specified.");
 	glUniform1f(m_dirLightsUniforms[index][static_cast<int>(uniform)], val);
 }
 template<>
-inline void Shader::setDirLight<glm::vec3>(DirLightUniform uniform, int index, const glm::vec3& val)
+inline void Shader::setDirLight<glm::vec3>(DirLightUniform uniform, unsigned int index, const glm::vec3& val)
 {
 	assert(index < MAX_DIR_LIGHTS && "Invalid dir light index specified.");
 	glUniform3f(m_dirLightsUniforms[index][static_cast<int>(uniform)], val.x, val.y, val.z);
 }
 // Point light
 template<>
-inline void Shader::setPointLightScalar<float>(PointLightUniform uniform, int index, float val)
+inline void Shader::setPointLightScalar<float>(PointLightUniform uniform, unsigned int index, float val)
 {
 	assert(index < MAX_POINT_LIGHTS && "Invalid point light index specified.");
 	glUniform1f(m_pointLightsUniforms[index][static_cast<int>(uniform)], val);
 }
 template<>
-inline void Shader::setPointLight<glm::vec3>(PointLightUniform uniform, int index, const glm::vec3& val)
+inline void Shader::setPointLight<glm::vec3>(PointLightUniform uniform, unsigned int index, const glm::vec3& val)
 {
 	assert(index < MAX_POINT_LIGHTS && "Invalid point light index specified.");
 	glUniform3f(m_pointLightsUniforms[index][static_cast<int>(uniform)], val.x, val.y, val.z);
@@ -271,13 +271,13 @@ inline void Shader::setPointLight<glm::vec3>(PointLightUniform uniform, int inde
 }
 // Spot light
 template<>
-inline void Shader::setSpotLightScalar<float>(SpotLightUniform uniform, int index, float val)
+inline void Shader::setSpotLightScalar<float>(SpotLightUniform uniform, unsigned int index, float val)
 {
 	assert(index < MAX_SPOT_LIGHTS && "Invalid spot light index specified.");
 	glUniform1f(m_spotLightsUniforms[index][static_cast<int>(uniform)], val);
 }
 template<>
-inline void Shader::setSpotLight<glm::vec3>(SpotLightUniform uniform, int index, const glm::vec3& val)
+inline void Shader::setSpotLight<glm::vec3>(SpotLightUniform uniform, unsigned int index, const glm::vec3& val)
 {
 	assert(index < MAX_SPOT_LIGHTS && "Invalid spot light index specified.");
 	glUniform3f(m_spotLightsUniforms[index][static_cast<int>(uniform)], val.x, val.y, val.z);

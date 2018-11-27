@@ -4,6 +4,8 @@ project(openglframework)
 
 set(OpenGL_GL_PREFERENCE GLVND)
 
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -std=c++17")
+
 find_package(glm REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 REQUIRED)

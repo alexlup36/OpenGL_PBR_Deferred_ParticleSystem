@@ -13,7 +13,16 @@
 
 class Transform
 {
+
+private:
+	
+	const glm::mat4 IDENTITY = glm::mat4(1.0f);
+	const glm::vec3 UP = glm::vec3(0.0f, 1.0f, 0.0f);
+	const glm::vec3 RIGHT = glm::vec3(1.0f, 0.0f, 0.0f);
+	const glm::vec3 FORWARD = glm::vec3(0.0f, 0.0f, 1.0f);
+
 public:
+
 	Transform()
 		: m_scaleMat(IDENTITY), m_rotationMat(IDENTITY), m_translationMat(IDENTITY) {}
 
@@ -31,15 +40,10 @@ public:
 protected:
 
 private:
+
 	glm::mat4 m_scaleMat;
 	glm::mat4 m_rotationMat;
 	glm::mat4 m_translationMat;
-
-	const glm::vec3 UP = glm::vec3(0.0f, 1.0f, 0.0f);
-	const glm::vec3 RIGHT = glm::vec3(1.0f, 0.0f, 0.0f);
-	const glm::vec3 FORWARD = glm::vec3(0.0f, 0.0f, 1.0f);
-
-	const glm::mat4 IDENTITY = glm::mat4(1.0f);
 };
 
 

@@ -128,11 +128,11 @@ void GLFramework::draw(double dt)
 	GLuint textureUnit = 0;
 	m_displayFramebuffer.renderColorTargetToScreen(0, 0, windowWidth(), windowHeight(), textureUnit);
 	// Set tone mapper
-	m_finalShader.setScalar<int>(ShaderUniform::ToneMapper, static_cast<int>(m_pGUI->m_toneMapper));
+	m_finalShader.setScalar<unsigned int>(ShaderUniform::ToneMapper, static_cast<unsigned int>(m_pGUI->m_toneMapper));
 	m_finalShader.setScalar<float>(ShaderUniform::GammaHDR, m_pGUI->m_gammaHDR);
 	m_finalShader.setScalar<float>(ShaderUniform::Exposure, m_pGUI->m_exposure);
 	m_finalShader.setScalar<float>(ShaderUniform::ExposureBias, m_pGUI->m_exposureBias);
-	m_finalShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
+	m_finalShader.setScalar<unsigned int>(ShaderUniform::RenderedTexture, textureUnit);
 	// Draw triangles
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -140,7 +140,7 @@ void GLFramework::draw(double dt)
 	// Debug
 	glDepthFunc(GL_ALWAYS);
 	glDepthMask(GL_FALSE);
-	
+
 	drawGbufferToScreen();
 
 	// ------------------------------------------------------------------------
@@ -172,7 +172,7 @@ void GLFramework::drawGbufferToScreen()
 		textureUnit = 0;
 		int left = leftOffset;
 		m_gbufferFramebuffer.renderColorTargetToScreen(left, 0, gbufferVisualisationWidth, gbufferVisualisationHeight, textureUnit);
-		m_quadShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
+		m_quadShader.setScalar<unsigned int>(ShaderUniform::RenderedTexture, textureUnit);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		leftOffset += (gbufferVisualisationWidth + horizontalSpacing);
 	}
@@ -183,7 +183,7 @@ void GLFramework::drawGbufferToScreen()
 		textureUnit = 1;
 		int left = leftOffset;
 		m_gbufferFramebuffer.renderColorTargetToScreen(left, 0, gbufferVisualisationWidth, gbufferVisualisationHeight, textureUnit);
-		m_quadShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
+		m_quadShader.setScalar<unsigned int>(ShaderUniform::RenderedTexture, textureUnit);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		leftOffset += (gbufferVisualisationWidth + horizontalSpacing);
 	}
@@ -194,7 +194,7 @@ void GLFramework::drawGbufferToScreen()
 		textureUnit = 2;
 		int left = leftOffset;
 		m_gbufferFramebuffer.renderColorTargetToScreen(left, 0, gbufferVisualisationWidth, gbufferVisualisationHeight, textureUnit);
-		m_quadShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
+		m_quadShader.setScalar<unsigned int>(ShaderUniform::RenderedTexture, textureUnit);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		leftOffset += (gbufferVisualisationWidth + horizontalSpacing);
 	}
@@ -205,7 +205,7 @@ void GLFramework::drawGbufferToScreen()
 		textureUnit = 3;
 		int left = leftOffset;
 		m_gbufferFramebuffer.renderColorTargetToScreen(left, 0, gbufferVisualisationWidth, gbufferVisualisationHeight, textureUnit);
-		m_quadShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
+		m_quadShader.setScalar<unsigned int>(ShaderUniform::RenderedTexture, textureUnit);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		leftOffset += (gbufferVisualisationWidth + horizontalSpacing);
 	}
@@ -218,7 +218,7 @@ void GLFramework::drawGbufferToScreen()
 		textureUnit = 4;
 		int left = leftOffset;
 		m_gbufferFramebuffer.renderDepthTargetToScreen(left, 0, gbufferVisualisationWidth, gbufferVisualisationHeight, textureUnit);
-		m_quadDepthShader.setScalar<int>(ShaderUniform::RenderedTexture, textureUnit);
+		m_quadDepthShader.setScalar<unsigned int>(ShaderUniform::RenderedTexture, textureUnit);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		leftOffset += (gbufferVisualisationWidth + horizontalSpacing);
 	}
@@ -511,7 +511,7 @@ void GLFramework::drawScene(double dt)
 
 	// Get lights
 	auto& pointLight0 = LightData::getInstance().pointLight(0);
-	auto& directionalLight0 = LightData::getInstance().directionalLight(0);
+	//auto& directionalLight0 = LightData::getInstance().directionalLight(0);
 	auto& directionalLight1 = LightData::getInstance().directionalLight(1);
 
 	// ------
@@ -548,7 +548,7 @@ void GLFramework::drawScene(double dt)
 	m_pbr.setScalar<float>(ShaderUniform::DisplacementMapScale, m_pGUI->m_dispMapScale);
 	m_pbr.setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
 	m_pbr.setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
-	m_pbr.setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
+	m_pbr.setScalar<unsigned int>(ShaderUniform::DisplayMode, static_cast<unsigned int>(m_pGUI->m_displayMode));
 	// Draw main plane
 	m_planeObject->transform().setPos(glm::vec3(0.0f, -1.0f, -2.0f));
 	m_planeObject->transform().setScale(glm::vec3(0.5f, 0.001f, 0.5f));
@@ -616,7 +616,7 @@ void GLFramework::drawDeferredLighting(double dt)
 	glCheckError();
 
 	// Get lights
-	auto& lightData = LightData::getInstance();
+	//auto& lightData = LightData::getInstance();
 
 	// Set the display framebuffer as the active framebuffer
 	m_displayFramebuffer.renderToTexture();
@@ -641,7 +641,7 @@ void GLFramework::drawDeferredLighting(double dt)
 
 	m_deferredLighting.setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
 	m_deferredLighting.setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
-	m_deferredLighting.setScalar<int>(ShaderUniform::DisplayMode, static_cast<int>(m_pGUI->m_displayMode));
+	m_deferredLighting.setScalar<unsigned int>(ShaderUniform::DisplayMode, static_cast<unsigned int>(m_pGUI->m_displayMode));
 	m_deferredLighting.set<glm::vec3>(ShaderUniform::ViewPos, CameraMan::Instance().getActiveCamera()->viewPos());
 
 	glBindVertexArray(m_quadVAO);
@@ -673,6 +673,27 @@ void GLFramework::drawForwardLighting(double dt)
 	m_pointLightObject->transform().setRotation(m_pGUI->m_rotation);
 	m_pointLightObject->update(dt);
 	m_pointLightObject->render(m_phongColorShader);
+
+	// ------------------------------------------------------------------------
+
+	// Render the skybox
+
+	// Set the depth function to less or equal
+	glDepthFunc(GL_LEQUAL);
+	// Activate the skybox shader
+	m_skyBox.useShader();
+	// Get rid of the translation component from the view matrix
+	// We don't want the skybox to move together with the player
+	glm::mat4 v = glm::mat4x4(glm::mat3x3(m_cameraMan.getActiveCamera()->viewMatrix()));
+	glm::mat4 p = m_cameraMan.getActiveCamera()->projMatrix();
+	m_skyBox.set<glm::mat4>(ShaderUniform::ViewMat, v);
+	m_skyBox.set<glm::mat4>(ShaderUniform::ProjMat, p);
+	// Bind the cube VAO
+	glBindVertexArray(m_skyboxVAO);
+	// Bind the environment texture
+	m_cubeMap2->bind(m_skyBox.program());
+	// Draw the cube
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	// ------------------------------------------------------------------------
 }

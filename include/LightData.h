@@ -49,22 +49,22 @@ public:
 	// Get light sources
 	inline PointLight &pointLight(int index)
 	{
-		assert(index < m_pointLights.size());
+		assert(index < (int)m_pointLights.size());
 		return m_pointLights[index];
 	}
 	inline DirectionalLight &directionalLight(int index)
 	{
-		assert(index < m_directionalLights.size());
+		assert(index < (int)m_directionalLights.size());
 		return m_directionalLights[index];
 	}
 	inline SpotLight &spotLight(int index)
 	{
-		assert(index < m_spotLights.size());
+		assert(index < (int)m_spotLights.size());
 		return m_spotLights[index];
 	}
 	inline BaseLight* getLight(int index)
 	{
-		assert(index < m_globalLights.size());
+		assert(index < (int)m_globalLights.size());
 		return m_globalLights[index];
 	}
 
