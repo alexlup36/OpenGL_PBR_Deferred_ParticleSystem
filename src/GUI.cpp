@@ -230,5 +230,62 @@ void GUI::drawSpotLightSettings(SpotLight &spotLight)
 
 void GUI::drawObjectSettings()
 {
+	// Display a list of available 3D models
+	ImGui::ListBox("Models", &m_modelSelection, m_modelNames.data(), m_modelNames.size());
 
+	// Display a list of available textures
+	ImGui::ListBox("Textures", &m_textureSelection, m_textureNames.data(), m_textureNames.size());
+
+	if (m_fileSystemRequiresUpdate)
+	{
+		updateAssetList();
+		m_fileSystemRequiresUpdate = false;
+	}
+}
+
+void GUI::updateAssetList()
+{
+	std::string path = "Assets/";
+	for (auto &p : std::filesystem::directory_iterator(path))
+	{
+		if (p.is_directory())
+		{
+			expandDirectory(p);
+		}
+		else
+		{
+			std::cout << p << std::endl;
+			std::string path = p.path();
+			if (isTexture(path))
+			{
+				m_textureNames.push_back(path.c_str());
+			}
+			else if (isModel(p.path()))
+			{
+				m_modelNames.push_back(path.c_str());
+			}
+		}
+	}
+}
+
+void GUI::expandDirectory(const std::filesystem::directory_entry &dirEntry)
+{
+	for (auto &p : std::filesystem::directory_iterator(dirEntry))
+	{
+		if (p.is_directory())
+			expandDirectory(p);
+		else if (p.is_regular_file())
+		{
+			std::cout << p << std::endl;
+			std::string path = p.path();
+			if (isTexture(path))
+			{
+				m_textureNames.push_back(path.c_str());
+			}
+			else if (isModel(p.path()))
+			{
+				m_modelNames.push_back(path.c_str());
+			}
+		}
+	}
 }
