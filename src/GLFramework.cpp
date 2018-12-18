@@ -473,12 +473,12 @@ bool GLFramework::setupScene()
 	m_torusModelDeferred = std::make_unique<Object<VertexPNTT> >("Assets/torus.obj");
 
 	// Load meshes
-	m_pTorusModel = std::make_unique<Model<VertexPN> >("Assets/torus.obj");
+	//m_pTorusModel = std::make_unique<Model<VertexPN> >("Assets/torus.obj");
 	//m_pMonkeyModel = std::make_unique<Model<VertexPN>>("Assets/mymodel.obj");
-	m_pPlaneModel = std::make_unique<Model<VertexPTNT> >("Assets/plane2.obj");
-	m_pLightModel = std::make_unique<Model<VertexPN> >("Assets/sphere.obj");
-	m_pSphereModel = std::make_unique<Model<VertexPTNT> >("Assets/planet.obj");
-	m_bunny = std::make_unique<Model<VertexPTNT> >("Assets/bunny.obj");
+	//m_pPlaneModel = std::make_unique<Model<VertexPTNT> >("Assets/plane2.obj");
+	//m_pLightModel = std::make_unique<Model<VertexPN> >("Assets/sphere.obj");
+	//m_pSphereModel = std::make_unique<Model<VertexPTNT> >("Assets/planet.obj");
+	//m_bunny = std::make_unique<Model<VertexPTNT> >("Assets/bunny.obj");
 	//m_dragon = std::make_unique<Model<VertexPTNT>>("Assets/dragon.obj");
 	//m_buddha = std::make_unique<Model<VertexPTNT>>("Assets/buddha.obj");
 	//m_lucy = std::make_unique<Model<VertexPTNT>>("Assets/lucy.obj");
@@ -527,9 +527,10 @@ void GLFramework::drawScene(double dt)
 	m_phongColorShader.setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
 	m_phongColorShader.setScalar<float>(ShaderUniform::SpecularStrength, m_pGUI->m_specularStrength);
 	// Draw point light sphere
-	m_pointLightObject->transform().setPos(pointLight0.position);
-	m_pointLightObject->transform().setScale(glm::vec3(0.01f));
-	m_pointLightObject->transform().setRotation(m_pGUI->m_rotation);
+	m_pointLightObject->transform()
+		.setPos(pointLight0.position)
+		.setScale(glm::vec3(0.01f))
+		.setRotation(m_pGUI->m_rotation);
 	m_pointLightObject->update(dt);
 	m_pointLightObject->render(m_phongColorShader);
 
@@ -550,9 +551,10 @@ void GLFramework::drawScene(double dt)
 	m_pbr.setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
 	m_pbr.setScalar<unsigned int>(ShaderUniform::DisplayMode, static_cast<unsigned int>(m_pGUI->m_displayMode));
 	// Draw main plane
-	m_planeObject->transform().setPos(glm::vec3(0.0f, -1.0f, -2.0f));
-	m_planeObject->transform().setScale(glm::vec3(0.5f, 0.001f, 0.5f));
-	m_planeObject->transform().setRotation(m_pGUI->m_rotation);
+	m_planeObject->transform()
+		.setPos(glm::vec3(0.0f, -1.0f, -2.0f))
+		.setScale(glm::vec3(0.5f, 0.001f, 0.5f))
+		.setRotation(m_pGUI->m_rotation);
 	m_planeObject->update(dt);
 	m_planeObject->render(m_pbr);
 
@@ -585,9 +587,8 @@ void GLFramework::drawToGBuffer(double dt)
 {
 	glCheckError();
 
-	m_gbuffer.useShader();
-
 	// Set the gbuffer as the active framebuffer
+	m_gbuffer.useShader();
 	m_gbufferFramebuffer.renderToTexture();
 
 	// Set uniforms
@@ -595,16 +596,20 @@ void GLFramework::drawToGBuffer(double dt)
 	m_gbuffer.set<glm::vec2>(ShaderUniform::TextureOffset, m_pGUI->m_textureOffset);
 	m_gbuffer.set<glm::vec2>(ShaderUniform::TextureTile, m_pGUI->m_textureTile);
 	m_gbuffer.setScalar<float>(ShaderUniform::DisplacementMapScale, m_pGUI->m_dispMapScale);
+	
 	// Draw main plane
-	m_planeObjectDeferred->transform().setPos(glm::vec3(0.0f, -1.0f, -2.0f));
-	m_planeObjectDeferred->transform().setScale(glm::vec3(0.5f, 0.001f, 0.5f));
-	m_planeObjectDeferred->transform().setRotation(m_pGUI->m_rotation);
+	m_planeObjectDeferred->transform()
+		.setPos(glm::vec3(0.0f, -1.0f, -2.0f))
+		.setScale(glm::vec3(0.5f, 0.001f, 0.5f))
+		.setRotation(m_pGUI->m_rotation);
 	m_planeObjectDeferred->update(dt);
 	m_planeObjectDeferred->render(m_gbuffer);
 
-	m_torusModelDeferred->transform().setPos(glm::vec3(0.0f, -1.0f, -2.0f));
-	m_torusModelDeferred->transform().setScale(glm::vec3(1.0f, 1.0f, 1.0f));
-	m_torusModelDeferred->transform().setRotation(m_pGUI->m_rotation);
+	// Draw deferred torus
+	m_torusModelDeferred->transform()
+		.setPos(glm::vec3(0.0f, -1.0f, -2.0f))
+		.setScale(glm::vec3(1.0f, 1.0f, 1.0f))
+		.setRotation(m_pGUI->m_rotation);
 	m_torusModelDeferred->update(dt);
 	m_torusModelDeferred->render(m_gbuffer);
 	
@@ -614,9 +619,6 @@ void GLFramework::drawToGBuffer(double dt)
 void GLFramework::drawDeferredLighting(double dt)
 {
 	glCheckError();
-
-	// Get lights
-	//auto& lightData = LightData::getInstance();
 
 	// Set the display framebuffer as the active framebuffer
 	m_displayFramebuffer.renderToTexture();
@@ -668,9 +670,10 @@ void GLFramework::drawForwardLighting(double dt)
 	m_phongColorShader.setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
 	m_phongColorShader.setScalar<float>(ShaderUniform::SpecularStrength, m_pGUI->m_specularStrength);
 	// Draw point light sphere
-	m_pointLightObject->transform().setPos(LightData::getInstance().pointLight(0).position);
-	m_pointLightObject->transform().setScale(glm::vec3(0.01f));
-	m_pointLightObject->transform().setRotation(m_pGUI->m_rotation);
+	m_pointLightObject->transform()
+		.setPos(LightData::getInstance().pointLight(0).position)
+		.setScale(glm::vec3(0.01f))
+		.setRotation(m_pGUI->m_rotation);
 	m_pointLightObject->update(dt);
 	m_pointLightObject->render(m_phongColorShader);
 

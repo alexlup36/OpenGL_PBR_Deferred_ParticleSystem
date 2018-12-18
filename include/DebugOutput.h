@@ -6,11 +6,16 @@
 #include <iostream>
 #include <string>
 
-#define glCheckError() _glCheckError(__FILE__, __LINE__)
+#ifndef NDEBUG
+	#define glCheckError() _glCheckError(__FILE__, __LINE__)
+#else
+	#define glCheckError()
+#endif
 
 // ----------------------------------------------------------------------------
 
 GLenum _glCheckError(const char *file, int line);
+
 void APIENTRY glDebugOutput(GLenum source,
 	GLenum type,
 	GLuint id,
