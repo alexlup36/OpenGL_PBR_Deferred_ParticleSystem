@@ -16,23 +16,23 @@ ParticleSystem::~ParticleSystem()
 
 }
 
-Generator *ParticleSystem::addGenerator(Generator::Type type)
+Generator *ParticleSystem::addGenerator(Generator::Type type, size_t particleCount, const std::string &spritePath)
 {
 	switch (type)
 	{
 	case Generator::Type::Point:
 	{
-		m_generators.push_back(std::unique_ptr<Generator>(new PointGenerator()));
+		m_generators.push_back(std::unique_ptr<Generator>(new PointGenerator(particleCount, spritePath)));
 		return m_generators.back().get();
 	}
 	case Generator::Type::Circle:
 	{
-		m_generators.push_back(std::unique_ptr<Generator>(new CircleGenerator()));
+		m_generators.push_back(std::unique_ptr<Generator>(new CircleGenerator(particleCount, spritePath)));
 		return m_generators.back().get();
 	}
 	case Generator::Type::Square:
 	{
-		m_generators.push_back(std::unique_ptr<Generator>(new SquareGenerator()));
+		m_generators.push_back(std::unique_ptr<Generator>(new SquareGenerator(particleCount, spritePath)));
 		return m_generators.back().get();
 	}
 	default:
@@ -51,4 +51,18 @@ void ParticleSystem::draw()
 {
 	for (auto &generator : m_generators)
 		generator->draw();
+}
+
+void ParticleSystem::buildVertexBuffer()
+{
+	// Iterate through the generators
+	for (auto &generator : m_generators)
+	{
+		// Iterate through the particles for each generator
+		auto particleCount = generator->getParticleCount();
+		for (size_t particleIndex = 0; particleIndex < particleCount; ++particleIndex)
+		{
+
+		}
+	}
 }

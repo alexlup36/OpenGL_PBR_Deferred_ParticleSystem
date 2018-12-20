@@ -6,6 +6,7 @@
 #include <assert.h>
 
 #include "Generator.h"
+#include "Camera.h"
 
 class ParticleSystem
 {
@@ -17,7 +18,7 @@ public:
 		return instance;
 	}
 
-	Generator *addGenerator(Generator::Type type);
+	Generator *addGenerator(Generator::Type type, size_t particleCount, const std::string &spritePath = "");
 	inline Generator *getGenerator(size_t index) const 
 	{ 
 		assert(index < m_generators.size() && "Invalid generator index.");
@@ -27,6 +28,10 @@ public:
 	void update(float t);
 	void draw();
 
+	// Helper methods
+	inline void setCamera(Camera *camera) { m_camera = camera; }
+
+
 private:
 
 	ParticleSystem();
@@ -35,6 +40,10 @@ private:
 	ParticleSystem(const ParticleSystem &other) = delete;
 	void operator=(const ParticleSystem &other) = delete;
 
+	// Helper methods
+	void buildVertexBuffer();
+
+	Camera *m_camera = nullptr;
 	std::vector<std::unique_ptr<Generator>> m_generators;
 };
 

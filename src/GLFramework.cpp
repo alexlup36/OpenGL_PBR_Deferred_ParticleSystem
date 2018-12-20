@@ -241,12 +241,6 @@ bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, 
 {
 	// ------------------------------------------------------------------------
 
-	// Particle system setup
-	auto &ps = ParticleSystem::instance();
-	auto pointGenerator = ps.addGenerator(Generator::Type::Point);
-
-	// ------------------------------------------------------------------------
-
 	// Base class initialize
 	OpenGLApp::initialize(windowTitle, enableMultisampling, enableSRGB);
 
@@ -269,6 +263,15 @@ bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, 
 
 	// Initalize camera
 	CameraMan::Instance().createCamera(windowData, "FPSCamera1", 60.0f, 0.001f, 1000.0f);
+
+	// ------------------------------------------------------------------------
+
+	// Particle system setup
+	auto &ps = ParticleSystem::instance();
+	ps.setCamera(m_cameraMan.getActiveCamera());
+	auto pointGenerator0 = ps.addGenerator(Generator::Type::Point, 10000);
+
+	// ------------------------------------------------------------------------
 
 	glCheckError();
 
