@@ -1,4 +1,4 @@
-# openglframework_win
+# OpenGL_PBR_Deferred_ParticleSystem  
   
 OpenGL rendering framework  
   
