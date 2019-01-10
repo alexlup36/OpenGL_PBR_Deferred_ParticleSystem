@@ -304,9 +304,9 @@ void Shader::initializeUniforms()
 void Shader::updatePointLights()
 {
 	auto& lightData = LightData::getInstance();
-	unsigned int pointLightCount = lightData.pointLightCount();
+	auto pointLightCount = lightData.pointLightCount();
 
-	for (unsigned int pointLightIndex = 0; pointLightIndex < pointLightCount; ++pointLightIndex)
+	for (auto pointLightIndex = 0; pointLightIndex < pointLightCount; ++pointLightIndex)
 	{
 		auto &currentPointLight = lightData.pointLight(pointLightIndex);
 		setPointLightScalar<float>(PointLightUniform::Enabled, pointLightIndex, currentPointLight.enabled);
@@ -336,9 +336,9 @@ void Shader::updatePointLights()
 void Shader::updateDirectionalLights()
 {
 	auto& lightData = LightData::getInstance();
-	unsigned int dirLightCount = lightData.directionalLightCount();
+	auto dirLightCount = lightData.directionalLightCount();
 
-	for (unsigned int dirLightIndex = 0; dirLightIndex < dirLightCount; ++dirLightIndex)
+	for (auto dirLightIndex = 0; dirLightIndex < dirLightCount; ++dirLightIndex)
 	{
 		auto &currentDirLight = lightData.directionalLight(dirLightIndex);
 		setDirLightScalar<float>(DirLightUniform::Enabled, dirLightIndex, currentDirLight.enabled);
@@ -367,9 +367,9 @@ void Shader::updateDirectionalLights()
 void Shader::updateSpotLights()
 {
 	auto& lightData = LightData::getInstance();
-	unsigned int spotLightCount = lightData.spotLightCount();
+	auto spotLightCount = lightData.spotLightCount();
 
-	for (unsigned int spotLightIndex = 0; spotLightIndex < spotLightCount; ++spotLightIndex)
+	for (auto spotLightIndex = 0; spotLightIndex < spotLightCount; ++spotLightIndex)
 	{
 		auto &currentSpotLight = lightData.spotLight(spotLightIndex);
 		setSpotLightScalar<float>(SpotLightUniform::Enabled, spotLightIndex, currentSpotLight.enabled);

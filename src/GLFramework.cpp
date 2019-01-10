@@ -13,6 +13,8 @@
 #include "Window.h"
 #include "CameraMan.h"
 
+#include "ParticleSystem/ParticleSystem.h"
+
 // ----------------------------------------------------------------------------
 
 GLFramework::GLFramework(int windowWidth, int windowHeight, const CameraMan& cameraMan)
@@ -47,6 +49,8 @@ void GLFramework::update(double dt)
 
 	// ------------------------------------------------------------------------
 	// Update here
+
+	ParticleSystem::instance().update((float)dt);
 
 	// Camera input
 	if (Input::fpsCameraEnabled())
@@ -135,6 +139,11 @@ void GLFramework::draw(double dt)
 	m_finalShader.setScalar<unsigned int>(ShaderUniform::RenderedTexture, textureUnit);
 	// Draw triangles
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	// ------------------------------------------------------------------------
+	// Particle rendering 
+
+	ParticleSystem::instance().draw();
 
 	// ------------------------------------------------------------------------
 	// Debug
@@ -230,7 +239,7 @@ void GLFramework::drawGbufferToScreen()
 
 bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, bool enableSRGB)
 {
-	glCheckError();
+	// ------------------------------------------------------------------------
 
 	// Base class initialize
 	OpenGLApp::initialize(windowTitle, enableMultisampling, enableSRGB);
@@ -254,6 +263,15 @@ bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, 
 
 	// Initalize camera
 	CameraMan::Instance().createCamera(windowData, "FPSCamera1", 60.0f, 0.001f, 1000.0f);
+
+	// ------------------------------------------------------------------------
+
+	// Particle system setup
+	auto &ps = ParticleSystem::instance();
+	ps.setCamera(m_cameraMan.getActiveCamera());
+	auto pointGenerator0 = ps.addGenerator(Generator::Type::Point, 10000);
+
+	// ------------------------------------------------------------------------
 
 	glCheckError();
 
@@ -311,8 +329,9 @@ bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, 
 	// Setup scene
 	if (setupScene() == false)
 		return false;
-
 	glCheckError();
+
+	// ------------------------------------------------------------------------
 
 	// Success
 	return true;
@@ -331,109 +350,109 @@ bool GLFramework::setupScene()
 	MaterialData::getInstance().initialize();
 
 	// Load shaders
-	m_basicShader.addShader(Shader::ShaderType::VERTEX, "Shaders/basic.vert");
-	m_basicShader.addShader(Shader::ShaderType::FRAGMENT, "Shaders/basic.frag");
+	m_basicShader.addShader(Shader::ShaderType::VERTEX, "../Shaders/basic.vert");
+	m_basicShader.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/basic.frag");
 	if (m_basicShader.initialize() == false) return false;
 	
-	m_finalShader.addShader(Shader::ShaderType::VERTEX, "Shaders/hdr.vert");
-	m_finalShader.addShader(Shader::ShaderType::FRAGMENT, "Shaders/hdr.frag");
+	m_finalShader.addShader(Shader::ShaderType::VERTEX, "../Shaders/hdr.vert");
+	m_finalShader.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/hdr.frag");
 	if (m_finalShader.initialize() == false) return false;
 
-	m_phongColorShader.addShader(Shader::ShaderType::VERTEX, "Shaders/phongColor.vert");
-	m_phongColorShader.addShader(Shader::ShaderType::FRAGMENT, "Shaders/phongColor.frag");
+	m_phongColorShader.addShader(Shader::ShaderType::VERTEX, "../Shaders/phongColor.vert");
+	m_phongColorShader.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/phongColor.frag");
 	if (m_phongColorShader.initialize() == false) return false;
 
-	m_phongTextureShader.addShader(Shader::ShaderType::VERTEX, "Shaders/phongTexture.vert");
-	m_phongTextureShader.addShader(Shader::ShaderType::FRAGMENT, "Shaders/phongTexture.frag");
+	m_phongTextureShader.addShader(Shader::ShaderType::VERTEX, "../Shaders/phongTexture.vert");
+	m_phongTextureShader.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/phongTexture.frag");
 	if (m_phongTextureShader.initialize() == false) return false;
 
-	m_normalMapping.addShader(Shader::ShaderType::VERTEX, "Shaders/normalMapping.vert");
-	m_normalMapping.addShader(Shader::ShaderType::FRAGMENT, "Shaders/normalMapping.frag");
+	m_normalMapping.addShader(Shader::ShaderType::VERTEX, "../Shaders/normalMapping.vert");
+	m_normalMapping.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/normalMapping.frag");
 	if (m_normalMapping.initialize() == false) return false;
 
-	m_parallaxMapping.addShader(Shader::ShaderType::VERTEX, "Shaders/parallaxMapping.vert");
-	m_parallaxMapping.addShader(Shader::ShaderType::FRAGMENT, "Shaders/parallaxMapping.frag");
+	m_parallaxMapping.addShader(Shader::ShaderType::VERTEX, "../Shaders/parallaxMapping.vert");
+	m_parallaxMapping.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/parallaxMapping.frag");
 	if (m_parallaxMapping.initialize() == false) return false;
 
-	m_colorPBR.addShader(Shader::ShaderType::VERTEX, "Shaders/simplePBR.vert");
-	m_colorPBR.addShader(Shader::ShaderType::FRAGMENT, "Shaders/simplePBR.frag");
+	m_colorPBR.addShader(Shader::ShaderType::VERTEX, "../Shaders/simplePBR.vert");
+	m_colorPBR.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/simplePBR.frag");
 	if (m_colorPBR.initialize() == false) return false;
 
-	m_pbr.addShader(Shader::ShaderType::VERTEX, "Shaders/pbr.vert");
-	m_pbr.addShader(Shader::ShaderType::FRAGMENT, "Shaders/pbr.frag");
+	m_pbr.addShader(Shader::ShaderType::VERTEX, "../Shaders/pbr.vert");
+	m_pbr.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/pbr.frag");
 	if (m_pbr.initialize() == false) return false;
 
-	m_depth.addShader(Shader::ShaderType::VERTEX, "Shaders/shadowMap.vert");
-	m_depth.addShader(Shader::ShaderType::FRAGMENT, "Shaders/shadowMap.frag");
+	m_depth.addShader(Shader::ShaderType::VERTEX, "../Shaders/shadowMap.vert");
+	m_depth.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/shadowMap.frag");
 	if (m_depth.initialize() == false) return false;
 
-	m_skyBox.addShader(Shader::ShaderType::VERTEX, "Shaders/cubemap.vert");
-	m_skyBox.addShader(Shader::ShaderType::FRAGMENT, "Shaders/cubemap.frag");
+	m_skyBox.addShader(Shader::ShaderType::VERTEX, "../Shaders/cubemap.vert");
+	m_skyBox.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/cubemap.frag");
 	if (m_skyBox.initialize() == false) return false;
 
-	m_gbuffer.addShader(Shader::ShaderType::VERTEX, "Shaders/gbuffer.vert");
-	m_gbuffer.addShader(Shader::ShaderType::FRAGMENT, "Shaders/gbuffer.frag");
+	m_gbuffer.addShader(Shader::ShaderType::VERTEX, "../Shaders/gbuffer.vert");
+	m_gbuffer.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/gbuffer.frag");
 	if (m_gbuffer.initialize() == false) return false;
 
-	m_quadShader.addShader(Shader::ShaderType::VERTEX, "Shaders/quad.vert");
-	m_quadShader.addShader(Shader::ShaderType::FRAGMENT, "Shaders/quad.frag");
+	m_quadShader.addShader(Shader::ShaderType::VERTEX, "../Shaders/quad.vert");
+	m_quadShader.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/quad.frag");
 	if (m_quadShader.initialize() == false) return false;
 
-	m_quadDepthShader.addShader(Shader::ShaderType::VERTEX, "Shaders/quadDepth.vert");
-	m_quadDepthShader.addShader(Shader::ShaderType::FRAGMENT, "Shaders/quadDepth.frag");
+	m_quadDepthShader.addShader(Shader::ShaderType::VERTEX, "../Shaders/quadDepth.vert");
+	m_quadDepthShader.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/quadDepth.frag");
 	if (m_quadDepthShader.initialize() == false) return false;
 
-	m_deferredLighting.addShader(Shader::ShaderType::VERTEX, "Shaders/deferredLighting.vert");
-	m_deferredLighting.addShader(Shader::ShaderType::FRAGMENT, "Shaders/deferredLighting.frag");
+	m_deferredLighting.addShader(Shader::ShaderType::VERTEX, "../Shaders/deferredLighting.vert");
+	m_deferredLighting.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/deferredLighting.frag");
 	if (m_deferredLighting.initialize() == false) return false;
 
 	glCheckError();
 
 	// Load textures
-	if ((m_brick1Diffuse = TextureMan::Instance().getTexture("Assets/Textures/brick1/brick_diffuse.jpg", TextureType::Diffuse1)) == nullptr) return false;
-	if ((m_brick1Displacement = TextureMan::Instance().getTexture("Assets/Textures/brick1/brick_displacement.jpg", TextureType::Displacement)) == nullptr) return false;
-	if ((m_brick1Normal = TextureMan::Instance().getTexture("Assets/Textures/brick1/brick_normal.jpg", TextureType::Normal1)) == nullptr) return false;
-	if ((m_brick1Specular = TextureMan::Instance().getTexture("Assets/Textures/brick1/brick_specular.jpg", TextureType::Specular)) == nullptr) return false;
+	if ((m_brick1Diffuse = TextureMan::Instance().getTexture("../Assets/Textures/brick1/brick_diffuse.jpg", TextureType::Diffuse1)) == nullptr) return false;
+	if ((m_brick1Displacement = TextureMan::Instance().getTexture("../Assets/Textures/brick1/brick_displacement.jpg", TextureType::Displacement)) == nullptr) return false;
+	if ((m_brick1Normal = TextureMan::Instance().getTexture("../Assets/Textures/brick1/brick_normal.jpg", TextureType::Normal1)) == nullptr) return false;
+	if ((m_brick1Specular = TextureMan::Instance().getTexture("../Assets/Textures/brick1/brick_specular.jpg", TextureType::Specular)) == nullptr) return false;
 
-	if ((m_toyBoxDiffuse = TextureMan::Instance().getTexture("Assets/Textures/toybox/toy_box_diffuse.png", TextureType::Diffuse1)) == nullptr) return false;
-	if ((m_toyBoxDisplacement = TextureMan::Instance().getTexture("Assets/Textures/toybox/toy_box_disp.png", TextureType::Displacement)) == nullptr) return false;
-	if ((m_toyBoxNormal = TextureMan::Instance().getTexture("Assets/Textures/toybox/toy_box_normal.png", TextureType::Normal1)) == nullptr) return false;
+	if ((m_toyBoxDiffuse = TextureMan::Instance().getTexture("../Assets/Textures/toybox/toy_box_diffuse.png", TextureType::Diffuse1)) == nullptr) return false;
+	if ((m_toyBoxDisplacement = TextureMan::Instance().getTexture("../Assets/Textures/toybox/toy_box_disp.png", TextureType::Displacement)) == nullptr) return false;
+	if ((m_toyBoxNormal = TextureMan::Instance().getTexture("../Assets/Textures/toybox/toy_box_normal.png", TextureType::Normal1)) == nullptr) return false;
 
-	if ((m_brick1RoughnessPBR = TextureMan::Instance().getTexture("Assets/Textures/brick1/brick_specular.jpg", TextureType::Roughness)) == nullptr) return false;
-	if ((m_brick1MetallnessPBR = TextureMan::Instance().getTexture("Assets/Textures/brick1/brick_specular.jpg", TextureType::Metalness)) == nullptr) return false;
-	if ((m_brick1AmbientOcclusionPBR = TextureMan::Instance().getTexture("Assets/Textures/brick1/brick_displacement.jpg", TextureType::AmbientOcclusion)) == nullptr) return false;
+	if ((m_brick1RoughnessPBR = TextureMan::Instance().getTexture("../Assets/Textures/brick1/brick_specular.jpg", TextureType::Roughness)) == nullptr) return false;
+	if ((m_brick1MetallnessPBR = TextureMan::Instance().getTexture("../Assets/Textures/brick1/brick_specular.jpg", TextureType::Metalness)) == nullptr) return false;
+	if ((m_brick1AmbientOcclusionPBR = TextureMan::Instance().getTexture("../Assets/Textures/brick1/brick_displacement.jpg", TextureType::AmbientOcclusion)) == nullptr) return false;
 
-	if ((m_rustedIronAlbedo = TextureMan::Instance().getTexture("Assets/Textures/pbr/rusted_iron/albedo.png", TextureType::Diffuse1)) == nullptr) return false;
-	if ((m_rustedIronRoughness = TextureMan::Instance().getTexture("Assets/Textures/pbr/rusted_iron/metallic.png", TextureType::Metalness)) == nullptr) return false;
-	if ((m_rustedIronMetallic = TextureMan::Instance().getTexture("Assets/Textures/pbr/rusted_iron/roughness.png", TextureType::Roughness)) == nullptr) return false;
-	if ((m_rustedIronAmbientOcclusion = TextureMan::Instance().getTexture("Assets/Textures/pbr/rusted_iron/ao.png", TextureType::AmbientOcclusion)) == nullptr) return false;
-	if ((m_rustedIronNormal = TextureMan::Instance().getTexture("Assets/Textures/pbr/rusted_iron/normal.png", TextureType::Normal1)) == nullptr) return false;
+	if ((m_rustedIronAlbedo = TextureMan::Instance().getTexture("../Assets/Textures/pbr/rusted_iron/albedo.png", TextureType::Diffuse1)) == nullptr) return false;
+	if ((m_rustedIronRoughness = TextureMan::Instance().getTexture("../Assets/Textures/pbr/rusted_iron/metallic.png", TextureType::Metalness)) == nullptr) return false;
+	if ((m_rustedIronMetallic = TextureMan::Instance().getTexture("../Assets/Textures/pbr/rusted_iron/roughness.png", TextureType::Roughness)) == nullptr) return false;
+	if ((m_rustedIronAmbientOcclusion = TextureMan::Instance().getTexture("../Assets/Textures/pbr/rusted_iron/ao.png", TextureType::AmbientOcclusion)) == nullptr) return false;
+	if ((m_rustedIronNormal = TextureMan::Instance().getTexture("../Assets/Textures/pbr/rusted_iron/normal.png", TextureType::Normal1)) == nullptr) return false;
 
-	if ((m_goldAlbedo = TextureMan::Instance().getTexture("Assets/Textures/pbr/gold/albedo.png", TextureType::Diffuse1)) == nullptr) return false;
-	if ((m_goldRoughness = TextureMan::Instance().getTexture("Assets/Textures/pbr/gold/metallic.png", TextureType::Metalness)) == nullptr) return false;
-	if ((m_goldMetallic = TextureMan::Instance().getTexture("Assets/Textures/pbr/gold/roughness.png", TextureType::Roughness)) == nullptr) return false;
-	if ((m_goldAmbientOcclusion = TextureMan::Instance().getTexture("Assets/Textures/pbr/gold/ao.png", TextureType::AmbientOcclusion)) == nullptr) return false;
-	if ((m_goldNormal = TextureMan::Instance().getTexture("Assets/Textures/pbr/gold/normal.png", TextureType::Normal1)) == nullptr) return false;
+	if ((m_goldAlbedo = TextureMan::Instance().getTexture("../Assets/Textures/pbr/gold/albedo.png", TextureType::Diffuse1)) == nullptr) return false;
+	if ((m_goldRoughness = TextureMan::Instance().getTexture("../Assets/Textures/pbr/gold/metallic.png", TextureType::Metalness)) == nullptr) return false;
+	if ((m_goldMetallic = TextureMan::Instance().getTexture("../Assets/Textures/pbr/gold/roughness.png", TextureType::Roughness)) == nullptr) return false;
+	if ((m_goldAmbientOcclusion = TextureMan::Instance().getTexture("../Assets/Textures/pbr/gold/ao.png", TextureType::AmbientOcclusion)) == nullptr) return false;
+	if ((m_goldNormal = TextureMan::Instance().getTexture("../Assets/Textures/pbr/gold/normal.png", TextureType::Normal1)) == nullptr) return false;
 
 	glCheckError();
 
 	// Load cube maps
 	std::vector<std::string> facePaths = {
-		"Assets/Textures/skybox2/right.jpg", 
-		"Assets/Textures/skybox2/left.jpg",
-		"Assets/Textures/skybox2/top.jpg",
-		"Assets/Textures/skybox2/bottom.jpg",
-		"Assets/Textures/skybox2/back.jpg",
-		"Assets/Textures/skybox2/front.jpg" };
+		"../Assets/Textures/skybox2/right.jpg", 
+		"../Assets/Textures/skybox2/left.jpg",
+		"../Assets/Textures/skybox2/top.jpg",
+		"../Assets/Textures/skybox2/bottom.jpg",
+		"../Assets/Textures/skybox2/back.jpg",
+		"../Assets/Textures/skybox2/front.jpg" };
 	m_cubeMap1 = TextureMan::Instance().getTexture("skybox1", facePaths);
 
 	facePaths = {
-		"Assets/Textures/skybox1/right.bmp",
-		"Assets/Textures/skybox1/left.bmp",
-		"Assets/Textures/skybox1/top.bmp",
-		"Assets/Textures/skybox1/bottom.bmp",
-		"Assets/Textures/skybox1/front.bmp",
-		"Assets/Textures/skybox1/back.bmp" };
+		"../Assets/Textures/skybox1/right.bmp",
+		"../Assets/Textures/skybox1/left.bmp",
+		"../Assets/Textures/skybox1/top.bmp",
+		"../Assets/Textures/skybox1/bottom.bmp",
+		"../Assets/Textures/skybox1/front.bmp",
+		"../Assets/Textures/skybox1/back.bmp" };
 	m_cubeMap2 = TextureMan::Instance().getTexture("skybox2", facePaths);
 
 	glCheckError();
@@ -466,11 +485,11 @@ bool GLFramework::setupScene()
 	glCheckError();
 
 	// Load objects
-	m_planeObject = std::make_unique<Object<VertexPTNT> >("Assets/plane2.obj");
-	m_pointLightObject = std::make_unique<Object<VertexPN> >("Assets/sphere.obj");
+	m_planeObject = std::make_unique<Object<VertexPTNT> >("../Assets/plane2.obj");
+	m_pointLightObject = std::make_unique<Object<VertexPN> >("../Assets/sphere.obj");
 
-	m_planeObjectDeferred = std::make_unique<Object<VertexPNTT> >("Assets/plane2.obj");
-	m_torusModelDeferred = std::make_unique<Object<VertexPNTT> >("Assets/torus.obj");
+	m_planeObjectDeferred = std::make_unique<Object<VertexPNTT> >("../Assets/plane2.obj");
+	m_torusModelDeferred = std::make_unique<Object<VertexPNTT> >("../Assets/torus.obj");
 
 	// Load meshes
 	//m_pTorusModel = std::make_unique<Model<VertexPN> >("Assets/torus.obj");
@@ -507,7 +526,7 @@ bool GLFramework::setupScene()
 void GLFramework::drawScene(double dt)
 {
 	// Do rendering
-	glm::mat4 m, v, p, normalMat;
+	glm::mat4 v, p;
 
 	// Get lights
 	auto& pointLight0 = LightData::getInstance().pointLight(0);

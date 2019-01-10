@@ -29,14 +29,14 @@ public:
 	inline glm::mat4 modelMat() const { return m_translationMat * m_rotationMat * m_scaleMat; }
 
 	inline Transform &setPos(const glm::vec3& pos) { m_translationMat = glm::translate(pos); return *this; }
-	inline Transform &setPos(GLfloat x, GLfloat y, GLfloat z) { m_translationMat = glm::translate(glm::vec3(x, y, z)); }
+	inline Transform &setPos(GLfloat x, GLfloat y, GLfloat z) { m_translationMat = glm::translate(glm::vec3(x, y, z)); return *this; }
 
-	inline Transform &setRotation(const glm::vec3& rot) { m_rotationMat = glm::rotate(rot.z, FORWARD) * glm::rotate(rot.y, UP) * glm::rotate(rot.x, RIGHT); }
-	inline Transform &setRotation(GLfloat x, GLfloat y, GLfloat z) { m_rotationMat = glm::rotate(z, FORWARD) * glm::rotate(y, UP) * glm::rotate(x, RIGHT); }
-	inline Transform &setRotation(const glm::quat& rotation) { m_rotationMat = glm::toMat4(rotation); }
+	inline Transform &setRotation(const glm::vec3& rot) { m_rotationMat = glm::rotate(rot.z, FORWARD) * glm::rotate(rot.y, UP) * glm::rotate(rot.x, RIGHT); return *this; }
+	inline Transform &setRotation(GLfloat x, GLfloat y, GLfloat z) { m_rotationMat = glm::rotate(z, FORWARD) * glm::rotate(y, UP) * glm::rotate(x, RIGHT); return *this; }
+	inline Transform &setRotation(const glm::quat& rotation) { m_rotationMat = glm::toMat4(rotation); return *this; }
 
-	inline Transform &setScale(const glm::vec3& scale) { m_scaleMat = glm::scale(scale); }
-	inline Transform &setScale(GLfloat x, GLfloat y, GLfloat z) { m_scaleMat = glm::scale(glm::vec3(x, y, z)); }
+	inline Transform &setScale(const glm::vec3& scale) { m_scaleMat = glm::scale(scale); return *this; }
+	inline Transform &setScale(GLfloat x, GLfloat y, GLfloat z) { m_scaleMat = glm::scale(glm::vec3(x, y, z)); return *this; }
 protected:
 
 private:

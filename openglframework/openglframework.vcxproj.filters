@@ -1,0 +1,274 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{707fd6fc-9844-4e9b-b5b7-44ed4a9a6f5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ParticleSystem">
+      <UniqueIdentifier>{d675495d-8f5f-4bfc-92e8-d1eebc045237}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ParticleSystem">
+      <UniqueIdentifier>{bd39afa1-3ab8-404f-9c67-66aeb9204d46}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\CameraMan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\DebugOutput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Framebuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GLFramework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\LightData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\MaterialData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\OpenGLApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Texture2D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Texture3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\TextureMan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Transform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ParticleSystem\CircleGenerator.h">
+      <Filter>Header Files\ParticleSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ParticleSystem\Generator.h">
+      <Filter>Header Files\ParticleSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ParticleSystem\ParticleSystem.h">
+      <Filter>Header Files\ParticleSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ParticleSystem\PointGenerator.h">
+      <Filter>Header Files\ParticleSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ParticleSystem\SquareGenerator.h">
+      <Filter>Header Files\ParticleSystem</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\CameraMan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\DebugOutput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Framebuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GLFramework.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\LightData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MaterialData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\OpenGLApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Texture2D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Texture3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\TextureMan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui_impl_glfw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui_impl_opengl3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ParticleSystem\CircleGenerator.cpp">
+      <Filter>Source Files\ParticleSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ParticleSystem\Generator.cpp">
+      <Filter>Source Files\ParticleSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ParticleSystem\ParticleSystem.cpp">
+      <Filter>Source Files\ParticleSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ParticleSystem\PointGenerator.cpp">
+      <Filter>Source Files\ParticleSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ParticleSystem\SquareGenerator.cpp">
+      <Filter>Source Files\ParticleSystem</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Shaders\basic.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\basic.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\cube.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\cube.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\cubemap.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\cubemap.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\deferredLighting.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\deferredLighting.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\gbuffer.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\gbuffer.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\hdr.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\hdr.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\normalMapping.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\normalMapping.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\parallaxMapping.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\parallaxMapping.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\pbr.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\pbr.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\phongColor.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\phongColor.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\phongTexture.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\phongTexture.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\quad.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\quad.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\quadDepth.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\quadDepth.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\shadowMap.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\shadowMap.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\simplePBR.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\simplePBR.vert">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>

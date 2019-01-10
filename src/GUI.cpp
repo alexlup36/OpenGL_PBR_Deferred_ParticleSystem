@@ -104,11 +104,11 @@ void GUI::drawGbufferSettings()
 void GUI::drawLightPanel()
 {
 	// Display list of light source type
-	ImGui::ListBox("Light types", &m_lightTypeSelection, LightTypes.data(), LightTypes.size());
+	ImGui::ListBox("Light types", &m_lightTypeSelection, LightTypes.data(), (int)LightTypes.size());
 	// Add light source button
 	bool addLightSourcePressed = ImGui::Button("Add light source");
 
-	ImGui::ListBox("Light sources", &m_lightSourceSelection, m_lightSourceNames.data(), m_lightSourceNames.size());
+	ImGui::ListBox("Light sources", &m_lightSourceSelection, m_lightSourceNames.data(), (int)m_lightSourceNames.size());
 	// Display 
 	auto baseLight = LightData::getInstance().getLight(m_lightSourceSelection);
 	auto lightSourceType = baseLight->lightSourceType;
@@ -231,10 +231,10 @@ void GUI::drawSpotLightSettings(SpotLight &spotLight)
 void GUI::drawObjectSettings()
 {
 	// Display a list of available 3D models
-	ImGui::ListBox("Models", &m_modelSelection, m_modelNames.data(), m_modelNames.size());
+	ImGui::ListBox("Models", &m_modelSelection, m_modelNames.data(), (int)m_modelNames.size());
 
 	// Display a list of available textures
-	ImGui::ListBox("Textures", &m_textureSelection, m_textureNames.data(), m_textureNames.size());
+	ImGui::ListBox("Textures", &m_textureSelection, m_textureNames.data(), (int)m_textureNames.size());
 
 	if (m_fileSystemRequiresUpdate)
 	{
@@ -254,13 +254,13 @@ void GUI::updateAssetList()
 		}
 		else
 		{
-			std::cout << p << std::endl;
-			std::string path = p.path();
+			std::string path = p.path().string();
+			std::cout << path << std::endl;
 			if (isTexture(path))
 			{
 				m_textureNames.push_back(path.c_str());
 			}
-			else if (isModel(p.path()))
+			else if (isModel(p.path().string()))
 			{
 				m_modelNames.push_back(path.c_str());
 			}
@@ -276,13 +276,13 @@ void GUI::expandDirectory(const std::filesystem::directory_entry &dirEntry)
 			expandDirectory(p);
 		else if (p.is_regular_file())
 		{
-			std::cout << p << std::endl;
-			std::string path = p.path();
+			std::string path = p.path().string();
+			std::cout << path << std::endl;
 			if (isTexture(path))
 			{
 				m_textureNames.push_back(path.c_str());
 			}
-			else if (isModel(p.path()))
+			else if (isModel(path))
 			{
 				m_modelNames.push_back(path.c_str());
 			}

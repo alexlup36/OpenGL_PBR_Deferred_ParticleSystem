@@ -76,10 +76,10 @@ public:
 		return ids;
 	}
 
-	inline int lightCount() const { return m_pointLights.size() + m_directionalLights.size() + m_spotLights.size(); }
-	inline int pointLightCount() const { return m_pointLights.size(); }
-	inline int directionalLightCount() const { return m_directionalLights.size(); }
-	inline int spotLightCount() const { return m_spotLights.size(); }
+	inline size_t lightCount() const { return m_pointLights.size() + m_directionalLights.size() + m_spotLights.size(); }
+	inline size_t pointLightCount() const { return m_pointLights.size(); }
+	inline size_t directionalLightCount() const { return m_directionalLights.size(); }
+	inline size_t spotLightCount() const { return m_spotLights.size(); }
 
 private:
 	LightData() {}

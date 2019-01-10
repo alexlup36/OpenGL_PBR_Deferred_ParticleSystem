@@ -51,7 +51,7 @@ bool Framebuffer::create()
 		}
 
 		// Set the list of draw buffers
-		glDrawBuffers(drawBuffers.size(), drawBuffers.data());
+		glDrawBuffers((GLsizei)drawBuffers.size(), drawBuffers.data());
 	}
 	else
 	{
