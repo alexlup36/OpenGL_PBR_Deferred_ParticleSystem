@@ -29,8 +29,9 @@ public:
 	Texture2D(const std::string& sFileName, TextureType type, bool bImmutableStorage = true, bool bEnableMipmaps = true);
 	virtual ~Texture2D() {}
 
+	void init();
 	void bind(GLuint program);
-	GLuint getHandler();
+	inline GLuint getHandler() { return m_uiTexture; }
 	inline const std::string& getPath() const { return m_sTexturePath; }
 	inline const TextureType getTextureType() const { return m_textureType; }
 
@@ -42,10 +43,23 @@ private:
 	Texture2D( const Texture2D& other ) {}
 	void operator=( const Texture2D& other ) {}
 
-	TextureType m_textureType;
+	// OpenGL handle
 	GLuint m_uiTexture;
-	bool m_bSRGB;
+
+	TextureType m_textureType;
 	std::string m_sTexturePath;
+
+	// Texture properties
+	int m_iWidth = 0, m_iHeight = 0, m_iComponents = 0;
+
+	// Configuration
+	bool m_bSRGB = false;
+	bool m_immutableStorage = false;
+	bool m_enableMipMaps = true;
+
+	// Helper methods
+	unsigned char* loadImageData();
+	void initOpenGLTexture(unsigned char *imageData);
 };
 
 #endif // __TEXTURE_H__

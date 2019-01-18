@@ -50,7 +50,7 @@ void GLFramework::update(double dt)
 	// ------------------------------------------------------------------------
 	// Update here
 
-	ParticleSystem::instance().update((float)dt);
+	//ParticleSystem::instance().update((float)dt);
 
 	// Camera input
 	if (Input::fpsCameraEnabled())
@@ -143,7 +143,7 @@ void GLFramework::draw(double dt)
 	// ------------------------------------------------------------------------
 	// Particle rendering 
 
-	ParticleSystem::instance().draw();
+	//ParticleSystem::instance().draw();
 
 	// ------------------------------------------------------------------------
 	// Debug
@@ -434,8 +434,6 @@ bool GLFramework::setupScene()
 	if ((m_goldAmbientOcclusion = TextureMan::Instance().getTexture("../Assets/Textures/pbr/gold/ao.png", TextureType::AmbientOcclusion)) == nullptr) return false;
 	if ((m_goldNormal = TextureMan::Instance().getTexture("../Assets/Textures/pbr/gold/normal.png", TextureType::Normal1)) == nullptr) return false;
 
-	glCheckError();
-
 	// Load cube maps
 	std::vector<std::string> facePaths = {
 		"../Assets/Textures/skybox2/right.jpg", 
@@ -454,8 +452,6 @@ bool GLFramework::setupScene()
 		"../Assets/Textures/skybox1/front.bmp",
 		"../Assets/Textures/skybox1/back.bmp" };
 	m_cubeMap2 = TextureMan::Instance().getTexture("skybox2", facePaths);
-
-	glCheckError();
 
 	// Setup PBR material
 

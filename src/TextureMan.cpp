@@ -24,93 +24,60 @@ TextureMan::~TextureMan()
 
 // ----------------------------------------------------------------------------
 
-template<typename Texture2D>
-void TextureMan::addTexture(Texture2D* texture)
+Texture3D* TextureMan::getTexture(const std::string& texturePath, const std::vector<std::string> &faceNames)
 {
-	// If the texture doesn't exist in the map, add it
-	const std::string& texturePath = texture->getPath();
-	if (m_textureMap.find(texturePath) == m_textureMap.end())
+	// Look for the texture
+	auto texture = m_textureCubeMap.find(texturePath);
+	if (texture != m_textureCubeMap.end()) return texture->second;
+	else
 	{
-		m_textureMap[texturePath] = texture;
-		m_vTextureList.push_back(texture);
+		// Create texture
+		return createTexture3D(texturePath, faceNames);
 	}
 }
 
 // ----------------------------------------------------------------------------
 
-Texture3D* TextureMan::getTexture(const std::string& textureName, const std::vector<std::string> &faceNames)
-{
-	// Look for the texture
-	auto texture = m_textureCubeMap.find(textureName);
-	if (texture != m_textureCubeMap.end())
-	{
-		// We found the texture
-		return texture->second;
-	}
-	else
-	{
-		// Create texture
-		Texture3D* newTexture = new Texture3D(textureName, faceNames);
-		if (newTexture != nullptr)
-		{
-			// Add texture to cache
-			m_textureCubeMap[textureName] = newTexture;
-			return newTexture;
-		}
-		else
-		{
-			std::cout << "Failed to create texture: " << textureName << "\n";
-			assert(newTexture);
-			return nullptr;
-		}
-	}
-}
-
-Texture2D* TextureMan::getTexture(const std::string& texturePath, 
-	TextureType textureType)
+Texture2D* TextureMan::getTexture(const std::string& texturePath, TextureType textureType)
 {
 	// Look for the texture
 	auto texture = m_textureMap.find(texturePath);
 	if (texture != m_textureMap.end())
 	{
-		if (texture->second->getTextureType() == textureType)
-			// We found the texture
+		// Texture found
+		if (texture->second->getTextureType() == textureType) 
 			return texture->second;
-		else
-		{
-			// Create texture
-			Texture2D* newTexture = new Texture2D(texturePath, textureType);
-			if (newTexture != nullptr)
-			{
-				// Add texture to cache
-				m_textureMap[texturePath] = newTexture;
-				return newTexture;
-			}
-			else
-			{
-				std::cout << "Failed to create texture: " << texturePath << "\n";
-				assert(newTexture);
-				return nullptr;
-			}
-		}
+		else 
+			return createTexture2D(texturePath, textureType);
 	}
 	else
+		return createTexture2D(texturePath, textureType);
+}
+
+// ----------------------------------------------------------------------------
+
+Texture2D* TextureMan::createTexture2D(const std::string& texturePath, TextureType textureType)
+{
+	auto newTexture = new Texture2D(texturePath, textureType);
+	if (newTexture != nullptr)
 	{
-		// Create texture
-		Texture2D* newTexture = new Texture2D(texturePath, textureType);
-		if (newTexture != nullptr)
-		{
-			// Add texture to cache
-			m_textureMap[texturePath] = newTexture;
-			return newTexture;
-		}
-		else
-		{
-			std::cout << "Failed to create texture: " << texturePath << "\n";
-			assert(newTexture);
-			return nullptr;
-		}
+		newTexture->init();
+		m_textureMap[texturePath] = newTexture;
 	}
+	return newTexture;
+}
+
+// ----------------------------------------------------------------------------
+
+Texture3D* TextureMan::createTexture3D(const std::string& texturePath, const std::vector<std::string> &faceNames)
+{
+	auto newTexture = new Texture3D(texturePath, faceNames);
+	if (newTexture != nullptr)
+	{
+		newTexture->init();
+		m_textureCubeMap[texturePath] = newTexture;
+	}
+	return newTexture;
 }
 
 // ----------------------------------------------------------------------------

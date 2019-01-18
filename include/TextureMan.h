@@ -26,15 +26,16 @@ public:
 		return refInstance;
 	}
 
-	template<typename T>
-	void addTexture(T* texture);
-	Texture3D* getTexture(const std::string& textureName, const std::vector<std::string> &faceNames);
-	Texture2D* getTexture(const std::string& textureName, TextureType textureType);
+	Texture3D* getTexture(const std::string& texturePath, const std::vector<std::string> &faceNames);
+	Texture2D* getTexture(const std::string& texturePath, TextureType textureType);
 
 private:
 	std::vector<Texture2D*> m_vTextureList;
 	std::map<const std::string, Texture2D*> m_textureMap;
 	std::map<const std::string, Texture3D*> m_textureCubeMap;
+
+	Texture2D* createTexture2D(const std::string& texturePath, TextureType textureType);
+	Texture3D* createTexture3D(const std::string& texturePath, const std::vector<std::string> &faceNames);
 };
 
 // ----------------------------------------------------------------------------
