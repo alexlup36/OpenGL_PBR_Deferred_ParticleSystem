@@ -1,5 +1,6 @@
 #include "OpenGLApp.h"
 #include <iostream>
+#include <vector>
 #include <assert.h>
 
 // ----------------------------------------------------------------------------
@@ -98,6 +99,27 @@ bool OpenGLApp::initialize(const char* windowTitle,
 	{
 		std::cout << "Failed to initialize GLEW\n";
 		return false;
+	}
+
+	std::vector<std::string> openGLVersions = {
+		"GL_VERSION_1_4",
+		"GL_VERSION_3_3",
+		"GL_VERSION_4_0",
+		"GL_VERSION_4_1",
+		"GL_VERSION_4_2",
+		"GL_VERSION_4_3",
+		"GL_VERSION_4_4",
+		"GL_VERSION_4_5",
+		"GL_VERSION_4_6"
+	};
+
+	for (auto it = openGLVersions.rbegin(); it != openGLVersions.rend(); ++it) 
+	{
+		if (glewIsSupported((*it).c_str()))
+		{
+			std::cout << "OpenGL " << *it << " is supported.\n";
+			break;
+		}
 	}
 
 	// Set swap interval - enable VSync by default
