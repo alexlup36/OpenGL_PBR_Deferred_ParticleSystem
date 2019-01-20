@@ -105,56 +105,24 @@ void GLFramework::draw(double dt)
 	//glCheckError();
 
 	// ------------------------------------------------------------------------
-
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	glDepthMask(GL_TRUE);
+	// Scene rendering
 
 	drawToGBuffer(dt);
-
-	glDepthFunc(GL_ALWAYS);
-	glDepthMask(GL_FALSE);
-
 	drawDeferredLighting(dt);
-
-	glDepthFunc(GL_LESS);
-	glDepthMask(GL_TRUE);
-
 	drawForwardLighting(dt);
+	drawToBackBuffer();
 
-	glDepthFunc(GL_ALWAYS);
-	glDepthMask(GL_FALSE);
-
-	// Render color to screen
-	// Activate shader
-	glBindVertexArray(m_quadVAO);
-	m_finalShader.useShader();
-	GLuint textureUnit = 0;
-	m_displayFramebuffer.renderColorTargetToScreen(0, 0, windowWidth(), windowHeight(), textureUnit);
-	// Set tone mapper
-	m_finalShader.setScalar<unsigned int>(ShaderUniform::ToneMapper, static_cast<unsigned int>(m_pGUI->m_toneMapper));
-	m_finalShader.setScalar<float>(ShaderUniform::GammaHDR, m_pGUI->m_gammaHDR);
-	m_finalShader.setScalar<float>(ShaderUniform::Exposure, m_pGUI->m_exposure);
-	m_finalShader.setScalar<float>(ShaderUniform::ExposureBias, m_pGUI->m_exposureBias);
-	m_finalShader.setScalar<unsigned int>(ShaderUniform::RenderedTexture, textureUnit);
-	// Draw triangles
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	// ------------------------------------------------------------------------
 	// Particle rendering 
-
 	//ParticleSystem::instance().draw();
 
-	// ------------------------------------------------------------------------
-	// Debug
-	glDepthFunc(GL_ALWAYS);
-	glDepthMask(GL_FALSE);
-
+	// Debug rendering
 	drawGbufferToScreen();
 
-	// ------------------------------------------------------------------------
 	// Draw GUI
 	m_pGUI->draw();
+
+	// ------------------------------------------------------------------------
+	// End frame
 
 	// Swap buffers
 	glfwSwapBuffers(window());
@@ -164,7 +132,13 @@ void GLFramework::draw(double dt)
 
 void GLFramework::drawGbufferToScreen()
 {
+#ifndef NDEBUG
 	glCheckError();
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, userEventID, -1, "GBufferToScreenPass");
+#endif // NDEBUG
+
+	glDepthFunc(GL_ALWAYS);
+	glDepthMask(GL_FALSE);
 
 	// Draw gbuffer to screen
 	m_quadShader.useShader();
@@ -232,7 +206,42 @@ void GLFramework::drawGbufferToScreen()
 		leftOffset += (gbufferVisualisationWidth + horizontalSpacing);
 	}
 
+#ifndef NDEBUG
+	glPopDebugGroup();
 	glCheckError();
+#endif // NDEBUG
+}
+
+// ----------------------------------------------------------------------------
+
+void GLFramework::drawToBackBuffer()
+{
+#ifndef NDEBUG
+	glCheckError();
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, userEventID, -1, "BackBufferPass");
+#endif // NDEBUG
+
+	// Render color to screen
+	glDepthFunc(GL_ALWAYS);
+	glDepthMask(GL_FALSE);
+	// Activate shader
+	glBindVertexArray(m_quadVAO);
+	m_finalShader.useShader();
+	GLuint textureUnit = 0;
+	m_displayFramebuffer.renderColorTargetToScreen(0, 0, windowWidth(), windowHeight(), textureUnit);
+	// Set tone mapper
+	m_finalShader.setScalar<unsigned int>(ShaderUniform::ToneMapper, static_cast<unsigned int>(m_pGUI->m_toneMapper));
+	m_finalShader.setScalar<float>(ShaderUniform::GammaHDR, m_pGUI->m_gammaHDR);
+	m_finalShader.setScalar<float>(ShaderUniform::Exposure, m_pGUI->m_exposure);
+	m_finalShader.setScalar<float>(ShaderUniform::ExposureBias, m_pGUI->m_exposureBias);
+	m_finalShader.setScalar<unsigned int>(ShaderUniform::RenderedTexture, textureUnit);
+	// Draw triangles
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+#ifndef NDEBUG
+	glPopDebugGroup();
+	glCheckError();
+#endif // NDEBUG
 }
 
 // ----------------------------------------------------------------------------
@@ -600,7 +609,15 @@ void GLFramework::drawScene(double dt)
 
 void GLFramework::drawToGBuffer(double dt)
 {
+#ifndef NDEBUG
 	glCheckError();
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, userEventID, -1, "GBufferPass");
+	glCheckError();
+#endif // NDEBUG
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glDepthMask(GL_TRUE);
 
 	// Set the gbuffer as the active framebuffer
 	m_gbuffer.useShader();
@@ -627,13 +644,22 @@ void GLFramework::drawToGBuffer(double dt)
 		.setRotation(m_pGUI->m_rotation);
 	m_torusModelDeferred->update(dt);
 	m_torusModelDeferred->render(m_gbuffer);
-	
+
+#ifndef NDEBUG
+	glPopDebugGroup();
 	glCheckError();
+#endif // NDEBUG
 }
 
 void GLFramework::drawDeferredLighting(double dt)
 {
+#ifndef NDEBUG
 	glCheckError();
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, userEventID, -1, "DeferredLightingPass");
+#endif // NDDEBUG
+
+	glDepthFunc(GL_ALWAYS);
+	glDepthMask(GL_FALSE);
 
 	// Set the display framebuffer as the active framebuffer
 	m_displayFramebuffer.renderToTexture();
@@ -664,11 +690,22 @@ void GLFramework::drawDeferredLighting(double dt)
 	glBindVertexArray(m_quadVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
+#ifndef NDEBUG
+	glPopDebugGroup();
 	glCheckError();
+#endif // NDEBUG
 }
 
 void GLFramework::drawForwardLighting(double dt)
 {
+#ifndef NDEBUG
+	glCheckError();
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, userEventID, -1, "ForwardLightingPass");
+#endif // NDEBUG
+
+	glDepthFunc(GL_LESS);
+	glDepthMask(GL_TRUE);
+
 	// Set the display framebuffer as the active framebuffer
 	m_displayFramebuffer.renderToTexture(Framebuffer::RenderTargetType::COLOR_TARGET, false);
 
@@ -714,6 +751,11 @@ void GLFramework::drawForwardLighting(double dt)
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	// ------------------------------------------------------------------------
+
+#ifndef NDEBUG
+	glPopDebugGroup();
+	glCheckError();
+#endif // NDEBUG
 }
 
 void GLFramework::drawSceneToDepth()

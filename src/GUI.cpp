@@ -41,6 +41,11 @@ GUI::~GUI()
 
 void GUI::draw() 
 {
+#ifndef NDEBUG
+	glCheckError();
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, userEventID, -1, "GUIDrawPass");
+#endif // NDEBUG
+
 	// Start imgui new frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -90,6 +95,11 @@ void GUI::draw()
 	glfwGetFramebufferSize(m_window, &m_framebufferWidth, &m_framebufferHeight);
 	glViewport(0, 0, m_framebufferWidth, m_framebufferHeight);
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+#ifndef NDEBUG
+	glPopDebugGroup();
+	glCheckError();
+#endif // NDEBUG
 }
 
 void GUI::drawGbufferSettings()
