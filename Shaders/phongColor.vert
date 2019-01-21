@@ -16,5 +16,5 @@ void main()
 	vPosWorld = vec3(model * vec4(vPos, 1.0f));
 	vNorm = vec3(normalMat * vec4(vNormal, 0.0f));
 
-    gl_Position = projection * view * vec4(vPosWorld, 1.0);
+	gl_Position = projection * view * vec4(vPosWorld, 1.0);
 }

@@ -95,9 +95,9 @@ bool Shader::readShaderFromFile(const std::string& shaderFilePath, std::string& 
 	// Open shader file and read content into outShaderCode
 	std::ifstream shaderStream;
 	shaderStream.exceptions(std::ifstream::badbit);
-  	try 
+	try 
 	{
-    	shaderStream.open(shaderFilePath.c_str(), std::ifstream::in);
+		shaderStream.open(shaderFilePath.c_str(), std::ifstream::in);
 
 		if (shaderStream.is_open())
 		{
@@ -111,12 +111,12 @@ bool Shader::readShaderFromFile(const std::string& shaderFilePath, std::string& 
 			std::cout << "Failed to open " << shaderFilePath;
 			return false;
 		}
-  	}
-  	catch (const std::ifstream::failure& e) 
+	}
+	catch (const std::ifstream::failure& e) 
 	{
 		std::cout << "Exception: " << e.what() << " while opening/reading file " << shaderFilePath << "\n";
 		return false;
-  	}
+	}
 
 	// Success
 	return true;

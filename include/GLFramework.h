@@ -55,11 +55,15 @@ private:
 	// CameraMan reference
 	const CameraMan& m_cameraMan;
 
-	// Shaders
+#pragma region Shaders
+
 	Shader m_basicShader, m_finalShader, m_phongColorShader, m_phongTextureShader, m_parallaxMapping, m_normalMapping;
 	Shader m_colorPBR, m_pbr, m_depth, m_skyBox, m_gbuffer, m_quadShader, m_quadDepthShader, m_deferredLighting;
 
-	// Textures
+#pragma endregion // Shaders
+
+#pragma region Textures
+
 	std::unique_ptr<Texture2D> m_depthMap = nullptr;
 
 	Texture2D* m_brick1Diffuse = nullptr;
@@ -93,10 +97,14 @@ private:
 	Texture2D* m_goldMetallic = nullptr;
 	Texture2D* m_goldAmbientOcclusion = nullptr;
 	Texture2D* m_goldNormal = nullptr;
-	
+
 	// Cube maps
 	Texture3D* m_cubeMap1 = nullptr;
 	Texture3D* m_cubeMap2 = nullptr;
+
+#pragma endregion // Textures
+
+#pragma region Models/Objects
 
 	std::unique_ptr<Model<VertexPN>> m_pTorusModel;
 	std::unique_ptr<Model<VertexPN>> m_pMonkeyModel;
@@ -117,6 +125,9 @@ private:
 
 	std::unique_ptr<Object<VertexPNTT>> m_planeObjectDeferred;
 	std::unique_ptr<Object<VertexPNTT>> m_torusModelDeferred;
+
+#pragma endregion // Models/Objects
+	
 };
 
 #endif // GLFRAMEWORK_H

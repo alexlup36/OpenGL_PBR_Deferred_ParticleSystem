@@ -106,11 +106,16 @@ void GLFramework::draw(double dt)
 
 	// ------------------------------------------------------------------------
 
+	std::string markerName = "Draw to GBuffer";
+	glPushGroupMarkerEXT(markerName.length(), markerName.c_str());
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
 
 	drawToGBuffer(dt);
+
+	glPopGroupMarkerEXT();
 
 	glDepthFunc(GL_ALWAYS);
 	glDepthMask(GL_FALSE);
@@ -126,7 +131,6 @@ void GLFramework::draw(double dt)
 	glDepthMask(GL_FALSE);
 
 	// Render color to screen
-	// Activate shader
 	glBindVertexArray(m_quadVAO);
 	m_finalShader.useShader();
 	GLuint textureUnit = 0;
@@ -146,10 +150,9 @@ void GLFramework::draw(double dt)
 	//ParticleSystem::instance().draw();
 
 	// ------------------------------------------------------------------------
-	// Debug
+	// GBuffer visualisation
 	glDepthFunc(GL_ALWAYS);
 	glDepthMask(GL_FALSE);
-
 	drawGbufferToScreen();
 
 	// ------------------------------------------------------------------------
@@ -773,79 +776,79 @@ void GLFramework::drawSceneToDepth()
 	// Draw triangles
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
-	// ---------------------------------------------------------------------
-	// Draw sphere rusted iron
+	//// ---------------------------------------------------------------------
+	//// Draw sphere rusted iron
 
-	// Set matrices
-	scaleFactor = 0.02f;
-	position = glm::vec3(-5.0f, 0.0f, -2.0f);
-	m = glm::mat4();
-	m = glm::scale(m, glm::vec3(scaleFactor));
-	m = glm::translate(m, position);
-	rotMat = glm::toMat4(m_pGUI->m_rotation);
-	m = m * rotMat;
-	// Activate shader
-	m_depth.useShader();
-	// Matrices
-	m_depth.set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_depth.set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
-	// Draw triangles
-	m_pSphereModel->render();
+	//// Set matrices
+	//scaleFactor = 0.02f;
+	//position = glm::vec3(-5.0f, 0.0f, -2.0f);
+	//m = glm::mat4();
+	//m = glm::scale(m, glm::vec3(scaleFactor));
+	//m = glm::translate(m, position);
+	//rotMat = glm::toMat4(m_pGUI->m_rotation);
+	//m = m * rotMat;
+	//// Activate shader
+	//m_depth.useShader();
+	//// Matrices
+	//m_depth.set<glm::mat4>(ShaderUniform::ModelMat, m);
+	//m_depth.set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
+	//// Draw triangles
+	//m_pSphereModel->render();
 
-	// ---------------------------------------------------------------------
-	// Draw sphere gold
+	//// ---------------------------------------------------------------------
+	//// Draw sphere gold
 
-	// Set matrices
-	scaleFactor = 0.02f;
-	position = glm::vec3(-10.0f, 0.0f, -2.0f);
-	m = glm::mat4();
-	m = glm::scale(m, glm::vec3(scaleFactor));
-	m = glm::translate(m, position);
-	rotMat = glm::toMat4(m_pGUI->m_rotation);
-	m = m * rotMat;
-	// Activate shader
-	m_depth.useShader();
-	// Matrices
-	m_depth.set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_depth.set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
-	// Draw triangles
-	m_pSphereModel->render();
+	//// Set matrices
+	//scaleFactor = 0.02f;
+	//position = glm::vec3(-10.0f, 0.0f, -2.0f);
+	//m = glm::mat4();
+	//m = glm::scale(m, glm::vec3(scaleFactor));
+	//m = glm::translate(m, position);
+	//rotMat = glm::toMat4(m_pGUI->m_rotation);
+	//m = m * rotMat;
+	//// Activate shader
+	//m_depth.useShader();
+	//// Matrices
+	//m_depth.set<glm::mat4>(ShaderUniform::ModelMat, m);
+	//m_depth.set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
+	//// Draw triangles
+	//m_pSphereModel->render();
 
-	// ------------------------------------------------------------------------
-	// Draw torus - simple color PBR
+	//// ------------------------------------------------------------------------
+	//// Draw torus - simple color PBR
 
-	// Set matrices
-	scaleFactor = 0.1f;
-	position = glm::vec3(1.0f, 0.0f, -3.0f);
-	m = glm::mat4();
-	m = glm::scale(m, glm::vec3(scaleFactor));
-	m = glm::translate(m, position);
-	rotMat = glm::toMat4(m_pGUI->m_rotation);
-	m = m * rotMat;
-	// Activate shader
-	m_depth.useShader();
-	// Matrices
-	m_depth.set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_depth.set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
-	// Draw triangles
-	m_pTorusModel->render();
+	//// Set matrices
+	//scaleFactor = 0.1f;
+	//position = glm::vec3(1.0f, 0.0f, -3.0f);
+	//m = glm::mat4();
+	//m = glm::scale(m, glm::vec3(scaleFactor));
+	//m = glm::translate(m, position);
+	//rotMat = glm::toMat4(m_pGUI->m_rotation);
+	//m = m * rotMat;
+	//// Activate shader
+	//m_depth.useShader();
+	//// Matrices
+	//m_depth.set<glm::mat4>(ShaderUniform::ModelMat, m);
+	//m_depth.set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
+	//// Draw triangles
+	//m_pTorusModel->render();
 
-	// ------------------------------------------------------
-	// Draw quad - parallax mapping
+	//// ------------------------------------------------------
+	//// Draw quad - parallax mapping
 
-	position = glm::vec3(0.0f, -1.0f, -2.0f);
-	scaleFactor = 0.1f;
-	m = glm::mat4();
-	m = glm::translate(m, position);
-	m = glm::rotate(m, 0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-	m = glm::scale(m, glm::vec3(scaleFactor, 0.001f, scaleFactor));
-	// Activate shader
-	m_depth.useShader();
-	// Matrices
-	m_depth.set<glm::mat4>(ShaderUniform::ModelMat, m);
-	m_depth.set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
-	// Draw triangles
-	m_pPlaneModel->render();
+	//position = glm::vec3(0.0f, -1.0f, -2.0f);
+	//scaleFactor = 0.1f;
+	//m = glm::mat4();
+	//m = glm::translate(m, position);
+	//m = glm::rotate(m, 0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+	//m = glm::scale(m, glm::vec3(scaleFactor, 0.001f, scaleFactor));
+	//// Activate shader
+	//m_depth.useShader();
+	//// Matrices
+	//m_depth.set<glm::mat4>(ShaderUniform::ModelMat, m);
+	//m_depth.set<glm::mat4>(ShaderUniform::LightMat, lightMatrix);
+	//// Draw triangles
+	//m_pPlaneModel->render();
 }
 
 // ----------------------------------------------------------------------------

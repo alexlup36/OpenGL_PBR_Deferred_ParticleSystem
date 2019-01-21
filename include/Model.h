@@ -32,8 +32,6 @@ private:
 	std::vector<GLushort> processIndices(aiMesh* pModel);
 
 	std::vector<Mesh<T>> m_meshList;
-
-	//static std::map<std::string, Model&> m_modelMap;
 };
 
 // ----------------------------------------------------------------------------
@@ -48,8 +46,6 @@ Model<T>::Model(const std::string& filePath)
 	}
 
 	loadModel(filePath);
-
-	//m_modelMap[filePath] = *this;
 }
 
 // ----------------------------------------------------------------------------
