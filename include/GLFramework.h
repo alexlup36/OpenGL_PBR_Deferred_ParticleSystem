@@ -31,6 +31,7 @@ private:
 	void drawForwardLighting(double dt);
 	void drawGbufferToScreen();
 	void drawToBackBuffer();
+	void drawSkybox();
 	virtual void drawSceneToDepth();
 
 	// User interface manager

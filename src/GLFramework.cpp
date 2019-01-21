@@ -105,6 +105,7 @@ void GLFramework::draw(double dt)
 	drawToGBuffer(dt);
 	drawDeferredLighting(dt);
 	drawForwardLighting(dt);
+	drawSkybox();
 	drawToBackBuffer();
 
 	// Particle rendering 
@@ -241,6 +242,38 @@ void GLFramework::drawToBackBuffer()
 
 // ----------------------------------------------------------------------------
 
+void GLFramework::drawSkybox()
+{
+#ifndef NDEBUG
+	glCheckError();
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, userEventID, -1, "SkyboxPass");
+#endif // NDEBUG
+
+	// Set the depth function to less or equal
+	glDepthFunc(GL_LEQUAL);
+	// Activate the skybox shader
+	m_skyBox.useShader();
+	// Get rid of the translation component from the view matrix
+	// We don't want the skybox to move together with the player
+	glm::mat4 v = glm::mat4x4(glm::mat3x3(m_cameraMan.getActiveCamera()->viewMatrix()));
+	glm::mat4 p = m_cameraMan.getActiveCamera()->projMatrix();
+	m_skyBox.set<glm::mat4>(ShaderUniform::ViewMat, v);
+	m_skyBox.set<glm::mat4>(ShaderUniform::ProjMat, p);
+	// Bind the cube VAO
+	glBindVertexArray(m_skyboxVAO);
+	// Bind the environment texture
+	m_cubeMap2->bind(m_skyBox.program());
+	// Draw the cube
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+#ifndef NDEBUG
+	glPopDebugGroup();
+	glCheckError();
+#endif // NDEBUG
+}
+
+// ----------------------------------------------------------------------------
+
 bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, bool enableSRGB)
 {
 	// ------------------------------------------------------------------------
@@ -288,7 +321,8 @@ bool GLFramework::initialize(const char* windowTitle, bool enableMultisampling, 
 	// Create display buffer
 	m_displayFramebuffer
 		.initialize(m_displayWidth, m_displayHeight)
-		.addColorTarget("DisplayColor", GL_RGBA16F, GL_RGBA, GL_FLOAT);
+		.addColorTarget("DisplayColor", GL_RGBA16F, GL_RGBA, GL_FLOAT)
+		.addDepthTarget(GL_DEPTH_COMPONENT24);
 	if (m_displayFramebuffer.create() == false)
 	{
 		std::cout << "Failed to initialize display framebuffer.\n";
@@ -617,6 +651,8 @@ void GLFramework::drawToGBuffer(double dt)
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
 
+	// -----------------------------------------------------------------------
+
 	// Set the gbuffer as the active framebuffer
 	m_gbuffer.useShader();
 	m_gbufferFramebuffer.renderToTexture();
@@ -642,6 +678,17 @@ void GLFramework::drawToGBuffer(double dt)
 		.setRotation(m_pGUI->m_rotation);
 	m_torusModelDeferred->update(dt);
 	m_torusModelDeferred->render(m_gbuffer);
+
+	// -----------------------------------------------------------------------
+
+	// Copy the contents of the depth buffer (gbuffer) into the depth buffer in the default framebuffer
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_gbufferFramebuffer.handle());
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_displayFramebuffer.handle());
+	glBlitFramebuffer(0, 0, m_gbufferFramebuffer.width(), m_gbufferFramebuffer.height(), 
+		0, 0, m_displayWidth, m_displayHeight, 
+		GL_DEPTH_BUFFER_BIT, 
+		GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 #ifndef NDEBUG
 	glPopDebugGroup();
@@ -722,27 +769,6 @@ void GLFramework::drawForwardLighting(double dt)
 		.setRotation(m_pGUI->m_rotation);
 	m_pointLightObject->update(dt);
 	m_pointLightObject->render(m_debugSolidColor);
-
-	// ------------------------------------------------------------------------
-
-	// Render the skybox
-
-	// Set the depth function to less or equal
-	glDepthFunc(GL_LEQUAL);
-	// Activate the skybox shader
-	m_skyBox.useShader();
-	// Get rid of the translation component from the view matrix
-	// We don't want the skybox to move together with the player
-	glm::mat4 v = glm::mat4x4(glm::mat3x3(m_cameraMan.getActiveCamera()->viewMatrix()));
-	glm::mat4 p = m_cameraMan.getActiveCamera()->projMatrix();
-	m_skyBox.set<glm::mat4>(ShaderUniform::ViewMat, v);
-	m_skyBox.set<glm::mat4>(ShaderUniform::ProjMat, p);
-	// Bind the cube VAO
-	glBindVertexArray(m_skyboxVAO);
-	// Bind the environment texture
-	m_cubeMap2->bind(m_skyBox.program());
-	// Draw the cube
-	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	// ------------------------------------------------------------------------
 

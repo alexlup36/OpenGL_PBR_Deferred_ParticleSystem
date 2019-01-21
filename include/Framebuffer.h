@@ -47,6 +47,7 @@ public:
 		return -1;
 	}
 	inline const GLuint depthTexture() const { return m_depthTexture; }
+	inline const GLuint handle() const { return m_framebufferHandle; }
 
 	static const GLuint screenQuadVAO() { return m_uiScreenQuadVAO; }
 

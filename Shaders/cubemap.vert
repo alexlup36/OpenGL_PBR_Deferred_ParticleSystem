@@ -18,7 +18,7 @@ void main()
 	// We will also have to change the depth test function from the default
 	// GL_LESS to GL_LEQUAL so that the depth test won't fail for depth values
 	// of 1 and the skybox will be rendered where there is nothing in front of it.
-    gl_Position = pos.xyww;
+	gl_Position = pos.xyww;
 	// The position of each vertex is also a vector from the origin to
 	// the vertex. So we can use it as texture coordinate to sample
 	// the cube map in the fragment shader.
