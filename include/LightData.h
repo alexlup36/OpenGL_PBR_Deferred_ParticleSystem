@@ -9,7 +9,9 @@
 #include <map>
 
 #define WHITE glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+#define WHITE3 glm::vec3(1.0f, 1.0f, 1.0f)
 #define BLACK glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
+#define BLACK3 glm::vec3(0.0f, 0.0f, 0.0f)
 
 const unsigned int MAX_POINT_LIGHTS = 20;
 const unsigned int MAX_DIR_LIGHTS = 20;
@@ -25,6 +27,10 @@ public:
 		return instance;
 	}
 	void initialize();
+
+	// Debug
+	inline glm::vec3 &debugVisLightColor() { return m_visualisationLightColor; }
+	inline glm::vec3 &debugVisLightDir() { return m_visualisationLightDirection; }
 
 	// Add light sources
 	inline void addPointLight(const PointLight &pointLight) 
@@ -90,6 +96,10 @@ private:
 	std::vector<PointLight> m_pointLights;
 	std::vector<DirectionalLight> m_directionalLights;
 	std::vector<SpotLight> m_spotLights;
+
+	// Debug visualization light properties
+	glm::vec3 m_visualisationLightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 m_visualisationLightDirection = glm::vec3(1.0f, 0.0f, 1.0f);
 
 public:
 	LightData(LightData const&) = delete;

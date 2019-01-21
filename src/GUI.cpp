@@ -54,6 +54,14 @@ void GUI::draw()
 	// Setup
 	ImGui::Begin("MainWindow");
 
+	if (ImGui::CollapsingHeader("Debug visualisation"))
+	{
+		auto &lightData = LightData::getInstance();
+
+		ImGui::ColorEdit3("Debug light color", (float*)&lightData.debugVisLightColor());
+		ImGui::SliderFloat3("Debug light direction", &lightData.debugVisLightDir().x, -1.0f, 1.0f);
+	}
+
 	if (ImGui::CollapsingHeader("Properties"))
 	{
 		// Nornal map
@@ -88,7 +96,7 @@ void GUI::draw()
 		drawObjectSettings();
 	}
 	
-    ImGui::End();
+	ImGui::End();
 
 	// Rendering
 	ImGui::Render();

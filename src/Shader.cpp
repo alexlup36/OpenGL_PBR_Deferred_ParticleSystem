@@ -5,6 +5,8 @@
 #include <assert.h>
 #include <vector>
 
+#include "GUI.h"
+
 // ----------------------------------------------------------------------------
 
 Shader::Shader()
@@ -186,7 +188,6 @@ void Shader::initializeUniforms()
 	m_shaderUniforms[static_cast<int>(ShaderUniform::LightMat)] = glGetUniformLocation(m_program, "lightVP");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::LightDir)] = glGetUniformLocation(m_program, "lightDir");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::LightColor)] = glGetUniformLocation(m_program, "lightColor");
-	m_shaderUniforms[static_cast<int>(ShaderUniform::ObjectColor)] = glGetUniformLocation(m_program, "objectColor");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::ViewPos)] = glGetUniformLocation(m_program, "viewPos");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::Shininess)] = glGetUniformLocation(m_program, "shininess");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::SpecularStrength)] = glGetUniformLocation(m_program, "specularStrength");
@@ -195,6 +196,9 @@ void Shader::initializeUniforms()
 	m_shaderUniforms[static_cast<int>(ShaderUniform::NormalMapScale)] = glGetUniformLocation(m_program, "normalMapScale");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::Gamma)] = glGetUniformLocation(m_program, "gamma");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::DisplayMode)] = glGetUniformLocation(m_program, "displayMode");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::DebugVisualisationLightColor)] = glGetUniformLocation(m_program, "lightColor");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::DebugVisualisationLightDirection)] = glGetUniformLocation(m_program, "lightDir");
+	m_shaderUniforms[static_cast<int>(ShaderUniform::DebugVisualisationObjectColor)] = glGetUniformLocation(m_program, "objectColor");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::ToneMapper)] = glGetUniformLocation(m_program, "toneMapper");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::Exposure)] = glGetUniformLocation(m_program, "exposure");
 	m_shaderUniforms[static_cast<int>(ShaderUniform::GammaHDR)] = glGetUniformLocation(m_program, "gammaHDR");
@@ -397,6 +401,14 @@ void Shader::updateSpotLights()
 		setSpotLightScalar<float>(SpotLightUniform::Cutoff, spotLightIndex, currentSpotLight.cutoff);
 		setSpotLightScalar<float>(SpotLightUniform::Exponent, spotLightIndex, currentSpotLight.exponent);
 	}
+}
+
+void Shader::updateDebugLight()
+{
+	auto& lightData = LightData::getInstance();
+
+	set<glm::vec3>(ShaderUniform::DebugVisualisationLightColor, lightData.debugVisLightColor());
+	set<glm::vec3>(ShaderUniform::DebugVisualisationLightDirection, lightData.debugVisLightDir());
 }
 
 // ----------------------------------------------------------------------------

@@ -23,7 +23,6 @@ enum class ShaderUniform
 
 	LightDir,
 	LightColor,
-	ObjectColor,
 	ViewPos,
 	Shininess,
 	RenderedTexture,
@@ -54,6 +53,9 @@ enum class ShaderUniform
 
 	// Debug
 	DisplayMode,
+	DebugVisualisationLightColor,
+	DebugVisualisationLightDirection,
+	DebugVisualisationObjectColor,
 
 	Count,
 };
@@ -187,6 +189,7 @@ public:
 	void updatePointLights();
 	void updateDirectionalLights();
 	void updateSpotLights();
+	void updateDebugLight();
 
 private:
 	GLuint m_program;

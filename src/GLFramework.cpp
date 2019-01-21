@@ -56,12 +56,7 @@ void GLFramework::update(double dt)
 	if (Input::fpsCameraEnabled())
 	{
 		m_cameraMan.getActiveCamera()->processInput(window(), dt);
-
-		glCheckError();
-
 		m_cameraMan.getActiveCamera()->updateView();
-
-		glCheckError();
 	}
 
 	// ------------------------------------------------------------------------
@@ -371,6 +366,10 @@ bool GLFramework::setupScene()
 	m_phongColorShader.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/phongColor.frag");
 	if (m_phongColorShader.initialize() == false) return false;
 
+	m_debugSolidColor.addShader(Shader::ShaderType::VERTEX, "../Shaders/debugSolidColor.vert");
+	m_debugSolidColor.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/debugSolidColor.frag");
+	if (m_debugSolidColor.initialize() == false) return false;
+
 	m_phongTextureShader.addShader(Shader::ShaderType::VERTEX, "../Shaders/phongTexture.vert");
 	m_phongTextureShader.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/phongTexture.frag");
 	if (m_phongTextureShader.initialize() == false) return false;
@@ -547,7 +546,6 @@ void GLFramework::drawScene(double dt)
 	m_phongColorShader.set<glm::vec3>(ShaderUniform::LightColor, WHITE);
 	m_phongColorShader.set<glm::vec3>(ShaderUniform::LightDir, directionalLight1.direction);
 	// Set uniforms
-	m_phongColorShader.set<glm::vec4>(ShaderUniform::ObjectColor, WHITE);
 	m_phongColorShader.setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
 	m_phongColorShader.setScalar<float>(ShaderUniform::SpecularStrength, m_pGUI->m_specularStrength);
 	// Draw point light sphere
@@ -712,22 +710,18 @@ void GLFramework::drawForwardLighting(double dt)
 	// ------------------------------------------------------------------------
 
 	// Render Phong
-	m_phongColorShader.useShader();
+	m_debugSolidColor.useShader();
 	// Setup lighting
-	m_phongColorShader.updatePointLights();
-	m_phongColorShader.updateDirectionalLights();
-	m_phongColorShader.updateSpotLights();
+	m_debugSolidColor.updateDebugLight();
 	// Set uniforms
-	m_phongColorShader.set<glm::vec4>(ShaderUniform::ObjectColor, WHITE);
-	m_phongColorShader.setScalar<float>(ShaderUniform::Shininess, m_pGUI->m_shininess);
-	m_phongColorShader.setScalar<float>(ShaderUniform::SpecularStrength, m_pGUI->m_specularStrength);
+	m_debugSolidColor.set<glm::vec4>(ShaderUniform::DebugVisualisationObjectColor, WHITE);
 	// Draw point light sphere
 	m_pointLightObject->transform()
 		.setPos(LightData::getInstance().pointLight(0).position)
 		.setScale(glm::vec3(0.01f))
 		.setRotation(m_pGUI->m_rotation);
 	m_pointLightObject->update(dt);
-	m_pointLightObject->render(m_phongColorShader);
+	m_pointLightObject->render(m_debugSolidColor);
 
 	// ------------------------------------------------------------------------
 

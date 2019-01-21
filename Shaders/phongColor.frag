@@ -32,5 +32,5 @@ void main()
 	
 	// Final colour
 	vec3 lightComponents = (ambientComponent + diffuseComponent + specularComponent);
-    fragmentColor = vec4(lightComponents, 1.0f) * objectColor;	
+	fragmentColor = vec4(lightComponents, 1.0f) * objectColor;	
 }
