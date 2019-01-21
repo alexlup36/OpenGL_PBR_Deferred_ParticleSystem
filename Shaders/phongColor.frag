@@ -30,6 +30,7 @@ void main()
 	float specular = pow(max(dot(viewDir, reflectDir), 0.0f), shininess);
 	vec3 specularComponent = specularStrength * specular * lightColor;
 	
+	// Final colour
 	vec3 lightComponents = (ambientComponent + diffuseComponent + specularComponent);
-	fragmentColor = vec4(lightComponents, 1.0f) * objectColor;	
+    fragmentColor = vec4(lightComponents, 1.0f) * objectColor;	
 }

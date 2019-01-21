@@ -30,6 +30,7 @@ private:
 	void drawDeferredLighting(double dt);
 	void drawForwardLighting(double dt);
 	void drawGbufferToScreen();
+	void drawToBackBuffer();
 	virtual void drawSceneToDepth();
 
 	// User interface manager

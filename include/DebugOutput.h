@@ -6,6 +6,8 @@
 #include <iostream>
 #include <string>
 
+const GLuint userEventID = 3636;
+
 #ifndef NDEBUG
 	#define glCheckError() _glCheckError(__FILE__, __LINE__)
 #else
