@@ -93,6 +93,24 @@ public:
 		"SpotLight"
 	};
 
+	std::array<const char*, 6> toneMappingTypes = {
+		"Normal",
+		"Gamma corrected",
+		"Reinhard",
+		"Exposure tone mapper",
+		"Jim tone mapper",
+		"Uncharted"
+	};
+
+	std::array<const char*, 6> displayModeTypes = {
+		"Diffuse",
+		"Normal",
+		"Normal + Textures",
+		"Directional light shading",
+		"Point light shading",
+		"Final PBR rendering"
+	};
+
 	std::array<std::string, 2> modelExtensions = {
 		".obj", ".fbx"
 	};
@@ -128,8 +146,8 @@ public:
 
 	int m_framebufferWidth, m_framebufferHeight;
 
-	DisplayMode m_displayMode = DisplayMode::FINAL;
-	ToneMapper m_toneMapper = ToneMapper::NORMAL;
+	int m_displayModeSelection = 5;
+	int m_toneMapperSelection = 0;
 };
 
 #endif // GUI_H

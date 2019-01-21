@@ -4,7 +4,7 @@
 
 struct DirectionalLight
 {
-    vec3 lightDirection;
+	vec3 lightDirection;
 	vec3 ambientLight;
 	vec3 diffuseLight;
 	vec3 specularLight;
@@ -14,7 +14,7 @@ struct DirectionalLight
 
 struct PointLight
 {
-    vec3 lightPosition;
+	vec3 lightPosition;
 	vec3 ambientLight;
 	vec3 diffuseLight;
 	vec3 specularLight;

@@ -226,7 +226,7 @@ void GLFramework::drawToBackBuffer()
 	GLuint textureUnit = 0;
 	m_displayFramebuffer.renderColorTargetToScreen(0, 0, windowWidth(), windowHeight(), textureUnit);
 	// Set tone mapper
-	m_finalShader.setScalar<unsigned int>(ShaderUniform::ToneMapper, static_cast<unsigned int>(m_pGUI->m_toneMapper));
+	m_finalShader.setScalar<unsigned int>(ShaderUniform::ToneMapper, static_cast<unsigned int>(m_pGUI->m_toneMapperSelection));
 	m_finalShader.setScalar<float>(ShaderUniform::GammaHDR, m_pGUI->m_gammaHDR);
 	m_finalShader.setScalar<float>(ShaderUniform::Exposure, m_pGUI->m_exposure);
 	m_finalShader.setScalar<float>(ShaderUniform::ExposureBias, m_pGUI->m_exposureBias);
@@ -605,7 +605,7 @@ void GLFramework::drawScene(double dt)
 	m_pbr.setScalar<float>(ShaderUniform::DisplacementMapScale, m_pGUI->m_dispMapScale);
 	m_pbr.setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
 	m_pbr.setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
-	m_pbr.setScalar<unsigned int>(ShaderUniform::DisplayMode, static_cast<unsigned int>(m_pGUI->m_displayMode));
+	m_pbr.setScalar<unsigned int>(ShaderUniform::DisplayMode, m_pGUI->m_displayModeSelection);
 	// Draw main plane
 	m_planeObject->transform()
 		.setPos(glm::vec3(0.0f, -1.0f, -2.0f))
@@ -729,7 +729,7 @@ void GLFramework::drawDeferredLighting(double dt)
 
 	m_deferredLighting.setScalar<float>(ShaderUniform::NormalMapScale, m_pGUI->m_normalMapScale);
 	m_deferredLighting.setScalar<float>(ShaderUniform::Gamma, m_pGUI->m_gamma);
-	m_deferredLighting.setScalar<unsigned int>(ShaderUniform::DisplayMode, static_cast<unsigned int>(m_pGUI->m_displayMode));
+	m_deferredLighting.setScalar<unsigned int>(ShaderUniform::DisplayMode, m_pGUI->m_displayModeSelection);
 	m_deferredLighting.set<glm::vec3>(ShaderUniform::ViewPos, CameraMan::Instance().getActiveCamera()->viewPos());
 
 	glBindVertexArray(m_quadVAO);

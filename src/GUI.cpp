@@ -54,46 +54,83 @@ void GUI::draw()
 	// Setup
 	ImGui::Begin("MainWindow");
 
+	//ImGui::Unindent();
 	if (ImGui::CollapsingHeader("Debug visualisation"))
 	{
+		ImGui::Indent(16.0f);
+
 		auto &lightData = LightData::getInstance();
 
+		// Debug visualisation
 		ImGui::ColorEdit3("Debug light color", (float*)&lightData.debugVisLightColor());
 		ImGui::SliderFloat3("Debug light direction", &lightData.debugVisLightDir().x, -1.0f, 1.0f);
+
+		// Display mode
+		if (ImGui::CollapsingHeader("Display Mode"))
+		{
+			// Display list of light source type
+			ImGui::ListBox("Display modes", &m_displayModeSelection, displayModeTypes.data(), (int)displayModeTypes.size());
+		}
+
+		ImGui::Unindent();
+	}
+
+	if (ImGui::CollapsingHeader("Tonemapper"))
+	{
+		ImGui::Indent(16.0f);
+
+		// Tonemapping
+		ImGui::SliderFloat("Gamma", &m_gammaHDR, 0.0f, 10.0f);
+		ImGui::SliderFloat("Exposure", &m_exposure, 0.0f, 10.0f);
+		ImGui::SliderFloat("Exposure bias", &m_exposureBias, 0.0f, 10.0f);
+
+		// Display list of available tone mappers
+		ImGui::ListBox("Tonemapper", &m_toneMapperSelection, toneMappingTypes.data(), (int)toneMappingTypes.size());
+
+		ImGui::Unindent();
 	}
 
 	if (ImGui::CollapsingHeader("Properties"))
 	{
+		ImGui::Indent(16.0f);
+
 		// Nornal map
 		ImGui::SliderFloat("Normal map scale", &m_normalMapScale, 1.0f, 5.0f);
-
+		ImGui::SliderFloat("Texture gamma", &m_gamma, 0.0f, 5.0f);
 		ImGui::Separator();
 
 		// Texture
 		ImGui::SliderFloat2("Texture offset", &m_textureOffset.x, 0.0f, 1.0f);
 		ImGui::SliderFloat2("Texture tile", &m_textureTile.x, 0.0f, 5.0f);
-
 		ImGui::Separator();
 
 		// Frame
 		ImGui::ColorEdit3("Clear color", (float*)&m_clearColor);
 		ImGui::Checkbox("VSync", &m_enableVsync);
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+		ImGui::Unindent();
 	}
 
 	if (ImGui::CollapsingHeader("Gbuffer Visualisation"))
 	{
+		ImGui::Indent(16.0f);
 		drawGbufferSettings();
+		ImGui::Unindent();
 	}
 
 	if (ImGui::CollapsingHeader("Light properties"))
 	{
+		ImGui::Indent(16.0f);
 		drawLightPanel();
+		ImGui::Unindent();
 	}
 
 	if (ImGui::CollapsingHeader("Object properties"))
 	{
+		ImGui::Indent(16.0f);
 		drawObjectSettings();
+		ImGui::Unindent();
 	}
 	
 	ImGui::End();
