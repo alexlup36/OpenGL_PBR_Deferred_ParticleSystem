@@ -1,0 +1,28 @@
+{
+    "object": {
+        "active": true,
+        "name": "Cabinet",
+        "model": "cabinet.obj",
+        "shader": {
+            "vertex": "gbuffer.vert",
+            "fragment": "gbuffer.frag"
+        },
+        "vertextype": "VertexPNTT",
+        "transform": {
+            "position": [0.0, 0.0, 0.0],
+            "rotation": [0.0, 0.0, 0.0],
+            "scale": [0.01, 0.01, 0.01]
+        },
+        "material": {
+            "albedo": "cabinet_a.png",
+            "normal": "cabinet_n.png",
+            "roughness": "cabinet_r.png",
+            "metallic": "cabinet_m.png",
+            "displacement": "cabinet_d.png",
+            "ambientocclusion": "cabinet_ao.png"
+        },
+        "displacementmapscale": 0.0,
+        "textureoffset": [0.0, 0.0],
+        "texturetile": [0.0, 0.0]
+    }
+}

@@ -127,7 +127,8 @@ private:
 
 	std::unique_ptr<Object<VertexPNTT>> m_planeObjectDeferred;
 	std::unique_ptr<Object<VertexPNTT>> m_torusModelDeferred;
-
+	std::unique_ptr<Object<VertexPNTT>> m_cabinetModelDeferred;
+	
 #pragma endregion // Models/Objects
 	
 };

@@ -92,6 +92,7 @@
     <ClInclude Include="..\include\ParticleSystem\ParticleSystem.h" />
     <ClInclude Include="..\include\ParticleSystem\PointGenerator.h" />
     <ClInclude Include="..\include\ParticleSystem\SquareGenerator.h" />
+    <ClInclude Include="..\include\ResourceLoader.h" />
     <ClInclude Include="..\include\Shader.h" />
     <ClInclude Include="..\include\Texture2D.h" />
     <ClInclude Include="..\include\Texture3D.h" />
@@ -121,6 +122,7 @@
     <ClCompile Include="..\src\ParticleSystem\ParticleSystem.cpp" />
     <ClCompile Include="..\src\ParticleSystem\PointGenerator.cpp" />
     <ClCompile Include="..\src\ParticleSystem\SquareGenerator.cpp" />
+    <ClCompile Include="..\src\ResourceLoader.cpp" />
     <ClCompile Include="..\src\Shader.cpp" />
     <ClCompile Include="..\src\Texture2D.cpp" />
     <ClCompile Include="..\src\Texture3D.cpp" />

@@ -12,6 +12,7 @@
 #include "MaterialData.h"
 #include "Window.h"
 #include "CameraMan.h"
+#include "ResourceLoader.h"
 
 #include "ParticleSystem/ParticleSystem.h"
 
@@ -387,6 +388,10 @@ bool GLFramework::setupScene()
 	LightData::getInstance().initialize();
 	MaterialData::getInstance().initialize();
 
+	// Use the resource loader
+	auto& loader = ResourceLoader::Instance();
+	loader.load();
+
 	// Load shaders
 	m_basicShader.addShader(Shader::ShaderType::VERTEX, "../Shaders/basic.vert");
 	m_basicShader.addShader(Shader::ShaderType::FRAGMENT, "../Shaders/basic.frag");
@@ -528,6 +533,7 @@ bool GLFramework::setupScene()
 
 	m_planeObjectDeferred = std::make_unique<Object<VertexPNTT> >("../Assets/plane2.obj");
 	m_torusModelDeferred = std::make_unique<Object<VertexPNTT> >("../Assets/torus.obj");
+	m_cabinetModelDeferred = std::make_unique<Object<VertexPNTT> >("../Assets/cabinet.obj");
 
 	// Load meshes
 	//m_pTorusModel = std::make_unique<Model<VertexPN> >("Assets/torus.obj");
@@ -678,6 +684,21 @@ void GLFramework::drawToGBuffer(double dt)
 		.setRotation(m_pGUI->m_rotation);
 	m_torusModelDeferred->update(dt);
 	m_torusModelDeferred->render(m_gbuffer);
+
+	// Draw cabinet
+
+	// Set uniforms
+	MaterialData::getInstance().matRustedIron.bindTextures(m_gbuffer.program());
+	m_gbuffer.set<glm::vec2>(ShaderUniform::TextureOffset, m_pGUI->m_textureOffset);
+	m_gbuffer.set<glm::vec2>(ShaderUniform::TextureTile, m_pGUI->m_textureTile);
+	m_gbuffer.setScalar<float>(ShaderUniform::DisplacementMapScale, m_pGUI->m_dispMapScale);
+
+	m_cabinetModelDeferred->transform()
+		.setPos(glm::vec3(0.0f))
+		.setScale(glm::vec3(0.01f, 0.01f, 0.01f))
+		.setRotation(m_pGUI->m_rotation);
+	m_cabinetModelDeferred->update(dt);
+	m_cabinetModelDeferred->render(m_gbuffer);
 
 	// -----------------------------------------------------------------------
 

@@ -101,6 +101,9 @@
     <ClInclude Include="..\include\ParticleSystem\SquareGenerator.h">
       <Filter>Header Files\ParticleSystem</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\ResourceLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\Camera.cpp">
@@ -177,6 +180,9 @@
     </ClCompile>
     <ClCompile Include="..\src\ParticleSystem\SquareGenerator.cpp">
       <Filter>Source Files\ParticleSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ResourceLoader.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -42,6 +42,9 @@ public:
 	Camera* getCamera(const char* camName) const;
 	Camera* getCamera(int index) const;
 
+	CameraMan(CameraMan const&) = delete;
+	void operator=(CameraMan const&) = delete;
+
 private:
 
 	Camera* m_activeCamera;
